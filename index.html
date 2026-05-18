@@ -934,9 +934,6 @@ function doMoveChip(src, dst) {
 
 // ============================================================
 //  ★ グループDnD（完全修正版）
-//  - grpDragOverGi と grpDropInsertBefore を move中に更新
-//  - pointerup では move中に確定した値をそのまま使う（releaseCapture後の
-//    elementFromPoint に依存しない）
 // ============================================================
 function cancelGrpDrag() {
   const ghost = document.getElementById('groupDragGhost');
@@ -990,13 +987,11 @@ function setupGroupHeaderPointerDnD(hdr, block, gi) {
     e.preventDefault();
     grpGhost.style.transform = `translate(${e.clientX - 90}px,${e.clientY - 22}px)`;
 
-    // ハイライトをリセット
     document.querySelectorAll('.group-block.group-drag-over-left,.group-block.group-drag-over-right')
       .forEach(b => b.classList.remove('group-drag-over-left','group-drag-over-right'));
     grpDragOverGi = null;
     grpDropInsertBefore = true;
 
-    // ★ポインタキャプチャを一時解放して elementFromPoint を正確に取得
     try { hdr.releasePointerCapture(e.pointerId); } catch(_){}
     const elemBelow = document.elementFromPoint(e.clientX, e.clientY);
     try { hdr.setPointerCapture(e.pointerId); } catch(_){}
@@ -1009,7 +1004,6 @@ function setupGroupHeaderPointerDnD(hdr, block, gi) {
       if (targetDataIdx >= 0) {
         grpDragOverGi = targetDataIdx;
         const bRect = targetBlock.getBoundingClientRect();
-        // ★move中にinsertBeforeを確定して保存
         grpDropInsertBefore = e.clientX < bRect.left + bRect.width / 2;
         if (grpDropInsertBefore) targetBlock.classList.add('group-drag-over-left');
         else targetBlock.classList.add('group-drag-over-right');
@@ -1020,21 +1014,14 @@ function setupGroupHeaderPointerDnD(hdr, block, gi) {
   hdr.addEventListener('pointerup', e => {
     if (grpPointerId === null || e.pointerId !== grpPointerId) return;
     const wasActive = grpDragActive;
-
-    // ★cancelGrpDrag前にmove中に確定済みの情報を取り出す
     const srcId = grpDragSrc ? grpDragSrc.groupId : null;
-    const dstDataIdx = grpDragOverGi;         // move中に確定済み
-    const insertBefore = grpDropInsertBefore; // move中に確定済み
-
+    const dstDataIdx = grpDragOverGi;
+    const insertBefore = grpDropInsertBefore;
     cancelGrpDrag();
-
     if (wasActive && srcId && dstDataIdx !== null && dstDataIdx !== undefined && dstDataIdx >= 0) {
-      // IDでsrcの現在インデックスを再取得
       const srcDataIdx = groups.findIndex(g => g.id === srcId);
       if (srcDataIdx < 0 || srcDataIdx === dstDataIdx) return;
-
       const moved = groups.splice(srcDataIdx, 1)[0];
-      // splice後のインデックス補正
       let insertIdx = srcDataIdx < dstDataIdx ? dstDataIdx - 1 : dstDataIdx;
       if (!insertBefore) insertIdx++;
       groups.splice(Math.max(0, Math.min(insertIdx, groups.length)), 0, moved);
@@ -1324,9 +1311,14 @@ function renderPinRow() {
               copyText(cC.b.toUpperCase()); showColorToast(cC.b.toUpperCase(), cC.b, cC.t, '背景色');
             }, 280);
           } else if (chipTapCount === 2) {
-            clearTimeout(chipTapTimer); chipTapTimer = null; chipTapCount = 0;
-            applyHex('t', cC.t); applyHex('b', cC.b);
-            copyText(cC.t.toUpperCase()); showColorToast(cC.t.toUpperCase(), cC.t, cC.b, '文字色');
+            // ★修正: カウントを0にリセットせず、新しいタイマーを起動する
+            // これにより3回目のタップが chipTapCount===3 として正しく検出される
+            clearTimeout(chipTapTimer);
+            chipTapTimer = setTimeout(() => {
+              chipTapCount = 0;
+              applyHex('t', cC.t); applyHex('b', cC.b);
+              copyText(cC.t.toUpperCase()); showColorToast(cC.t.toUpperCase(), cC.t, cC.b, '文字色');
+            }, 280);
           } else if (chipTapCount >= 3) {
             // ★修正: トリプルタップはコピーなし・プレビューのみ
             clearTimeout(chipTapTimer); chipTapTimer = null; chipTapCount = 0;
@@ -1468,9 +1460,14 @@ function renderGroups() {
                   copyText(cC.b.toUpperCase()); showColorToast(cC.b.toUpperCase(), cC.b, cC.t, '背景色');
                 }, 280);
               } else if (chipTapCount === 2) {
-                clearTimeout(chipTapTimer); chipTapTimer = null; chipTapCount = 0;
-                applyHex('t', cC.t); applyHex('b', cC.b);
-                copyText(cC.t.toUpperCase()); showColorToast(cC.t.toUpperCase(), cC.t, cC.b, '文字色');
+                // ★修正: カウントを0にリセットせず、新しいタイマーを起動する
+                // これにより3回目のタップが chipTapCount===3 として正しく検出される
+                clearTimeout(chipTapTimer);
+                chipTapTimer = setTimeout(() => {
+                  chipTapCount = 0;
+                  applyHex('t', cC.t); applyHex('b', cC.b);
+                  copyText(cC.t.toUpperCase()); showColorToast(cC.t.toUpperCase(), cC.t, cC.b, '文字色');
+                }, 280);
               } else if (chipTapCount >= 3) {
                 // ★修正: トリプルタップはコピーなし・プレビューのみ
                 clearTimeout(chipTapTimer); chipTapTimer = null; chipTapCount = 0;
@@ -1782,7 +1779,20 @@ async function setupSync() {
 function clearSync() { stopPolling(); syncConfig = { token: '', gistId: '' }; localStorage.removeItem('cp_sync'); setSyncBadge('', '未接続'); document.getElementById('syncShareUrlRow').style.display = 'none'; document.getElementById('syncSetup').style.display = 'block'; }
 function startPolling() { stopPolling(); setSyncBadge('synced', '同期中'); pollTimer = setInterval(async () => { const data = await gistGet(); if (data === null) { setSyncBadge('error', 'エラー'); return; } if (data && data !== 'unchanged') { if (data.groups) { groups = ensureIds(data.groups); renderGroups(); } if (data.pin) { pinColors = data.pin; renderPinRow(); } } }, 8000); }
 function stopPolling() { if (pollTimer) clearInterval(pollTimer); }
-async function syncPush() { if (syncConfig.gistId) gistPut(groups, pinColors); }
+
+// ★修正: syncPush にデバウンス処理を追加
+// 連続して saveGroups() / savePinColors() が呼ばれても、
+// 最後の変更から500ms後に1回だけ Gist API を叩く
+let syncPushDebounceTimer = null;
+async function syncPush() {
+  if (!syncConfig.gistId) return;
+  if (syncPushDebounceTimer) clearTimeout(syncPushDebounceTimer);
+  syncPushDebounceTimer = setTimeout(() => {
+    syncPushDebounceTimer = null;
+    gistPut(groups, pinColors);
+  }, 500);
+}
+
 function updateSyncShareUrl() { if (!syncConfig.gistId) return; const url = location.href.split('?')[0] + '?gist=' + syncConfig.gistId; document.getElementById('syncShareUrlRow').style.display = 'flex'; document.getElementById('syncShareInput').value = url; }
 function copySyncUrl() { navigator.clipboard.writeText(document.getElementById('syncShareInput').value); showToast('同期用URLをコピーしました'); }
 
@@ -1822,18 +1832,12 @@ function render() {
 function copyText(t){ return navigator.clipboard.writeText(t); }
 
 // ============================================================
-//  ★ ペースト機能（修正版）
-//  - navigator.clipboard.readText() を直接呼び出す
-//  - iPadのコピペポップアップが出ないようユーザージェスチャー起点で実行
-//  - ボタンのonclick属性から呼ばれるため、常にユーザージェスチャー起点になる
+//  ★ ペースト機能
 // ============================================================
 async function pasteHex(k) {
   try {
-    // clipboard.readText()はユーザージェスチャー起点であれば
-    // iOS/iPadOS 16.4+でもシステムポップアップなしに動作する
     const text = await navigator.clipboard.readText();
     let val = text.trim();
-    // # なしでも受け付ける
     if (/^[0-9a-fA-F]{6}$/.test(val)) val = '#' + val;
     if (validHex(val)) {
       applyHex(k, val);
@@ -1842,8 +1846,6 @@ async function pasteHex(k) {
       showToast('有効な HEX カラーコードが見つかりません');
     }
   } catch(e) {
-    // アクセス拒否またはAPIが使えない環境はフォールバック
-    // inputにフォーカスして手動ペーストを促す
     const inputEl = document.getElementById(k + 'Hex');
     if (inputEl) {
       inputEl.focus();
