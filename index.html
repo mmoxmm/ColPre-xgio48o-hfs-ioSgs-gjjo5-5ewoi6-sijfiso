@@ -8,7 +8,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#ffffff;--surface:#f5f5f7;--surface2:#ebebef;--border:#e0e0e8;
@@ -20,48 +19,57 @@ body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-he
 header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:8px}
 h1{font-size:19px;font-weight:700;letter-spacing:-.02em}
 h1 span{color:var(--muted);font-weight:400;font-size:13px;margin-left:6px}
-.sync-badge{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;padding:4px 10px;border-radius:99px;border:1px solid var(--border);background:var(--surface);color:var(--muted);transition:all .3s;cursor:pointer;user-select:none}
-.sync-badge:hover{border-color:#bbb}
+.sync-badge{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;padding:4px 10px;border-radius:99px;border:1px solid var(--border);background:var(--surface);color:var(--muted);transition:all .3s;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
 .sync-badge.synced{background:var(--accent-light);border-color:var(--accent-border);color:var(--accent)}
 .sync-badge.syncing{background:#fffbe6;border-color:#ffe58f;color:#b8860b}
 .sync-badge.error{background:#fff2f0;border-color:#ffccc7;color:#cf1322}
 .sync-dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0}
 .sync-gear{font-size:9px;opacity:.55;flex-shrink:0}
 
-.panels-with-actions{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto;gap:8px;margin-bottom:12px;}
-.swap-btn,.match-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:8px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'Syne',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s;text-align:center;grid-row:1;outline:none;-webkit-tap-highlight-color:transparent;}
-.panel-col{display:flex;flex-direction:column;gap:0;grid-row:2}
-.swap-btn:hover,.match-btn:hover{background:var(--surface2)}
-.swap-btn:active,.match-btn:active{background:var(--surface2)}
-.swap-btn svg,.match-btn svg{flex-shrink:0;transition:transform .3s}
-.swap-btn:hover svg{transform:rotate(180deg)}
-
-@media(max-width:540px){
-  .panels-with-actions{grid-template-columns:1fr;grid-template-rows:auto auto auto auto;}
-  .swap-btn{grid-row:1;grid-column:1;}
-  .match-btn{grid-row:2;grid-column:1;}
-  .panel-col:first-of-type{grid-row:3;grid-column:1}
-  .panel-col:last-of-type{grid-row:4;grid-column:1}
+/* ④ 縦長レイアウト修正 — grid で確実に順序制御 */
+.panels-with-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  grid-template-rows:auto auto;
+  gap:8px;
+  margin-bottom:12px;
 }
+.swap-btn{ grid-column:1; grid-row:1; }
+.match-btn{ grid-column:2; grid-row:1; }
+.panel-col-b{ grid-column:1; grid-row:2; }
+.panel-col-t{ grid-column:2; grid-row:2; }
+@media(max-width:540px){
+  .panels-with-actions{ grid-template-columns:1fr; grid-template-rows:auto auto auto auto; }
+  .swap-btn{  grid-column:1; grid-row:1; }
+  .panel-col-b{ grid-column:1; grid-row:2; }
+  .match-btn{ grid-column:1; grid-row:3; }
+  .panel-col-t{ grid-column:1; grid-row:4; }
+}
+
+/* ① タッチデバイスでhoverが残らないよう -webkit-tap-highlight-color + :hover は @media hover:hover のみ適用 */
+.swap-btn,.match-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:8px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'Syne',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s,color .15s;text-align:center;outline:none;-webkit-tap-highlight-color:transparent;appearance:none}
+.swap-btn svg,.match-btn svg{flex-shrink:0;transition:transform .3s}
+@media(hover:hover){.swap-btn:hover,.match-btn:hover{background:var(--surface2)}}
+@media(hover:hover){.swap-btn:hover svg{transform:rotate(180deg)}}
+.swap-btn:active,.match-btn:active{background:var(--surface2)}
 
 .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px}
 .panel-title{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
 .swatch-row{display:flex;align-items:center;gap:12px;margin-bottom:8px}
-.swatch{width:44px;height:44px;border-radius:50%;border:2px solid rgba(0,0,0,.07);flex-shrink:0;position:relative;overflow:hidden;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.12);transition:transform .15s,box-shadow .15s}
-@media(hover:hover){
-  .swatch:hover{transform:scale(1.08);box-shadow:0 4px 12px rgba(0,0,0,.18)}
-}
+.swatch{width:44px;height:44px;border-radius:50%;border:2px solid rgba(0,0,0,.07);flex-shrink:0;position:relative;overflow:hidden;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.12);transition:transform .15s,box-shadow .15s;-webkit-tap-highlight-color:transparent}
+@media(hover:hover){.swatch:hover{transform:scale(1.08);box-shadow:0 4px 12px rgba(0,0,0,.18)}}
 .swatch input[type=color]{position:absolute;inset:-4px;width:calc(100% + 8px);height:calc(100% + 8px);opacity:0;cursor:pointer}
 .hex-wrap{flex:1;min-width:0}
 .hex-label{font-size:10px;color:var(--muted);letter-spacing:.08em;margin-bottom:3px}
 .hex-copy-row{display:flex;align-items:center;gap:4px}
 .hex-input{flex:2;min-width:0;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Mono',monospace;font-size:13px;font-weight:500;padding:5px 6px;outline:none;transition:border-color .15s;text-align:center}
 .hex-input:focus{border-color:#999}
-.copy-hex-btn{flex:1;min-width:0;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--muted);font-size:11px;padding:5px 4px;cursor:pointer;transition:all .15s;font-family:'Syne',sans-serif;font-weight:600;white-space:nowrap;text-align:center;outline:none;-webkit-tap-highlight-color:transparent}
-@media(hover:hover){
-  .copy-hex-btn:hover{background:var(--text);color:#fff;border-color:var(--text)}
-}
-.copy-hex-btn.pressed{background:var(--text);color:#fff;border-color:var(--text)}
+
+/* ① コピーボタン：コピー後に元の色へ戻るアニメーション */
+.copy-hex-btn{flex:1;min-width:0;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--muted);font-size:11px;padding:5px 4px;cursor:pointer;transition:background .25s,color .25s,border-color .25s;font-family:'Syne',sans-serif;font-weight:600;white-space:nowrap;text-align:center;outline:none;-webkit-tap-highlight-color:transparent}
+@media(hover:hover){.copy-hex-btn:hover{background:var(--text);color:#fff;border-color:var(--text)}}
+.copy-hex-btn.copied{background:var(--text);color:#fff;border-color:var(--text)}
+
 .name-input{width:100%;background:transparent;border:none;border-bottom:1px dashed var(--border);color:var(--text);font-family:'Syne',sans-serif;font-size:12px;padding:3px 2px;outline:none;margin-bottom:8px;transition:border-color .15s}
 .name-input::placeholder{color:var(--muted)}
 .name-input:focus{border-bottom-color:#aaa}
@@ -73,10 +81,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;heigh
 input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .slider-val{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);width:30px;text-align:right;flex-shrink:0}
 .slider-step-btn{flex-shrink:0;width:18px;height:18px;border:none;background:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;border-radius:3px;transition:color .12s,background .12s;line-height:1;outline:none;-webkit-tap-highlight-color:transparent}
-@media(hover:hover){
-  .slider-step-btn:hover{color:var(--text);background:var(--surface2)}
-}
-.slider-step-btn:active{transform:scale(.85)}
+@media(hover:hover){.slider-step-btn:hover{color:var(--text);background:var(--surface2)}}
+.slider-step-btn:active{transform:scale(.85);color:var(--text)}
+
 .preview-wrap{border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);margin-bottom:16px}
 .preview-hint{font-size:10px;color:var(--muted);text-align:center;padding:5px 10px;font-style:italic;background:var(--bg);letter-spacing:.02em}
 .preview-box{padding:24px 20px;min-height:130px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;transition:background .12s,color .12s}
@@ -84,31 +91,29 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .preview-body{font-size:14px;line-height:1.65;max-width:400px;outline:none;border-radius:4px}
 .preview-small{font-size:11px;opacity:.7;outline:none;border-radius:4px}
 [contenteditable]:focus{outline:1px dashed rgba(128,128,128,.35);outline-offset:2px}
-
 .preview-bar{background:var(--surface);border-top:1px solid var(--border);padding:10px 14px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px}
 .color-codes{display:flex;gap:4px;flex-wrap:wrap;align-items:center;justify-content:center}
-.code-chip{display:flex;align-items:center;gap:6px;cursor:pointer;border-radius:8px;padding:5px 10px;transition:background .15s}
-@media(hover:hover){
-  .code-chip:hover{background:var(--surface2)}
-  .code-chip:hover .chip-copy-hint{opacity:1}
-}
+.code-chip{display:flex;align-items:center;gap:6px;cursor:pointer;border-radius:8px;padding:5px 10px;transition:background .15s;-webkit-tap-highlight-color:transparent}
+@media(hover:hover){.code-chip:hover{background:var(--surface2)}}
+@media(hover:hover){.code-chip:hover .chip-copy-hint{opacity:1}}
+.code-chip:active{background:var(--surface2)}
 .code-chip-sep{width:1px;height:22px;background:var(--border);flex-shrink:0;margin:0 2px}
 .chip-dot{width:16px;height:16px;border-radius:50%;border:1.5px solid rgba(0,0,0,.08);flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.12)}
-.code-chip.reversed{flex-direction:row-reverse}
 .code-label{color:var(--muted);font-size:10px;letter-spacing:.04em}
 .chip-code{font-family:'DM Mono',monospace;font-size:12px;font-weight:500}
 .chip-name{font-size:10px;color:var(--muted);font-family:'Syne',sans-serif}
 .chip-copy-hint{font-size:9px;color:var(--accent);opacity:0;transition:opacity .15s}
+
 .presets-section{margin-bottom:20px}
 .presets-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .section-label{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 .preset-actions{display:flex;gap:6px;flex-wrap:wrap}
-.icon-btn{font-size:11px;font-family:'Syne',sans-serif;font-weight:600;background:none;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);padding:4px 10px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:4px}
-@media(hover:hover){
-  .icon-btn:hover{background:var(--surface2)}
-}
+.icon-btn{font-size:11px;font-family:'Syne',sans-serif;font-weight:600;background:none;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);padding:4px 10px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:4px;outline:none;-webkit-tap-highlight-color:transparent}
+@media(hover:hover){.icon-btn:hover{background:var(--surface2)}}
+.icon-btn:active{background:var(--surface2)}
 .icon-btn.active{background:var(--text);color:#fff;border-color:var(--text)}
 .icon-btn.active-lock{background:#d9363e;color:#fff;border-color:#d9363e}
+
 .groups-list{display:flex;flex-direction:row;gap:12px;align-items:flex-start;flex-wrap:wrap}
 .group-block{flex:1 1 calc(33.333% - 8px);min-width:200px}
 @media(max-width:540px){.groups-list{flex-direction:column}.group-block{flex:1 1 100%;min-width:0}}
@@ -118,149 +123,61 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .group-drag-handle:active{cursor:grabbing}
 body.mode-edit .group-drag-handle{display:block}
 .group-name-display{font-family:'Syne',sans-serif;font-size:13px;font-weight:600;color:var(--text);text-align:center;cursor:text;padding:2px 6px;border-radius:4px;border:1px solid transparent;transition:border-color .15s,background .15s;min-width:40px;max-width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;outline:none}
-.group-name-display:focus-visible{border-color:#aaa;background:var(--bg)}
-@media(hover:hover){
-  .group-name-display:hover{border-color:var(--border);background:var(--bg)}
-}
-.group-del-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;transition:color .12s;flex-shrink:0;position:absolute;right:10px;top:50%;transform:translateY(-50%);display:none;padding:2px 4px}
-@media(hover:hover){
-  .group-del-btn:hover{color:#d9363e}
-}
+.group-name-display:focus{border-color:#aaa;background:var(--bg)}
+.group-del-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;transition:color .12s;flex-shrink:0;position:absolute;right:10px;top:50%;transform:translateY(-50%);display:none;padding:2px 4px;outline:none;-webkit-tap-highlight-color:transparent}
+@media(hover:hover){.group-del-btn:hover{color:#d9363e}}
 body.mode-edit .group-del-btn{display:block}
+
 .emoji-rows{padding:10px 12px;display:flex;flex-direction:column;gap:8px}
 .emoji-row{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;border-radius:6px;transition:background .12s}
-.row-drag-handle{display:none;width:10px;flex-shrink:0;background:var(--border);color:var(--muted);font-size:9px;cursor:grab;user-select:none;align-items:center;justify-content:center;height:28px;border-radius:3px;letter-spacing:-1px;transition:opacity .12s,background .12s}
+.row-drag-handle{display:none;width:14px;flex-shrink:0;background:#1a1a2e;color:#fff;font-size:10px;cursor:grab;user-select:none;align-items:center;justify-content:center;height:28px;border-radius:3px;letter-spacing:-1px;transition:opacity .12s}
 .row-drag-handle:active{cursor:grabbing}
-@media(hover:hover){
-  .row-drag-handle:hover{opacity:.7;background:var(--surface2)}
-}
+@media(hover:hover){.row-drag-handle:hover{opacity:.7}}
 body.mode-edit .row-drag-handle{display:flex}
 .emoji-row.row-dragging{opacity:.4}
 .emoji-row.row-drag-over{background:var(--accent-light);outline:1px dashed var(--accent);outline-offset:1px}
 .emoji-row.row-dragging *{pointer-events:none}
-.emoji-key{font-size:15px;flex-shrink:0;width:auto;min-width:28px;text-align:center;padding:2px 4px;border-radius:4px;border:1px solid transparent;transition:all .15s;line-height:32px;cursor:default}
+
+.emoji-key{font-size:15px;flex-shrink:0;width:auto;min-width:28px;text-align:center;padding:2px 4px;border-radius:4px;border:1px solid transparent;transition:all .15s;line-height:32px;cursor:default;-webkit-tap-highlight-color:transparent}
 body.mode-edit .emoji-key{border:1.5px dashed var(--muted);cursor:pointer}
-@media(hover:hover){
-  body.mode-edit .emoji-key:hover{border-color:var(--text);background:var(--surface2)}
-}
+body.mode-edit .emoji-key:active{border-color:var(--text);background:var(--surface2)}
+@media(hover:hover){body.mode-edit .emoji-key:hover{border-color:var(--text);background:var(--surface2)}}
+
 .emoji-swatches{display:flex;gap:4px;flex-wrap:wrap;align-items:flex-start;flex:1;min-width:0}
 
-/* ===== SWATCH CHIP BASE ===== */
-.swatch-chip{
-  position:relative;
-  width:32px;height:32px;
-  border-radius:50%;
-  border:1.5px solid rgba(0,0,0,.08);
-  cursor:pointer;
-  flex-shrink:0;
-  transition:transform .15s,box-shadow .15s;
-  overflow:visible;
-  -webkit-touch-callout:none;
-  -webkit-user-select:none;
-  user-select:none;
-  touch-action:manipulation;
-}
-@media(hover:hover){
-  .swatch-chip:hover{transform:scale(1.12);box-shadow:0 2px 8px rgba(0,0,0,.15)}
-}
-.swatch-chip-inner{
-  width:100%;height:100%;
-  display:flex;align-items:center;justify-content:center;
-  font-family:'IBM Plex Sans',sans-serif;font-weight:600;letter-spacing:-0.01em;
-  user-select:none;border-radius:50%;overflow:hidden;
-  text-align:center;line-height:1;padding:2px;
-  word-break:break-all;white-space:normal;
-}
-.swatch-chip-tooltip{
-  position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);
-  background:rgba(20,20,30,.82);color:#fff;
-  font-family:'IBM Plex Sans',sans-serif;font-size:10px;font-weight:500;
-  padding:4px 8px;border-radius:6px;white-space:nowrap;
-  pointer-events:none;opacity:0;transition:opacity .15s;z-index:10;
-}
-@media(hover:hover){
-  .swatch-chip:hover .swatch-chip-tooltip:not(:empty){opacity:1}
-}
+/* ① チップ：タッチデバイスでhoverが残らないよう media(hover:hover)限定 */
+.swatch-chip{position:relative;width:32px;height:32px;border-radius:50%;border:1.5px solid rgba(0,0,0,.08);cursor:pointer;flex-shrink:0;transition:transform .15s,box-shadow .15s;overflow:visible;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+@media(hover:hover){.swatch-chip:hover{transform:scale(1.12);box-shadow:0 2px 8px rgba(0,0,0,.15)}}
+.swatch-chip-inner{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Sans',sans-serif;font-weight:600;letter-spacing:-0.01em;user-select:none;border-radius:50%;overflow:hidden;text-align:center;line-height:1;padding:2px;word-break:break-all;white-space:normal}
+.swatch-chip-tooltip{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:rgba(20,20,30,.82);color:#fff;font-family:'IBM Plex Sans',sans-serif;font-size:10px;font-weight:500;padding:4px 8px;border-radius:6px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:10}
+@media(hover:hover){.swatch-chip:hover .swatch-chip-tooltip:not(:empty){opacity:1}}
 .swatch-chip.locked{border-radius:5px !important}
 .swatch-chip.locked .swatch-chip-inner{border-radius:3px !important}
 body.mode-lock .swatch-chip.locked{border-color:rgba(217,54,62,.4);box-shadow:0 0 0 1px rgba(217,54,62,.2)}
+body.mode-edit .swatch-chip.selected-for-swap{border-color:#ffffff !important;box-shadow:0 0 0 2px #ffffff,0 0 0 4.5px rgba(0,0,0,0.35) !important;transform:scale(1.1)}
 
-/* ===== TAP-SELECTED CHIP: pulsing ring ===== */
-/* 枠がゆっくり広がったり縮まったりするアニメーション、自己主張する感じ */
-@keyframes chipSelectPulse {
-  0%   { box-shadow: 0 0 0 2px var(--chip-sel-color, #1a1a2e), 0 0 0 4px rgba(26,26,46,.18); transform: scale(1.06); }
-  50%  { box-shadow: 0 0 0 3.5px var(--chip-sel-color, #1a1a2e), 0 0 0 7px rgba(26,26,46,.09); transform: scale(1.10); }
-  100% { box-shadow: 0 0 0 2px var(--chip-sel-color, #1a1a2e), 0 0 0 4px rgba(26,26,46,.18); transform: scale(1.06); }
-}
-.swatch-chip.selected-for-swap {
-  animation: chipSelectPulse 1.4s ease-in-out infinite;
-  border-color: var(--chip-sel-color, #1a1a2e) !important;
-  z-index: 2;
-}
-/* hover をキャンセルしてアニメ優先 */
-@media(hover:hover){
-  .swatch-chip.selected-for-swap:hover { transform: none; }
-}
+/* チップ D&D ドラッグ中 */
+.swatch-chip.chip-dragging{opacity:.4;cursor:grabbing}
+.swatch-chip.chip-drag-over{box-shadow:0 0 0 3px var(--accent) !important;transform:scale(1.15)}
 
-/* ===== DRAG-SELECTED (DnD中) CHIP: ゴースト感 + ハイライト ===== */
-/* タップ選択とは意図的に異なるビジュアル */
-.swatch-chip.chip-dragging {
-  opacity: .32;
-  transform: scale(.88);
-  filter: blur(.5px) grayscale(.3);
-  transition: opacity .15s, transform .15s, filter .15s;
-  pointer-events: none;
-}
+.emoji-add-btn{width:28px;height:28px;border-radius:50%;border:1.5px dashed var(--border);background:none;color:var(--muted);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;line-height:1;outline:none;-webkit-tap-highlight-color:transparent}
+@media(hover:hover){.emoji-add-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}}
+.emoji-add-btn:active{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}
 
-/* チップDnDのドロップ挿入ポイント: 挿入位置ハイライト */
-/* ドロップターゲットチップの前/後に挿入バーを表示 */
-.swatch-chip.chip-drop-before::before,
-.swatch-chip.chip-drop-after::after {
-  content: '';
-  position: absolute;
-  top: 50%; transform: translateY(-50%);
-  width: 2.5px; height: 38px;
-  border-radius: 2px;
-  background: #999aaa;
-  box-shadow: 0 0 6px rgba(0,0,0,.18);
-  pointer-events: none;
-  z-index: 10;
-}
-.swatch-chip.chip-drop-before::before { right: calc(100% + 3px); left: auto; }
-.swatch-chip.chip-drop-after::after  { left:  calc(100% + 3px); right: auto; }
-
-/* 行の末尾に追加する「末尾挿入」マーカー（空行含む） */
-.emoji-swatches.drop-append-here {
-  outline: 2px dashed #b0b0bc;
-  outline-offset: 3px;
-  border-radius: 6px;
-}
-/* 空行のキースパン部分もホバーターゲットになるよう、行全体をハイライト */
-.emoji-row.drop-row-highlight {
-  background: var(--surface2);
-  outline: 1.5px dashed #b0b0bc;
-  outline-offset: 2px;
-  border-radius: 6px;
-}
-
-.emoji-add-btn{width:28px;height:28px;border-radius:50%;border:1.5px dashed var(--border);background:none;color:var(--muted);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;line-height:1}
-@media(hover:hover){
-  .emoji-add-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}
-}
 .group-add-row{padding:6px 12px;border-top:1px solid var(--border)}
-.group-add-preset{display:flex;align-items:center;gap:5px;font-size:11px;font-family:'Syne',sans-serif;font-weight:600;color:var(--muted);cursor:pointer;background:none;border:none;width:100%;transition:color .15s;padding:0}
-@media(hover:hover){
-  .group-add-preset:hover{color:var(--text)}
-}
+.group-add-preset{display:flex;align-items:center;gap:5px;font-size:11px;font-family:'Syne',sans-serif;font-weight:600;color:var(--muted);cursor:pointer;background:none;border:none;width:100%;transition:color .15s;padding:0;outline:none;-webkit-tap-highlight-color:transparent}
+@media(hover:hover){.group-add-preset:hover{color:var(--text)}}
+.group-add-preset:active{color:var(--text)}
 .group-block.drag-over{outline:2px dashed var(--accent);outline-offset:2px}
 .group-block.dragging{opacity:.45;cursor:grabbing}
+
 .sync-setup{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-top:20px}
 .sync-setup-title{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
 .sync-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .sync-input{flex:1;min-width:160px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Mono',monospace;font-size:12px;padding:6px 10px;outline:none;transition:border-color .15s}
 .sync-input:focus{border-color:var(--accent)}
 .sync-input::placeholder{color:var(--muted);font-family:'Syne',sans-serif;font-size:12px}
-.sync-action-btn{font-family:'Syne',sans-serif;font-size:12px;font-weight:600;padding:6px 14px;border-radius:var(--radius-sm);cursor:pointer;border:1px solid var(--border);transition:all .15s;white-space:nowrap}
+.sync-action-btn{font-family:'Syne',sans-serif;font-size:12px;font-weight:600;padding:6px 14px;border-radius:var(--radius-sm);cursor:pointer;border:1px solid var(--border);transition:all .15s;white-space:nowrap;outline:none}
 .sync-action-btn.primary{background:var(--text);color:#fff;border-color:var(--text)}
 .sync-action-btn.primary:hover{opacity:.85}
 .sync-action-btn.secondary{background:none;color:var(--muted)}
@@ -273,16 +190,16 @@ body.mode-lock .swatch-chip.locked{border-color:rgba(217,54,62,.4);box-shadow:0 
 .sync-copy-btn{font-family:'Syne',sans-serif;font-size:11px;font-weight:600;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);padding:5px 12px;cursor:pointer;transition:opacity .15s;flex-shrink:0}
 .sync-copy-btn:hover{opacity:.85}
 
+/* ② カラー付きトースト */
 .copy-toast{
   position:fixed;bottom:24px;left:50%;
   transform:translateX(-50%) translateY(10px);
-  font-family:'DM Mono',monospace;font-size:12px;font-weight:500;
-  padding:8px 18px;border-radius:99px;
+  font-family:'DM Mono',monospace;font-size:12px;
+  padding:8px 16px;border-radius:99px;
   pointer-events:none;opacity:0;
-  transition:opacity .2s,transform .2s,background .15s,color .15s;
+  transition:opacity .2s,transform .2s;
   z-index:200;white-space:nowrap;
-  border:1.5px solid rgba(255,255,255,.18);
-  box-shadow:0 4px 20px rgba(0,0,0,.22);
+  background:rgba(0,0,0,.8);color:#fff; /* デフォルト */
 }
 .copy-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
@@ -296,32 +213,35 @@ body.mode-lock .swatch-chip.locked{border-color:rgba(217,54,62,.4);box-shadow:0 
 .modal-input,.group-select{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'Syne',sans-serif;font-size:13px;padding:7px 10px;outline:none;transition:border-color .15s;text-align:center}
 .modal-input:focus,.group-select:focus{border-color:#999}
 .emoji-key-select{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;justify-content:center}
-.emoji-key-btn{font-size:18px;padding:4px 6px;border:1.5px solid var(--border);border-radius:6px;cursor:pointer;background:var(--surface);transition:all .12s;line-height:1}
+.emoji-key-btn{font-size:18px;padding:4px 6px;border:1.5px solid var(--border);border-radius:6px;cursor:pointer;background:var(--surface);transition:all .12s;line-height:1;outline:none;-webkit-tap-highlight-color:transparent}
 @media(hover:hover){.emoji-key-btn:hover{background:var(--surface2)}}
 .emoji-key-btn.selected{border-color:var(--text);background:var(--surface2)}
 .emoji-new-input{margin-top:6px;display:none;width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'Syne',sans-serif;font-size:14px;padding:6px 10px;outline:none;text-align:center}
 .emoji-new-input.visible{display:block}
 .modal-btns{display:flex;gap:8px;justify-content:center;margin-top:16px}
-.modal-btn{font-family:'Syne',sans-serif;font-size:12px;font-weight:600;padding:6px 14px;border-radius:var(--radius-sm);cursor:pointer;border:1px solid var(--border);transition:all .15s}
+.modal-btn{font-family:'Syne',sans-serif;font-size:12px;font-weight:600;padding:6px 14px;border-radius:var(--radius-sm);cursor:pointer;border:1px solid var(--border);transition:all .15s;outline:none;-webkit-tap-highlight-color:transparent}
 .modal-btn.primary{background:var(--text);color:#fff;border-color:var(--text)}
 .modal-btn.primary:hover{opacity:.85}
 .modal-btn.secondary{background:none;color:var(--muted)}
 .modal-btn.secondary:hover{color:var(--text)}
+
 #longPressEditModal .modal{width:380px;max-width:95vw;padding:0;overflow:hidden}
-.lp-canvas{min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:22px 20px 14px;position:relative;transition:background .1s;}
-.lp-lock-icon-btn{position:absolute;top:10px;left:12px;width:28px;height:28px;border-radius:50%;border:none;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:14px;line-height:1;box-shadow:0 2px 8px rgba(0,0,0,.22);transition:transform .15s;z-index:5;padding:0;}
+.lp-canvas{min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:22px 20px 14px;position:relative;transition:background .1s}
+.lp-lock-icon-btn{position:absolute;top:10px;left:12px;width:28px;height:28px;border-radius:50%;border:none;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:14px;line-height:1;box-shadow:0 2px 8px rgba(0,0,0,.22);transition:transform .15s;z-index:5;padding:0;outline:none;-webkit-tap-highlight-color:transparent}
 .lp-lock-icon-btn:hover{transform:scale(1.12)}
 .lp-lock-icon-btn.is-locked{background:#1a1a2e;color:#fff}
 .lp-lock-icon-btn.is-unlocked-temp{background:#fff;color:#1a1a2e;border:1.5px solid rgba(0,0,0,.12)}
-.lp-chip-big{width:72px;height:72px;border-radius:50%;border:3px solid rgba(255,255,255,.9);box-shadow:0 0 0 1px rgba(0,0,0,.08),0 6px 24px rgba(0,0,0,.28);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Sans',sans-serif;font-size:15px;font-weight:600;text-align:center;line-height:1;word-break:break-all;padding:6px;overflow:hidden;margin-bottom:12px;transition:background .1s,color .1s;}
+.lp-chip-big{width:72px;height:72px;border-radius:50%;border:3px solid rgba(255,255,255,.9);box-shadow:0 0 0 1px rgba(0,0,0,.08),0 6px 24px rgba(0,0,0,.28);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Sans',sans-serif;font-size:15px;font-weight:600;text-align:center;line-height:1;word-break:break-all;padding:6px;overflow:hidden;margin-bottom:12px;transition:background .1s,color .1s}
 .lp-chip-big.is-locked{border-radius:12px !important}
 .lp-compare-bar{display:flex;align-items:center;gap:5px;width:100%}
-.lp-compare-btn{flex:1;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;padding:5px 8px;border-radius:var(--radius-sm);border:1px solid rgba(255,255,255,.45);cursor:pointer;transition:all .2s;background:rgba(255,255,255,.18);color:var(--lp-btn-fg,#fff);text-shadow:var(--lp-btn-shadow,0 1px 4px rgba(0,0,0,.55));text-align:center;letter-spacing:.04em;text-transform:uppercase;box-shadow:0 1px 6px rgba(0,0,0,.15),inset 0 1px 0 rgba(255,255,255,.25);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);}
-.lp-compare-btn.active-compare{background:rgba(255,255,255,.38);border-color:rgba(255,255,255,.7);box-shadow:0 2px 10px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.4);font-weight:800;}
-.lp-compare-btn:not(.active-compare):hover{background:rgba(255,255,255,.28);border-color:rgba(255,255,255,.55)}
-.lp-action-bar{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--surface);}
-.lp-action-btn{display:flex;align-items:center;justify-content:center;gap:6px;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.03em;padding:9px 10px;border:none;cursor:pointer;background:transparent;color:var(--text);transition:background .15s;}
-.lp-action-btn:hover{background:var(--surface2)}
+.lp-compare-btn{flex:1;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;padding:5px 8px;border-radius:var(--radius-sm);border:1px solid rgba(255,255,255,.45);cursor:pointer;transition:all .2s;background:rgba(255,255,255,.18);color:var(--lp-btn-fg,#fff);text-shadow:var(--lp-btn-shadow,0 1px 4px rgba(0,0,0,.55));text-align:center;letter-spacing:.04em;text-transform:uppercase;box-shadow:0 1px 6px rgba(0,0,0,.15),inset 0 1px 0 rgba(255,255,255,.25);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);outline:none;-webkit-tap-highlight-color:transparent}
+.lp-compare-btn.active-compare{background:rgba(255,255,255,.38);border-color:rgba(255,255,255,.7);box-shadow:0 2px 10px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.4);font-weight:800}
+@media(hover:hover){.lp-compare-btn:not(.active-compare):hover{background:rgba(255,255,255,.28);border-color:rgba(255,255,255,.55)}}
+.lp-compare-sep{width:1px;height:18px;background:rgba(255,255,255,.35);flex-shrink:0;border-radius:1px}
+.lp-action-bar{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--surface)}
+.lp-action-btn{display:flex;align-items:center;justify-content:center;gap:6px;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.03em;padding:9px 10px;border:none;cursor:pointer;background:transparent;color:var(--text);transition:background .15s;outline:none;-webkit-tap-highlight-color:transparent}
+@media(hover:hover){.lp-action-btn:hover{background:var(--surface2)}}
+.lp-action-btn:active{background:var(--surface2)}
 .lp-action-btn+.lp-action-btn{border-left:1px solid var(--border)}
 .lp-body{padding:14px 16px 0}
 .lp-sec{margin-bottom:14px}
@@ -332,25 +252,27 @@ body.mode-lock .swatch-chip.locked{border-color:rgba(217,54,62,.4);box-shadow:0 
 .lp-col-label{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
 .lp-swatch-row{display:flex;align-items:center;gap:5px;width:100%}
 .lp-color-swatch{width:30px;height:30px;border-radius:7px;border:2px solid rgba(0,0,0,.1);flex-shrink:0;cursor:pointer;position:relative;overflow:hidden;transition:transform .12s}
-.lp-color-swatch:hover{transform:scale(1.1)}
-.lp-color-swatch input[type=color]{position:absolute;inset:-4px;width:calc(100% + 8px);height:calc(100% + 8px);opacity:0;cursor:pointer}
+@media(hover:hover){.lp-color-swatch:hover{transform:scale(1.1)}}
+.lp-color-swatch input[type=color]{position:absolute;inset:-4px;width:calc(100%+8px);height:calc(100%+8px);opacity:0;cursor:pointer}
 .lp-hex{flex:1;width:0;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Mono',monospace;font-size:11px;font-weight:500;padding:5px 5px;outline:none;transition:border-color .15s;text-align:center}
 .lp-hex:focus{border-color:var(--accent)}
 .lp-hex.invalid{border-color:#d9363e;background:#fff5f5}
-.lp-overwrite-btn{width:100%;padding:8px 12px;border-radius:var(--radius-sm);border:1.5px solid rgba(0,0,0,.08);cursor:pointer;font-family:'Syne',sans-serif;font-size:12px;font-weight:600;transition:opacity .15s,filter .15s;display:flex;align-items:center;justify-content:center;gap:5px}
+.lp-overwrite-btn{width:100%;padding:8px 12px;border-radius:var(--radius-sm);border:1.5px solid rgba(0,0,0,.08);cursor:pointer;font-family:'Syne',sans-serif;font-size:12px;font-weight:600;transition:opacity .15s,filter .15s;display:flex;align-items:center;justify-content:center;gap:5px;outline:none;-webkit-tap-highlight-color:transparent}
 .lp-overwrite-btn:hover:not(:disabled){filter:brightness(.92)}
 .lp-overwrite-btn:disabled{opacity:.38;cursor:not-allowed}
 .lp-label-input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:500;padding:7px 10px;outline:none;transition:border-color .15s;text-align:center}
 .lp-label-input:focus{border-color:var(--accent)}
 .lp-label-input::placeholder{color:var(--muted);font-family:'Syne',sans-serif;font-size:11px}
 .lp-footer{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:12px 16px 16px;border-top:1px solid var(--border);background:var(--surface);margin-top:14px}
-.lp-del-btn{font-family:'Syne',sans-serif;font-size:11px;font-weight:600;padding:6px 12px;border-radius:var(--radius-sm);cursor:pointer;border:1px solid #d9363e;color:#d9363e;background:none;transition:all .15s}
-.lp-del-btn:hover{background:#d9363e;color:#fff}
+.lp-del-btn{font-family:'Syne',sans-serif;font-size:11px;font-weight:600;padding:6px 12px;border-radius:var(--radius-sm);cursor:pointer;border:1px solid #d9363e;color:#d9363e;background:none;transition:all .15s;outline:none;-webkit-tap-highlight-color:transparent}
+@media(hover:hover){.lp-del-btn:hover{background:#d9363e;color:#fff}}
+.lp-del-btn:active{background:#d9363e;color:#fff}
 .lp-footer-right{display:flex;gap:6px}
-.lp-cancel-btn{font-family:'Syne',sans-serif;font-size:11px;font-weight:600;padding:6px 12px;border-radius:var(--radius-sm);cursor:pointer;border:1px solid var(--border);color:var(--muted);background:none;transition:all .15s}
-.lp-cancel-btn:hover{color:var(--text)}
-.lp-save-btn{font-family:'Syne',sans-serif;font-size:11px;font-weight:600;padding:6px 14px;border-radius:var(--radius-sm);cursor:pointer;border:none;background:var(--text);color:#fff;transition:opacity .15s}
+.lp-cancel-btn{font-family:'Syne',sans-serif;font-size:11px;font-weight:600;padding:6px 12px;border-radius:var(--radius-sm);cursor:pointer;border:1px solid var(--border);color:var(--muted);background:none;transition:all .15s;outline:none;-webkit-tap-highlight-color:transparent}
+@media(hover:hover){.lp-cancel-btn:hover{color:var(--text)}}
+.lp-save-btn{font-family:'Syne',sans-serif;font-size:11px;font-weight:600;padding:6px 14px;border-radius:var(--radius-sm);cursor:pointer;border:none;background:var(--text);color:#fff;transition:opacity .15s;outline:none;-webkit-tap-highlight-color:transparent}
 .lp-save-btn:hover{opacity:.8}
+
 #overwriteModal .modal{width:300px;text-align:center}
 .overwrite-compare{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:20px;background:#d0d0d8;border-radius:var(--radius);padding:20px 16px}
 .overwrite-side{display:flex;flex-direction:column;align-items:center;gap:7px}
@@ -359,7 +281,6 @@ body.mode-lock .swatch-chip.locked{border-color:rgba(217,54,62,.4);box-shadow:0 
 .overwrite-arrow{font-size:18px;color:rgba(255,255,255,.7);flex-shrink:0;line-height:1;margin-top:18px}
 #deleteGroupModal .modal{width:300px;text-align:center}
 footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px}
-
 </style>
 </head>
 <body>
@@ -371,6 +292,7 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px}
     </div>
   </header>
 
+  <!-- ④ grid で縦長時の順序を制御 -->
   <div class="panels-with-actions">
     <button class="swap-btn" onclick="swapColors();this.blur()">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16V4m0 0L3 8m4-4l4 4"/><path d="M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
@@ -380,7 +302,7 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px}
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="3"/><circle cx="15" cy="12" r="3"/></svg>
       背景色に揃える
     </button>
-    <div class="panel-col">
+    <div class="panel-col-b">
       <div class="panel">
         <div class="panel-title">背景色</div>
         <div class="swatch-row">
@@ -389,7 +311,7 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px}
             <div class="hex-label">HEX</div>
             <div class="hex-copy-row">
               <input type="text" class="hex-input" id="bHex" value="#e8f4f8" maxlength="7" spellcheck="false">
-              <button class="copy-hex-btn" id="copyHexBBtn" onclick="copyHex('b');this.blur()">コピー</button>
+              <button class="copy-hex-btn" id="copyBBtn" onclick="copyHexWithFeedback('b',this)">コピー</button>
             </div>
           </div>
         </div>
@@ -401,7 +323,7 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px}
         </div>
       </div>
     </div>
-    <div class="panel-col">
+    <div class="panel-col-t">
       <div class="panel">
         <div class="panel-title">文字色</div>
         <div class="swatch-row">
@@ -410,7 +332,7 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px}
             <div class="hex-label">HEX</div>
             <div class="hex-copy-row">
               <input type="text" class="hex-input" id="tHex" value="#1a1a2e" maxlength="7" spellcheck="false">
-              <button class="copy-hex-btn" id="copyHexTBtn" onclick="copyHex('t');this.blur()">コピー</button>
+              <button class="copy-hex-btn" id="copyTBtn" onclick="copyHexWithFeedback('t',this)">コピー</button>
             </div>
           </div>
         </div>
@@ -431,9 +353,10 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px}
       <div class="preview-body" contenteditable="true" spellcheck="false">日本語と English が混在したサンプルテキストです。<br>This is a sample text for color preview.</div>
       <div class="preview-small" contenteditable="true" spellcheck="false">小さい文字サイズでの見やすさもチェックできます。Small text visibility check.</div>
     </div>
+    <!-- ③ 並び順: ◯背景カラーコード | カラーコード文字◯ -->
     <div class="preview-bar">
       <div class="color-codes">
-        <div class="code-chip reversed" onclick="copyAndShowHex('b')">
+        <div class="code-chip" onclick="copyAndShowHex('b')">
           <div class="chip-dot" id="bcDot"></div>
           <span class="code-label">背景</span>
           <span class="chip-code" id="bcCode">#E8F4F8</span>
@@ -442,11 +365,11 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px}
         </div>
         <div class="code-chip-sep"></div>
         <div class="code-chip" onclick="copyAndShowHex('t')">
-          <div class="chip-dot" id="tcDot"></div>
-          <span class="code-label">文字</span>
-          <span class="chip-code" id="tcCode">#1A1A2E</span>
-          <span class="chip-name" id="tcName"></span>
           <span class="chip-copy-hint">copy</span>
+          <span class="chip-name" id="tcName"></span>
+          <span class="chip-code" id="tcCode">#1A1A2E</span>
+          <span class="code-label">文字</span>
+          <div class="chip-dot" id="tcDot"></div>
         </div>
       </div>
     </div>
@@ -483,11 +406,12 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px}
       <button class="sync-copy-btn" onclick="copySyncUrl()">URLコピー</button>
     </div>
   </div>
-  <footer>チップをシングルタップ → 背景色コピー ／ ダブルタップ → 文字色コピー ／ 長押し（0.3秒）→ 編集（並び替えモードON時は長押しドラッグで移動）</footer>
+  <footer>チップをシングルタップ → 背景色コピー ／ ダブルタップ → 文字色コピー ／ 長押し（0.3秒）→ 編集 ／ 長押しドラッグ → チップ移動</footer>
 </div>
 
 <div class="copy-toast" id="copyToast"></div>
 
+<!-- 色を登録モーダル -->
 <div class="modal-overlay" id="addModal" style="display:none" onclick="if(event.target===this)closeModal()">
   <div class="modal">
     <h3>新規登録</h3>
@@ -518,6 +442,7 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px}
   </div>
 </div>
 
+<!-- 行編集モーダル -->
 <div class="modal-overlay" id="editRowModal" style="display:none" onclick="if(event.target===this)closeEditRowModal()">
   <div class="modal">
     <h3>行（キー）を編集</h3>
@@ -529,6 +454,7 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px}
   </div>
 </div>
 
+<!-- 長押し編集モーダル -->
 <div class="modal-overlay" id="longPressEditModal" style="display:none" onclick="if(event.target===this)closeLpModal()">
   <div class="modal">
     <div class="lp-canvas" id="lpCanvas">
@@ -590,6 +516,7 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px}
   </div>
 </div>
 
+<!-- 上書き確認モーダル -->
 <div class="modal-overlay" id="overwriteModal" style="display:none" onclick="if(event.target===this)closeOverwriteModal()">
   <div class="modal">
     <h3>色を上書きしますか？</h3>
@@ -605,6 +532,7 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px}
   </div>
 </div>
 
+<!-- グループ削除確認モーダル -->
 <div class="modal-overlay" id="deleteGroupModal" style="display:none">
   <div class="modal" style="width:300px;text-align:center;">
     <h3 style="color:#d9363e;">グループを削除しますか？</h3>
@@ -616,11 +544,12 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px}
   </div>
 </div>
 
+<!-- グループ追加モーダル -->
 <div class="modal-overlay" id="addGroupModal" style="display:none" onclick="if(event.target===this)closeAddGroupModal()">
   <div class="modal" style="width:300px;">
     <div style="display:flex;align-items:center;margin-bottom:16px;">
       <h3 style="margin-bottom:0;flex:1;text-align:center;">グループを追加</h3>
-      <button onclick="closeAddGroupModal()" style="background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;line-height:1;padding:0 2px;flex-shrink:0;">×</button>
+      <button onclick="closeAddGroupModal()" style="background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;line-height:1;padding:0 2px;flex-shrink:0;outline:none;">×</button>
     </div>
     <div class="modal-field"><div class="modal-label">グループ名（絵文字や文字）</div><input type="text" class="modal-input" id="addGroupNameInput" maxlength="20" placeholder="グループ名"></div>
     <div class="modal-btns">
@@ -631,7 +560,6 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px}
 </div>
 
 <script>
-
 const uid = () => Math.random().toString(36).slice(2, 9);
 const DEFAULT_GROUPS = [
   { name: '🌃', rows: [
@@ -708,20 +636,8 @@ let appMode = 'normal', swapSelected = null, pendingOverwrite = null;
 let longPressTimer = null, longPressActive = false;
 let lpTarget = null, lpOldB = '', lpOldT = '', lpSnapB = '', lpSnapT = '';
 
-// ===== CHIP DRAG STATE (pointer-based, insert/move, cross-row) =====
-// chipDragSrc: { gi, ri, ci, chip(DOM) }
-// chipDropInfo: { targetChip(DOM), position: 'before'|'after'|'append', gi, ri, ci } | null
-let chipDragSrc = null;
-let chipDropInfo = null;
-
-function setupCopyHexPressEffect(btnId) {
-  const btn = document.getElementById(btnId);
-  if (!btn) return;
-  btn.addEventListener('touchstart', () => {
-    btn.classList.add('pressed');
-    setTimeout(() => btn.classList.remove('pressed'), 300);
-  }, { passive: true });
-}
+// チップD&D用
+let chipDragSrc = null; // { gi, ri, ci }
 
 function toggleLockMode() {
   if (appMode !== 'lock') {
@@ -748,9 +664,9 @@ function toggleEditMode() {
     appMode = 'edit';
     document.getElementById('editModeBtn').classList.add('active');
     document.body.classList.add('mode-edit');
-    renderGroups(); showToast('長押しドラッグでチップを移動（行をまたいで移動可能）');
+    renderGroups(); showToast('ドラッグで行・グループを並び替え ／ キー絵文字タップで編集');
   } else {
-    appMode = 'normal'; swapSelected = null; chipDragSrc = null; chipDropInfo = null;
+    appMode = 'normal'; swapSelected = null;
     document.getElementById('editModeBtn').classList.remove('active');
     document.body.classList.remove('mode-edit');
     renderGroups();
@@ -759,35 +675,10 @@ function toggleEditMode() {
 
 function getChipLabel(c) { return (c.label && c.label.trim()) ? c.label.trim() : 'Aa'; }
 
-// ===== INSERT/MOVE chip (not swap) =====
-function doMoveChip(src, dst) {
-  // src: { gi, ri, ci }  dst: { gi, ri, ci, position: 'before'|'after'|'append' }
-  const srcRow = groups[src.gi].rows[src.ri].colors;
-  const [moved] = srcRow.splice(src.ci, 1);
-
-  // Clean up empty rows
-  if (srcRow.length === 0) {
-    groups[src.gi].rows.splice(src.ri, 1);
-    // Adjust dst indices if src row removed affected them
-    if (src.gi === dst.gi) {
-      if (src.ri < dst.ri) { dst.ri -= 1; }
-      else if (src.ri === dst.ri) {
-        // row was removed: append to end of previous context (shouldn't happen normally)
-        saveGroups(); renderGroups(); return;
-      }
-    }
-  }
-
-  if (dst.position === 'append') {
-    // append to end of row
-    groups[dst.gi].rows[dst.ri].colors.push(moved);
-  } else {
-    const dstRow = groups[dst.gi].rows[dst.ri].colors;
-    let insertIdx = dst.ci;
-    if (dst.position === 'after') insertIdx += 1;
-    dstRow.splice(insertIdx, 0, moved);
-  }
-
+function doSwapColors(a, b) {
+  const rowA = groups[a.gi].rows[a.ri].colors, rowB = groups[b.gi].rows[b.ri].colors;
+  if (a.gi === b.gi && a.ri === b.ri) { [rowA[a.ci], rowA[b.ci]] = [rowA[b.ci], rowA[a.ci]]; }
+  else { const tmp = rowA[a.ci]; rowA[a.ci] = rowB[b.ci]; rowB[b.ci] = tmp; }
   saveGroups(); renderGroups();
 }
 
@@ -800,13 +691,14 @@ function applyChipLabelStyle(inner, label) {
   else { inner.style.fontSize = '6px'; inner.style.wordBreak = 'break-all'; inner.style.whiteSpace = 'normal'; inner.style.lineHeight = '1.1'; }
 }
 
-// ===== LP Modal =====
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 長押しモーダル
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function lpUpdateCanvas() {
   const bVal = document.getElementById('lpBHex').value;
   const tVal = document.getElementById('lpTHex').value;
-  const bOk = validHex(bVal), tOk = validHex(tVal);
-  const displayB = bOk ? bVal : lpOldB;
-  const displayT = tOk ? tVal : lpOldT;
+  const displayB = validHex(bVal) ? bVal : lpOldB;
+  const displayT = validHex(tVal) ? tVal : lpOldT;
   const canvas = document.getElementById('lpCanvas');
   const chip = document.getElementById('lpChipBig');
   canvas.style.background = displayB;
@@ -864,18 +756,8 @@ function lpToggleLock() {
 }
 
 function lpSetInputs(bVal, tVal) {
-  if (validHex(bVal)) {
-    document.getElementById('lpBHex').value = bVal;
-    document.getElementById('lpBPicker').value = bVal;
-    document.getElementById('lpBSwatch').style.background = bVal;
-    document.getElementById('lpBHex').classList.remove('invalid');
-  }
-  if (validHex(tVal)) {
-    document.getElementById('lpTHex').value = tVal;
-    document.getElementById('lpTPicker').value = tVal;
-    document.getElementById('lpTSwatch').style.background = tVal;
-    document.getElementById('lpTHex').classList.remove('invalid');
-  }
+  if (validHex(bVal)) { document.getElementById('lpBHex').value = bVal; document.getElementById('lpBPicker').value = bVal; document.getElementById('lpBSwatch').style.background = bVal; document.getElementById('lpBHex').classList.remove('invalid'); }
+  if (validHex(tVal)) { document.getElementById('lpTHex').value = tVal; document.getElementById('lpTPicker').value = tVal; document.getElementById('lpTSwatch').style.background = tVal; document.getElementById('lpTHex').classList.remove('invalid'); }
 }
 
 function lpCompareTo(mode) {
@@ -890,8 +772,7 @@ function lpCompareTo(mode) {
 function lpSwapColors() {
   const bVal = document.getElementById('lpBHex').value, tVal = document.getElementById('lpTHex').value;
   if (!validHex(bVal) || !validHex(tVal)) { showToast('有効なHEXを入力してください'); return; }
-  lpSetInputs(tVal, bVal);
-  lpUpdateCanvas(); updateLpOverwriteBtn();
+  lpSetInputs(tVal, bVal); lpUpdateCanvas(); updateLpOverwriteBtn();
   showToast('入力欄の色を入れ替えました');
 }
 
@@ -900,8 +781,7 @@ function lpMatchToPreview() {
   const bOk = validHex(bVal), tOk = validHex(tVal);
   if (!bOk && !tOk) { showToast('有効なHEXを入力してください'); return; }
   const base = bOk ? bVal : tVal;
-  lpSetInputs(base, base);
-  lpUpdateCanvas(); updateLpOverwriteBtn();
+  lpSetInputs(base, base); lpUpdateCanvas(); updateLpOverwriteBtn();
   showToast('同じ色 ' + base.toUpperCase() + ' に揃えました');
 }
 
@@ -919,35 +799,12 @@ function openLpModal(c, gi, ri, ci) {
   document.getElementById('longPressEditModal').style.display = 'flex';
 }
 
-function closeLpModal() {
-  lpTarget = null;
-  document.getElementById('longPressEditModal').style.display = 'none';
-}
+function closeLpModal() { lpTarget = null; document.getElementById('longPressEditModal').style.display = 'none'; }
 
-document.getElementById('lpBPicker').addEventListener('input', e => {
-  document.getElementById('lpBHex').value = e.target.value;
-  document.getElementById('lpBSwatch').style.background = e.target.value;
-  document.getElementById('lpBHex').classList.remove('invalid');
-  lpUpdateCanvas(); updateLpOverwriteBtn();
-});
-document.getElementById('lpTPicker').addEventListener('input', e => {
-  document.getElementById('lpTHex').value = e.target.value;
-  document.getElementById('lpTSwatch').style.background = e.target.value;
-  document.getElementById('lpTHex').classList.remove('invalid');
-  lpUpdateCanvas(); updateLpOverwriteBtn();
-});
-document.getElementById('lpBHex').addEventListener('input', e => {
-  let v = normalizeHexInput(e.target.value); if (v !== e.target.value) e.target.value = v;
-  if (validHex(v)) { document.getElementById('lpBPicker').value = v; document.getElementById('lpBSwatch').style.background = v; e.target.classList.remove('invalid'); }
-  else { e.target.classList.add('invalid'); }
-  lpUpdateCanvas(); updateLpOverwriteBtn();
-});
-document.getElementById('lpTHex').addEventListener('input', e => {
-  let v = normalizeHexInput(e.target.value); if (v !== e.target.value) e.target.value = v;
-  if (validHex(v)) { document.getElementById('lpTPicker').value = v; document.getElementById('lpTSwatch').style.background = v; e.target.classList.remove('invalid'); }
-  else { e.target.classList.add('invalid'); }
-  lpUpdateCanvas(); updateLpOverwriteBtn();
-});
+document.getElementById('lpBPicker').addEventListener('input', e => { document.getElementById('lpBHex').value = e.target.value; document.getElementById('lpBSwatch').style.background = e.target.value; document.getElementById('lpBHex').classList.remove('invalid'); lpUpdateCanvas(); updateLpOverwriteBtn(); });
+document.getElementById('lpTPicker').addEventListener('input', e => { document.getElementById('lpTHex').value = e.target.value; document.getElementById('lpTSwatch').style.background = e.target.value; document.getElementById('lpTHex').classList.remove('invalid'); lpUpdateCanvas(); updateLpOverwriteBtn(); });
+document.getElementById('lpBHex').addEventListener('input', e => { let v = normalizeHexInput(e.target.value); if (v !== e.target.value) e.target.value = v; if (validHex(v)) { document.getElementById('lpBPicker').value = v; document.getElementById('lpBSwatch').style.background = v; e.target.classList.remove('invalid'); } else { e.target.classList.add('invalid'); } lpUpdateCanvas(); updateLpOverwriteBtn(); });
+document.getElementById('lpTHex').addEventListener('input', e => { let v = normalizeHexInput(e.target.value); if (v !== e.target.value) e.target.value = v; if (validHex(v)) { document.getElementById('lpTPicker').value = v; document.getElementById('lpTSwatch').style.background = v; e.target.classList.remove('invalid'); } else { e.target.classList.add('invalid'); } lpUpdateCanvas(); updateLpOverwriteBtn(); });
 document.getElementById('lpLabelInput').addEventListener('input', lpUpdateCanvas);
 
 function lpOverwrite() {
@@ -971,12 +828,9 @@ function lpSaveSettings() {
   if (!lpTarget) return;
   const rawLabel = document.getElementById('lpLabelInput').value.trim();
   lpTarget.c.label = rawLabel === 'Aa' ? '' : rawLabel;
-  closeLpModal();
-  longPressActive = false;
+  closeLpModal(); longPressActive = false;
   if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
-  saveGroups();
-  renderGroups();
-  showToast('設定を保存しました ✓');
+  saveGroups(); renderGroups(); showToast('設定を保存しました ✓');
 }
 
 function lpDelete() {
@@ -1020,41 +874,23 @@ function confirmAddGroup() {
 }
 document.getElementById('addGroupNameInput').addEventListener('keydown', e => { if (e.key === 'Enter') confirmAddGroup(); if (e.key === 'Escape') closeAddGroupModal(); });
 
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// グループ描画
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 let dragSrcGi = null;
-
-// ===== CLEAR ALL CHIP DROP HIGHLIGHTS =====
-function clearChipDropHighlights() {
-  document.querySelectorAll('.swatch-chip.chip-drop-before').forEach(c => c.classList.remove('chip-drop-before'));
-  document.querySelectorAll('.swatch-chip.chip-drop-after').forEach(c => c.classList.remove('chip-drop-after'));
-  document.querySelectorAll('.emoji-swatches.drop-append-here').forEach(el => el.classList.remove('drop-append-here'));
-  document.querySelectorAll('.emoji-row.drop-row-highlight').forEach(el => el.classList.remove('drop-row-highlight'));
-}
-
 function renderGroups() {
   const el = document.getElementById('groupsList'); el.innerHTML = '';
   groups.forEach((g, gi) => {
-    const block = document.createElement('div'); block.className = 'group-block';
-    block.setAttribute('draggable', 'false');
-
-    block.addEventListener('dragstart', e => {
-      if (appMode !== 'edit' || block.getAttribute('draggable') !== 'true') { e.preventDefault(); return; }
-      dragSrcGi = gi; block.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(gi));
-    });
-    block.addEventListener('dragend', () => {
-      block.setAttribute('draggable', 'false');
-      dragSrcGi = null; document.querySelectorAll('.group-block').forEach(b => b.classList.remove('dragging', 'drag-over'));
-    });
+    const block = document.createElement('div'); block.className = 'group-block'; block.setAttribute('draggable', 'true');
+    block.addEventListener('dragstart', e => { if (appMode !== 'edit') { e.preventDefault(); return; } dragSrcGi = gi; block.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(gi)); });
+    block.addEventListener('dragend', () => { dragSrcGi = null; document.querySelectorAll('.group-block').forEach(b => b.classList.remove('dragging', 'drag-over')); });
     block.addEventListener('dragover', e => { if (appMode !== 'edit' || dragSrcGi === null || dragSrcGi === gi) return; e.preventDefault(); e.dataTransfer.dropEffect = 'move'; document.querySelectorAll('.group-block').forEach(b => b.classList.remove('drag-over')); block.classList.add('drag-over'); });
     block.addEventListener('dragleave', e => { if (!block.contains(e.relatedTarget)) block.classList.remove('drag-over'); });
-    block.addEventListener('drop', e => { e.preventDefault(); block.classList.remove('drag-over'); if (dragSrcGi === null || dragSrcGi === gi) return; const moved = groups.splice(dragSrcGi, 1)[0]; const insertAt = dragSrcGi < gi ? gi - 1 : gi; groups.splice(insertAt, 0, moved); dragSrcGi = null; block.setAttribute('draggable','false'); saveGroups(); renderGroups(); });
+    block.addEventListener('drop', e => { e.preventDefault(); block.classList.remove('drag-over'); if (dragSrcGi === null || dragSrcGi === gi) return; const moved = groups.splice(dragSrcGi, 1)[0]; const insertAt = dragSrcGi < gi ? gi - 1 : gi; groups.splice(insertAt, 0, moved); dragSrcGi = null; saveGroups(); renderGroups(); });
 
     const hdr = document.createElement('div'); hdr.className = 'group-header';
-
     const dragHandle = document.createElement('span'); dragHandle.className = 'group-drag-handle'; dragHandle.title = 'ドラッグで並び替え'; dragHandle.textContent = '⠿';
-    dragHandle.addEventListener('mousedown', e => { e.stopPropagation(); block.setAttribute('draggable', 'true'); });
-    dragHandle.addEventListener('touchstart', e => { e.stopPropagation(); block.setAttribute('draggable', 'true'); }, { passive: true });
-    hdr.append(dragHandle);
-
+    dragHandle.addEventListener('mousedown', e => e.stopPropagation()); hdr.append(dragHandle);
     const nameEl = document.createElement('div'); nameEl.className = 'group-name-display'; nameEl.contentEditable = 'true'; nameEl.spellcheck = false; nameEl.textContent = g.name;
     nameEl.addEventListener('mousedown', e => e.stopPropagation());
     nameEl.addEventListener('input', () => { g.name = nameEl.textContent.trim() || g.name; saveGroups(); });
@@ -1069,30 +905,15 @@ function renderGroups() {
     let dragSrcRi = null;
     g.rows.forEach((row, ri) => {
       const rowEl = document.createElement('div'); rowEl.className = 'emoji-row';
-      rowEl.dataset.gi = gi; rowEl.dataset.ri = ri;
       const handle = document.createElement('div'); handle.className = 'row-drag-handle'; handle.textContent = '⠿'; handle.title = 'ドラッグして並び替え';
       rowEl.setAttribute('draggable', 'false');
       handle.addEventListener('mousedown', () => { rowEl.setAttribute('draggable', 'true'); });
-      handle.addEventListener('touchstart', () => { rowEl.setAttribute('draggable', 'true'); }, { passive: true });
       ;(function(cGi, cRi) {
-        rowEl.addEventListener('dragstart', e => {
-          if (appMode !== 'edit' || chipDragSrc !== null || rowEl.getAttribute('draggable') !== 'true') { e.preventDefault(); return; }
-          dragSrcRi = cRi; rowEl.classList.add('row-dragging'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(cRi));
-        });
-        rowEl.addEventListener('dragend', () => {
-          dragSrcRi = null; rowEl.setAttribute('draggable', 'false');
-          rowEl.classList.remove('row-dragging'); rowsEl.querySelectorAll('.emoji-row').forEach(r => r.classList.remove('row-drag-over'));
-        });
-        rowEl.addEventListener('dragover', e => {
-          if (appMode !== 'edit' || chipDragSrc !== null) return;
-          if (dragSrcRi === null || dragSrcRi === cRi) return; e.preventDefault(); rowsEl.querySelectorAll('.emoji-row').forEach(r => r.classList.remove('row-drag-over')); rowEl.classList.add('row-drag-over');
-        });
+        rowEl.addEventListener('dragstart', e => { if (appMode !== 'edit') { e.preventDefault(); return; } dragSrcRi = cRi; rowEl.classList.add('row-dragging'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(cRi)); });
+        rowEl.addEventListener('dragend', () => { dragSrcRi = null; rowEl.setAttribute('draggable', 'false'); rowEl.classList.remove('row-dragging'); rowsEl.querySelectorAll('.emoji-row').forEach(r => r.classList.remove('row-drag-over')); });
+        rowEl.addEventListener('dragover', e => { if (appMode !== 'edit' || dragSrcRi === null || dragSrcRi === cRi) return; e.preventDefault(); rowsEl.querySelectorAll('.emoji-row').forEach(r => r.classList.remove('row-drag-over')); rowEl.classList.add('row-drag-over'); });
         rowEl.addEventListener('dragleave', e => { if (!rowEl.contains(e.relatedTarget)) rowEl.classList.remove('row-drag-over'); });
-        rowEl.addEventListener('drop', e => {
-          if (chipDragSrc !== null) return;
-          e.preventDefault(); rowEl.classList.remove('row-drag-over'); if (dragSrcRi === null || dragSrcRi === cRi) return;
-          const rows = groups[cGi].rows; const moved = rows.splice(dragSrcRi, 1)[0]; const insertAt = dragSrcRi < cRi ? cRi - 1 : cRi; rows.splice(insertAt, 0, moved); dragSrcRi = null; saveGroups(); renderGroups();
-        });
+        rowEl.addEventListener('drop', e => { e.preventDefault(); rowEl.classList.remove('row-drag-over'); if (dragSrcRi === null || dragSrcRi === cRi) return; const rows = groups[cGi].rows; const moved = rows.splice(dragSrcRi, 1)[0]; const insertAt = dragSrcRi < cRi ? cRi - 1 : cRi; rows.splice(insertAt, 0, moved); dragSrcRi = null; saveGroups(); renderGroups(); });
       })(gi, ri);
       rowEl.append(handle);
 
@@ -1101,9 +922,7 @@ function renderGroups() {
       ;(function(cGi, cRi) {
         keySpan.addEventListener('click', () => {
           if (appMode === 'edit') { openEditRowModal(cGi, cRi); return; }
-          keyTapCount++;
-          if (keyTapCount === 1) { keyTapTimer = setTimeout(() => { keyTapCount = 0; }, 350); }
-          else if (keyTapCount >= 2) { clearTimeout(keyTapTimer); keyTapCount = 0; openEditRowModal(cGi, cRi); }
+          keyTapCount++; if (keyTapCount === 1) { keyTapTimer = setTimeout(() => { keyTapCount = 0; }, 350); } else if (keyTapCount >= 2) { clearTimeout(keyTapTimer); keyTapCount = 0; openEditRowModal(cGi, cRi); }
         });
         let lastTouch = 0;
         keySpan.addEventListener('touchend', e => { if (appMode === 'edit') return; const now = Date.now(); if (now - lastTouch < 350) { e.preventDefault(); openEditRowModal(cGi, cRi); } lastTouch = now; });
@@ -1111,17 +930,9 @@ function renderGroups() {
       rowEl.append(keySpan);
 
       const swatchesEl = document.createElement('div'); swatchesEl.className = 'emoji-swatches';
-
       row.colors.forEach((c, ci) => {
         const chip = document.createElement('div'); chip.className = 'swatch-chip';
-
-        // TAP selected: pulsing ring with chip's own text color as ring color
-        if (swapSelected && swapSelected.gi === gi && swapSelected.ri === ri && swapSelected.ci === ci) {
-          chip.classList.add('selected-for-swap');
-          // Use the chip's text color as the ring color for on-brand look
-          chip.style.setProperty('--chip-sel-color', c.t);
-        }
-
+        if (swapSelected && swapSelected.gi === gi && swapSelected.ri === ri && swapSelected.ci === ci) chip.classList.add('selected-for-swap');
         if (c.locked) chip.classList.add('locked');
         const inner = document.createElement('div'); inner.className = 'swatch-chip-inner';
         inner.style.background = c.b; inner.style.color = c.t;
@@ -1129,146 +940,67 @@ function renderGroups() {
         const tt = document.createElement('div'); tt.className = 'swatch-chip-tooltip';
         const updateTooltip = () => {
           if (appMode === 'lock') { tt.textContent = c.locked ? '🔓 タップで解除' : '🔒 タップでロック'; }
-          else if (appMode === 'edit') { tt.textContent = '長押しドラッグで移動'; }
+          else if (appMode === 'edit') { tt.textContent = c.locked ? '🔒 ロック中' : '色をタップして入れ替え'; }
           else { tt.textContent = ''; }
         };
         updateTooltip(); chip.addEventListener('mouseenter', updateTooltip);
 
-        chip.addEventListener('touchstart', () => {
-          if (document.activeElement && document.activeElement !== chip) { document.activeElement.blur(); }
-        }, { passive: true });
-
         let chipTapCount = 0, chipTapTimer = null;
-        let chipLongPressTimer = null, chipDragActive = false;
+        let chipDragLpTimer = null; // チップD&D用長押しタイマー
 
         ;(function(cC, cGi, cRi, cCi) {
+          // ━━ チップ D&D（長押し0.3秒でドラッグ可能に） ━━
+          chip.setAttribute('draggable', 'false');
 
-          // ===== CHIP POINTER DRAG (edit mode: insert/move, cross-row) =====
           chip.addEventListener('pointerdown', e => {
-            if (appMode === 'edit') {
-              chipDragActive = false;
-              chipLongPressTimer = setTimeout(() => {
-                chipDragActive = true;
-                chipLongPressTimer = null;
-                chipDragSrc = { gi: cGi, ri: cRi, ci: cCi };
-                chip.classList.add('chip-dragging');
-                showToast('ドラッグして移動してください（行をまたいで移動可能）');
-                try { chip.setPointerCapture(e.pointerId); } catch(_) {}
-              }, 400);
-              return;
-            }
             if (appMode !== 'normal') return;
             longPressActive = false;
             if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+
+            // D&D長押し検知と編集モーダル長押し検知を共用
             longPressTimer = setTimeout(() => {
               longPressActive = true; longPressTimer = null;
-              chipTapCount = 0; if (chipTapTimer) { clearTimeout(chipTapTimer); chipTapTimer = null; }
-              openLpModal(cC, cGi, cRi, cCi);
+              if (navigator.vibrate) navigator.vibrate(20);
+              // D&Dモード開始 — draggableを有効化
+              chip.setAttribute('draggable', 'true');
+              chip.classList.add('chip-dragging');
+              chipDragSrc = { gi: cGi, ri: cRi, ci: cCi };
+              showToast('ドラッグして移動 ↔');
             }, 300);
           });
 
-          chip.addEventListener('pointermove', e => {
-            if (appMode !== 'edit' || !chipDragActive || chipDragSrc === null) return;
-            e.preventDefault();
-
-            // Release capture briefly to hit-test elements beneath
-            try { chip.releasePointerCapture(e.pointerId); } catch(_) {}
-            const elemBelow = document.elementFromPoint(e.clientX, e.clientY);
-            try { chip.setPointerCapture(e.pointerId); } catch(_) {}
-
-            clearChipDropHighlights();
-            chipDropInfo = null;
-
-            if (!elemBelow) return;
-
-            // 1) Hovering an existing chip → insert before/after
-            const targetChip = elemBelow.closest('.swatch-chip');
-            if (targetChip && targetChip !== chip) {
-              const dstGi = +targetChip.dataset.gi;
-              const dstRi = +targetChip.dataset.ri;
-              const dstCi = +targetChip.dataset.ci;
-              const rect = targetChip.getBoundingClientRect();
-              const midX = rect.left + rect.width / 2;
-              const position = e.clientX < midX ? 'before' : 'after';
-              if (position === 'before') targetChip.classList.add('chip-drop-before');
-              else targetChip.classList.add('chip-drop-after');
-              chipDropInfo = { gi: dstGi, ri: dstRi, ci: dstCi, position };
-              return;
-            }
-
-            // 2) Hovering a swatches container (chips area) → append to that row
-            const targetSwatches = elemBelow.closest('.emoji-swatches');
-            if (targetSwatches && targetSwatches.dataset.gi !== undefined) {
-              const dstGi = +targetSwatches.dataset.gi;
-              const dstRi = +targetSwatches.dataset.ri;
-              targetSwatches.classList.add('drop-append-here');
-              chipDropInfo = { gi: dstGi, ri: dstRi, ci: -1, position: 'append' };
-              return;
-            }
-
-            // 3) Hovering any part of a row (e.g. the emoji-key of an empty row) → append to that row
-            const targetRow = elemBelow.closest('.emoji-row');
-            if (targetRow && targetRow.dataset.gi !== undefined) {
-              const dstGi = +targetRow.dataset.gi;
-              const dstRi = +targetRow.dataset.ri;
-              targetRow.classList.add('drop-row-highlight');
-              const swatchesInRow = targetRow.querySelector('.emoji-swatches');
-              if (swatchesInRow) swatchesInRow.classList.add('drop-append-here');
-              chipDropInfo = { gi: dstGi, ri: dstRi, ci: -1, position: 'append' };
-            }
+          // チップのドラッグイベント
+          chip.addEventListener('dragstart', e => {
+            if (!chipDragSrc) { e.preventDefault(); return; }
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', JSON.stringify(chipDragSrc));
           });
-
-          chip.addEventListener('pointerup', e => {
-            if (chipLongPressTimer) { clearTimeout(chipLongPressTimer); chipLongPressTimer = null; }
-
-            if (appMode === 'edit' && chipDragActive && chipDragSrc !== null) {
-              clearChipDropHighlights();
-              chip.classList.remove('chip-dragging');
-              const dst = chipDropInfo;
-              chipDropInfo = null;
-              const src = chipDragSrc;
-              chipDragSrc = null;
-              chipDragActive = false;
-
-              if (dst !== null) {
-                // Validate it's not dropping on itself
-                const isSelf = dst.position !== 'append'
-                  && dst.gi === src.gi && dst.ri === src.ri && dst.ci === src.ci;
-                if (!isSelf) {
-                  doMoveChip(src, dst);
-                  showToast('チップを移動しました');
-                } else {
-                  renderGroups();
-                }
-              } else {
-                showToast('キャンセルしました');
-                renderGroups();
-              }
-              return;
-            }
-
-            chip.classList.remove('chip-dragging');
-            chipDragActive = false;
+          chip.addEventListener('dragend', () => {
+            chip.setAttribute('draggable', 'false');
+            chip.classList.remove('chip-dragging', 'chip-drag-over');
             chipDragSrc = null;
-            chipDropInfo = null;
-            clearChipDropHighlights();
-
-            if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+            document.querySelectorAll('.swatch-chip').forEach(c2 => c2.classList.remove('chip-drag-over'));
+          });
+          chip.addEventListener('dragover', e => {
+            if (!chipDragSrc) return;
+            const src = chipDragSrc;
+            if (src.gi === cGi && src.ri === cRi && src.ci === cCi) return;
+            e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+            document.querySelectorAll('.swatch-chip').forEach(c2 => c2.classList.remove('chip-drag-over'));
+            chip.classList.add('chip-drag-over');
+          });
+          chip.addEventListener('dragleave', () => { chip.classList.remove('chip-drag-over'); });
+          chip.addEventListener('drop', e => {
+            e.preventDefault(); chip.classList.remove('chip-drag-over');
+            if (!chipDragSrc) return;
+            const src = chipDragSrc;
+            if (src.gi === cGi && src.ri === cRi && src.ci === cCi) return;
+            doSwapColors(src, { gi: cGi, ri: cRi, ci: cCi });
+            chipDragSrc = null; showToast('チップを移動しました ↔');
           });
 
-          chip.addEventListener('pointercancel', () => {
-            if (chipLongPressTimer) { clearTimeout(chipLongPressTimer); chipLongPressTimer = null; }
-            chip.classList.remove('chip-dragging');
-            clearChipDropHighlights();
-            chipDragSrc = null; chipDragActive = false; chipDropInfo = null;
-            if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
-            longPressActive = false;
-          });
-
-          // ===== CLICK / TAP =====
           chip.addEventListener('click', e => {
             e.stopPropagation();
-            if (chipDragActive) { chipDragActive = false; return; }
             if (appMode === 'lock') {
               cC.locked = !cC.locked;
               if (cC.locked) { chip.classList.add('locked'); showToast('🔒 ロックしました'); }
@@ -1276,25 +1008,9 @@ function renderGroups() {
               updateTooltip(); return;
             }
             if (appMode === 'edit') {
-              // TAP swap in edit mode — uses selected-for-swap with pulse animation (different from DnD)
-              if (swapSelected === null) {
-                swapSelected = { gi: cGi, ri: cRi, ci: cCi };
-                renderGroups();
-                showToast('移動先をタップ（同じ色でキャンセル）');
-              } else if (swapSelected.gi === cGi && swapSelected.ri === cRi && swapSelected.ci === cCi) {
-                swapSelected = null; renderGroups();
-              } else {
-                // TAP swap: swap positions (original behavior)
-                const rowA = groups[swapSelected.gi].rows[swapSelected.ri].colors;
-                const rowB = groups[cGi].rows[cRi].colors;
-                if (swapSelected.gi === cGi && swapSelected.ri === cRi) {
-                  [rowA[swapSelected.ci], rowA[cCi]] = [rowA[cCi], rowA[swapSelected.ci]];
-                } else {
-                  const tmp = rowA[swapSelected.ci]; rowA[swapSelected.ci] = rowB[cCi]; rowB[cCi] = tmp;
-                }
-                swapSelected = null;
-                saveGroups(); renderGroups(); showToast('入れ替えました ↔');
-              }
+              if (swapSelected === null) { swapSelected = { gi: cGi, ri: cRi, ci: cCi }; renderGroups(); showToast('移動先をタップ（同じ色でキャンセル）'); }
+              else if (swapSelected.gi === cGi && swapSelected.ri === cRi && swapSelected.ci === cCi) { swapSelected = null; renderGroups(); }
+              else { doSwapColors(swapSelected, { gi: cGi, ri: cRi, ci: cCi }); swapSelected = null; showToast('入れ替えました ↔'); }
               return;
             }
             if (longPressActive) { longPressActive = false; return; }
@@ -1304,25 +1020,25 @@ function renderGroups() {
                 chipTapCount = 0;
                 applyHex('t', cC.t); applyHex('b', cC.b);
                 copyText(cC.b.toUpperCase());
-                showColorToast(cC.b.toUpperCase(), cC.b, cC.t, '背景色');
+                // ② 背景色でトースト着色
+                showColoredToast('背景色 ' + cC.b.toUpperCase() + ' をコピー', cC.b, cC.t);
               }, 280);
             } else if (chipTapCount >= 2) {
               clearTimeout(chipTapTimer); chipTapTimer = null; chipTapCount = 0;
               applyHex('t', cC.t); applyHex('b', cC.b);
               copyText(cC.t.toUpperCase());
-              showColorToast(cC.t.toUpperCase(), cC.t, cC.b, '文字色');
+              // ② 文字色でトースト着色
+              showColoredToast('文字色 ' + cC.t.toUpperCase() + ' をコピー', cC.t, cC.b);
             }
           });
         })(c, gi, ri, ci);
 
+        chip.addEventListener('pointerup', () => { if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; } });
+        chip.addEventListener('pointerleave', () => { if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; } });
+        chip.addEventListener('pointercancel', () => { if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; } longPressActive = false; });
         chip.addEventListener('contextmenu', e => e.preventDefault());
-        chip.dataset.gi = gi; chip.dataset.ri = ri; chip.dataset.ci = ci;
         chip.append(inner, tt); swatchesEl.append(chip);
       });
-
-      // Store gi/ri on swatchesEl for drop-append detection
-      swatchesEl.dataset.gi = gi;
-      swatchesEl.dataset.ri = ri;
 
       const addRowBtn = document.createElement('button'); addRowBtn.className = 'emoji-add-btn'; addRowBtn.textContent = '+'; addRowBtn.title = '現在の色を追加';
       ;(function(cRow) { addRowBtn.onclick = () => { const t = document.getElementById('tHex').value, b = document.getElementById('bHex').value; cRow.colors.push({ id: uid(), t, b, locked: false, label: '', copyTarget: 'b' }); saveGroups(); renderGroups(); }; })(row);
@@ -1336,6 +1052,7 @@ function renderGroups() {
   });
 }
 
+// 色を登録モーダル
 let modalTargetGi = 0, selectedEmojiKey = null;
 function openAddModal(gi) {
   modalTargetGi = gi ?? 0;
@@ -1379,6 +1096,7 @@ function saveEditRow() { const val = document.getElementById('editRowInput').val
 function deleteEditRow() { if (confirm('この行を削除しますか？\n含まれるカラーもすべて消去されます。')) { groups[editGi].rows.splice(editRi, 1); saveGroups(); renderGroups(); closeEditRowModal(); } }
 function closeEditRowModal() { document.getElementById('editRowModal').style.display = 'none'; }
 
+// 同期設定
 let syncConfig = { token: '', gistId: '' }, pollTimer = null, lastEtag = '';
 function setSyncBadge(state, label) { document.getElementById('syncBadge').className = 'sync-badge ' + (state || ''); document.getElementById('syncLabel').textContent = label; if (state === 'error') document.getElementById('syncSetup').style.display = 'block'; }
 function toggleSyncSetupPanel() { const setup = document.getElementById('syncSetup'); setup.style.display = setup.style.display === 'none' ? 'block' : 'none'; }
@@ -1420,6 +1138,7 @@ async function syncPush() { if (syncConfig.gistId) gistPut(groups); }
 function updateSyncShareUrl() { if (!syncConfig.gistId) return; const url = location.href.split('?')[0] + '?gist=' + syncConfig.gistId; document.getElementById('syncShareUrlRow').style.display = 'flex'; document.getElementById('syncShareInput').value = url; }
 function copySyncUrl() { navigator.clipboard.writeText(document.getElementById('syncShareInput').value); showToast('同期用URLをコピーしました'); }
 
+// カラー計算
 const state = { t: { h: 229, s: 44, v: 18 }, b: { h: 200, s: 38, v: 97 } };
 function hexToHsv(hex) {
   let r = parseInt(hex.slice(1,3),16)/255, g = parseInt(hex.slice(3,5),16)/255, b = parseInt(hex.slice(5,7),16)/255;
@@ -1452,73 +1171,44 @@ function render() {
 }
 function copyText(t){ return navigator.clipboard.writeText(t); }
 
-let toastTimer = null;
-function contrastColor(hex) {
-  if (!validHex(hex)) return '#fff';
-  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
-  const lum = (0.299*r + 0.587*g + 0.114*b) / 255;
-  if (lum > 0.55) {
-    const factor = 0.28;
-    const dr = Math.round(r * factor).toString(16).padStart(2,'0');
-    const dg = Math.round(g * factor).toString(16).padStart(2,'0');
-    const db = Math.round(b * factor).toString(16).padStart(2,'0');
-    return '#' + dr + dg + db;
-  }
-  const factor = 0.82;
-  const lr = Math.round(r + (255 - r) * factor).toString(16).padStart(2,'0');
-  const lg = Math.round(g + (255 - g) * factor).toString(16).padStart(2,'0');
-  const lb = Math.round(b + (255 - b) * factor).toString(16).padStart(2,'0');
-  return '#' + lr + lg + lb;
-}
-
-function showColorToast(hexText, bgColor, _ignoredFg, label) {
-  const fg = contrastColor(bgColor);
-  const toast = document.getElementById('copyToast');
-  toast.style.background = bgColor;
-  toast.style.color = fg;
-  toast.style.borderColor = fg.startsWith('#f') || fg.startsWith('#e') || fg.startsWith('#d')
-    ? 'rgba(255,255,255,.22)' : 'rgba(0,0,0,.12)';
-  toast.textContent = label + ' ' + hexText + ' をコピー';
-  toast.classList.add('show');
-  if (toastTimer) clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { toast.classList.remove('show'); toastTimer = null; }, 2400);
-}
-
-function showToast(m) {
-  const toast = document.getElementById('copyToast');
-  toast.style.background = 'rgba(20,20,30,.84)';
-  toast.style.color = '#fff';
-  toast.style.borderColor = 'rgba(255,255,255,.12)';
-  toast.textContent = m;
-  toast.classList.add('show');
-  if (toastTimer) clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { toast.classList.remove('show'); toastTimer = null; }, 2200);
-}
-
-function copyHex(k) {
+// ① コピーボタン：コピー後に黒→元の色へ戻る
+let copyBtnTimers = {};
+function copyHexWithFeedback(k, btn) {
   const h = document.getElementById(k+'Hex').value;
   copyText(h);
-  if (k === 'b') {
-    const paired = document.getElementById('tHex').value;
-    showColorToast(h.toUpperCase(), h, paired, '背景色');
-  } else {
-    const paired = document.getElementById('bHex').value;
-    showColorToast(h.toUpperCase(), h, paired, '文字色');
-  }
+  btn.classList.add('copied');
+  btn.blur(); // ① フォーカス除去
+  if (copyBtnTimers[k]) clearTimeout(copyBtnTimers[k]);
+  copyBtnTimers[k] = setTimeout(() => { btn.classList.remove('copied'); }, 1800);
+  showToast(h + ' をコピー');
 }
 
-function copyAndShowHex(k) {
-  const h = document.getElementById(k==='t'?'tcCode':'bcCode').textContent;
-  copyText(h);
-  if (k === 'b') {
-    const paired = document.getElementById('tHex').value;
-    showColorToast(h, h, paired, '背景色');
-  } else {
-    const paired = document.getElementById('bHex').value;
-    showColorToast(h, h, paired, '文字色');
+// ② カラー付きトースト
+let toastTimer = null, toastColorTimer = null;
+function showColoredToast(m, bg, fg) {
+  const t = document.getElementById('copyToast');
+  t.textContent = m;
+  // コントラスト確認して文字色決定
+  if (validHex(bg)) {
+    const r = parseInt(bg.slice(1,3),16), g2 = parseInt(bg.slice(3,5),16), b2 = parseInt(bg.slice(5,7),16);
+    const lum = (0.299*r + 0.587*g2 + 0.114*b2) / 255;
+    t.style.background = bg;
+    t.style.color = lum > 0.5 ? 'rgba(0,0,0,.85)' : '#fff';
+    t.style.border = lum > 0.85 ? '1px solid rgba(0,0,0,.15)' : 'none';
   }
+  t.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.classList.remove('show'); toastTimer = null; t.style.background = ''; t.style.color = ''; t.style.border = ''; }, 2200);
 }
-
+function showToast(m) {
+  const t = document.getElementById('copyToast');
+  t.textContent = m; t.style.background = ''; t.style.color = ''; t.style.border = '';
+  t.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.classList.remove('show'); toastTimer = null; }, 2200);
+}
+function copyHex(k){ const h=document.getElementById(k+'Hex').value; copyText(h); showToast(h+' をコピー'); }
+function copyAndShowHex(k){ const h=document.getElementById(k==='t'?'tcCode':'bcCode').textContent; copyText(h); showToast(h+' をコピー'); }
 function stepSlider(id, k, delta, btn) { const el = document.getElementById(id); el.value = Math.min(+el.max, Math.max(+el.min, +el.value + delta)); fromSlider(k); if(btn) btn.blur(); }
 function normalizeHexInput(val) { val = val.trim(); if (!val) return val; if (!val.startsWith('#')) val = '#' + val; return val; }
 
@@ -1529,15 +1219,6 @@ document.getElementById('bPicker').oninput=e=>applyHex('b',e.target.value);
 document.getElementById('tHex').addEventListener('input', e => { let v = normalizeHexInput(e.target.value); if (v !== e.target.value) e.target.value = v; applyHex('t', v); });
 document.getElementById('bHex').addEventListener('input', e => { let v = normalizeHexInput(e.target.value); if (v !== e.target.value) e.target.value = v; applyHex('b', v); });
 document.getElementById('tName').oninput=render; document.getElementById('bName').oninput=render;
-
-document.addEventListener('touchstart', e => {
-  const active = document.activeElement;
-  if (active && active !== e.target && !active.contains(e.target)) {
-    if (active.tagName !== 'INPUT' && active.tagName !== 'TEXTAREA' && active.tagName !== 'SELECT') {
-      active.blur();
-    }
-  }
-}, { passive: true });
 
 document.addEventListener('click', e => {
   if (appMode === 'edit' && swapSelected !== null && !e.target.closest('.swatch-chip')) { swapSelected = null; renderGroups(); }
@@ -1550,10 +1231,7 @@ document.addEventListener('click', e => {
   if (urlGistId) { syncConfig.gistId = urlGistId; document.getElementById('gistIdInput').value = urlGistId; }
   if (syncConfig.token && syncConfig.gistId) { startPolling(); updateSyncShareUrl(); document.getElementById('gistTokenInput').value = syncConfig.token; document.getElementById('gistIdInput').value = syncConfig.gistId; document.getElementById('syncSetup').style.display = 'none'; }
   syncUI('t'); syncUI('b'); render(); renderGroups();
-  setupCopyHexPressEffect('copyHexBBtn');
-  setupCopyHexPressEffect('copyHexTBtn');
 })();
-
 </script>
 </body>
 </html>
