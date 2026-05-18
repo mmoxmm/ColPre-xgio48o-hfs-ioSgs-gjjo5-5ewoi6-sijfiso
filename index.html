@@ -99,7 +99,7 @@ h1 span{color:var(--muted);font-weight:400;font-size:13px;margin-left:6px}
 }
 @media(hover:hover){.paste-hex-btn:hover{background:#333;border-color:#333}}
 .paste-hex-btn:active{transform:scale(.9)}
-/* コピーボタン: 明るめ */
+/* コピーボタン: 明るめ・幅15px相当 */
 .copy-hex-btn{
   flex-shrink:0;
   background:var(--surface2);
@@ -107,7 +107,9 @@ h1 span{color:var(--muted);font-weight:400;font-size:13px;margin-left:6px}
   border-radius:var(--radius-sm);
   color:var(--text);
   font-size:10px;
-  padding:5px 15px;
+  /* ★修正: 幅15px相当にするためpaddingを絞る */
+  padding:5px 12px;
+  min-width:15px;
   cursor:pointer;
   transition:all .15s;
   font-family:'Syne',sans-serif;
@@ -824,6 +826,8 @@ let grpDragActive = false;
 let grpPointerId = null;
 let grpGhost = null;
 let grpDragOverGi = null;
+// ★グループDnD: ドロップ位置（before/after）を move中に追跡
+let grpDropInsertBefore = true;
 
 function setupCopyHexPressEffect(btnId) {
   const btn = document.getElementById(btnId);
@@ -929,9 +933,10 @@ function doMoveChip(src, dst) {
 }
 
 // ============================================================
-//  ★ グループDnD（修正版）
-//  - mode-edit 時のみポインタキャプチャを設定
-//  - grpDragSrc を cancelGrpDrag 前に保存し、IDベースで再検索
+//  ★ グループDnD（完全修正版）
+//  - grpDragOverGi と grpDropInsertBefore を move中に更新
+//  - pointerup では move中に確定した値をそのまま使う（releaseCapture後の
+//    elementFromPoint に依存しない）
 // ============================================================
 function cancelGrpDrag() {
   const ghost = document.getElementById('groupDragGhost');
@@ -944,22 +949,23 @@ function cancelGrpDrag() {
   }
   document.querySelectorAll('.group-block.group-drag-over-left,.group-block.group-drag-over-right')
     .forEach(b => b.classList.remove('group-drag-over-left','group-drag-over-right'));
-  grpDragSrc = null; grpDragActive = false; grpPointerId = null; grpDragOverGi = null;
+  grpDragSrc = null; grpDragActive = false; grpPointerId = null;
+  grpDragOverGi = null; grpDropInsertBefore = true;
 }
 
 function setupGroupHeaderPointerDnD(hdr, block, gi) {
-  // クロージャ時点のグループIDを記憶（renderGroups再呼び出しでもIDは不変）
   const srcGroupId = groups[gi].id;
 
   hdr.addEventListener('pointerdown', e => {
     if (appMode !== 'edit') return;
     if (e.button !== 0 && e.pointerType !== 'touch') return;
     if (e.target.closest('.group-del-btn')) return;
-    e.preventDefault(); // テキスト選択防止
+    e.preventDefault();
     grpDragSrc = { groupId: srcGroupId, block, hdr, startX: e.clientX, startY: e.clientY };
     grpDragActive = false;
-    grpPointerId = e.pointerId;
     grpDragOverGi = null;
+    grpDropInsertBefore = true;
+    grpPointerId = e.pointerId;
     try { hdr.setPointerCapture(e.pointerId); } catch(_) {}
   });
 
@@ -988,8 +994,9 @@ function setupGroupHeaderPointerDnD(hdr, block, gi) {
     document.querySelectorAll('.group-block.group-drag-over-left,.group-block.group-drag-over-right')
       .forEach(b => b.classList.remove('group-drag-over-left','group-drag-over-right'));
     grpDragOverGi = null;
+    grpDropInsertBefore = true;
 
-    // ポインタキャプチャを一時解放して elementFromPoint を使う
+    // ★ポインタキャプチャを一時解放して elementFromPoint を正確に取得
     try { hdr.releasePointerCapture(e.pointerId); } catch(_){}
     const elemBelow = document.elementFromPoint(e.clientX, e.clientY);
     try { hdr.setPointerCapture(e.pointerId); } catch(_){}
@@ -1002,7 +1009,9 @@ function setupGroupHeaderPointerDnD(hdr, block, gi) {
       if (targetDataIdx >= 0) {
         grpDragOverGi = targetDataIdx;
         const bRect = targetBlock.getBoundingClientRect();
-        if (e.clientX < bRect.left + bRect.width / 2) targetBlock.classList.add('group-drag-over-left');
+        // ★move中にinsertBeforeを確定して保存
+        grpDropInsertBefore = e.clientX < bRect.left + bRect.width / 2;
+        if (grpDropInsertBefore) targetBlock.classList.add('group-drag-over-left');
         else targetBlock.classList.add('group-drag-over-right');
       }
     }
@@ -1012,22 +1021,10 @@ function setupGroupHeaderPointerDnD(hdr, block, gi) {
     if (grpPointerId === null || e.pointerId !== grpPointerId) return;
     const wasActive = grpDragActive;
 
-    // cancelGrpDrag 前に必要な情報を保存
+    // ★cancelGrpDrag前にmove中に確定済みの情報を取り出す
     const srcId = grpDragSrc ? grpDragSrc.groupId : null;
-    const dstDataIdx = grpDragOverGi;
-
-    // drop 位置の判定（cancelGrpDrag でブロックのハイライトが消える前に）
-    let insertBefore = true;
-    if (dstDataIdx !== null && dstDataIdx !== undefined && dstDataIdx >= 0) {
-      const dstGroup = groups[dstDataIdx];
-      if (dstGroup) {
-        const targetBlock = document.querySelector(`.group-block[data-group-id="${dstGroup.id}"]`);
-        if (targetBlock) {
-          const bRect = targetBlock.getBoundingClientRect();
-          insertBefore = e.clientX < bRect.left + bRect.width / 2;
-        }
-      }
-    }
+    const dstDataIdx = grpDragOverGi;         // move中に確定済み
+    const insertBefore = grpDropInsertBefore; // move中に確定済み
 
     cancelGrpDrag();
 
@@ -1331,6 +1328,7 @@ function renderPinRow() {
             applyHex('t', cC.t); applyHex('b', cC.b);
             copyText(cC.t.toUpperCase()); showColorToast(cC.t.toUpperCase(), cC.t, cC.b, '文字色');
           } else if (chipTapCount >= 3) {
+            // ★修正: トリプルタップはコピーなし・プレビューのみ
             clearTimeout(chipTapTimer); chipTapTimer = null; chipTapCount = 0;
             applyHex('t', cC.t); applyHex('b', cC.b);
             showToast('プレビューに反映しました（コピーなし）');
@@ -1362,7 +1360,7 @@ function renderGroups() {
   groups.forEach((g, gi) => {
     const block = document.createElement('div');
     block.className = 'group-block';
-    block.dataset.groupId = g.id; // IDベースDnD追跡に必要
+    block.dataset.groupId = g.id;
 
     const hdr = document.createElement('div');
     hdr.className = 'group-header';
@@ -1386,7 +1384,6 @@ function renderGroups() {
     hdr.append(delBtn);
     block.append(hdr);
 
-    // 並び替えモードのときのみDnDをセットアップ
     if (appMode === 'edit') setupGroupHeaderPointerDnD(hdr, block, gi);
 
     const rowsEl = document.createElement('div'); rowsEl.className = 'emoji-rows';
@@ -1475,6 +1472,7 @@ function renderGroups() {
                 applyHex('t', cC.t); applyHex('b', cC.b);
                 copyText(cC.t.toUpperCase()); showColorToast(cC.t.toUpperCase(), cC.t, cC.b, '文字色');
               } else if (chipTapCount >= 3) {
+                // ★修正: トリプルタップはコピーなし・プレビューのみ
                 clearTimeout(chipTapTimer); chipTapTimer = null; chipTapCount = 0;
                 applyHex('t', cC.t); applyHex('b', cC.b);
                 showToast('プレビューに反映しました（コピーなし）');
@@ -1824,10 +1822,15 @@ function render() {
 function copyText(t){ return navigator.clipboard.writeText(t); }
 
 // ============================================================
-//  ペースト機能
+//  ★ ペースト機能（修正版）
+//  - navigator.clipboard.readText() を直接呼び出す
+//  - iPadのコピペポップアップが出ないようユーザージェスチャー起点で実行
+//  - ボタンのonclick属性から呼ばれるため、常にユーザージェスチャー起点になる
 // ============================================================
 async function pasteHex(k) {
   try {
+    // clipboard.readText()はユーザージェスチャー起点であれば
+    // iOS/iPadOS 16.4+でもシステムポップアップなしに動作する
     const text = await navigator.clipboard.readText();
     let val = text.trim();
     // # なしでも受け付ける
@@ -1839,7 +1842,14 @@ async function pasteHex(k) {
       showToast('有効な HEX カラーコードが見つかりません');
     }
   } catch(e) {
-    showToast('クリップボードへのアクセスが拒否されました');
+    // アクセス拒否またはAPIが使えない環境はフォールバック
+    // inputにフォーカスして手動ペーストを促す
+    const inputEl = document.getElementById(k + 'Hex');
+    if (inputEl) {
+      inputEl.focus();
+      inputEl.select();
+    }
+    showToast('ここに直接ペーストしてください');
   }
 }
 
