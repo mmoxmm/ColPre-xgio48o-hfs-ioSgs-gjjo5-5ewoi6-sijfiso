@@ -8,7 +8,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 
-<!-- ▼ Twemoji: iOS/macOS Safari以外で絵文字をTwemoji SVGに差し替え -->
 <script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
 <script>
 (function(){
@@ -33,7 +32,6 @@
   document.addEventListener('DOMContentLoaded', function(){ applyTw(document.body); });
 })();
 </script>
-<!-- ▲ Twemoji end -->
 
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -74,55 +72,15 @@ h1 span{color:var(--muted);font-weight:400;font-size:13px;margin-left:6px}
 .swatch input[type=color]{position:absolute;inset:-4px;width:calc(100% + 8px);height:calc(100% + 8px);opacity:0;cursor:pointer}
 .hex-wrap{flex:1;min-width:0}
 .hex-label{font-size:10px;color:var(--muted);letter-spacing:.08em;margin-bottom:3px}
-/* ▼ HEX入力行: カラーコード | ペースト | コピー */
 .hex-copy-row{display:flex;align-items:center;gap:4px}
 .hex-input{flex:1;min-width:0;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Mono',monospace;font-size:13px;font-weight:500;padding:5px 6px;outline:none;transition:border-color .15s;text-align:center}
 .hex-input:focus{border-color:#999}
-/* ペーストボタン: 濃いめ */
-.paste-hex-btn{
-  flex-shrink:0;
-  background:var(--text);
-  border:1px solid var(--text);
-  border-radius:var(--radius-sm);
-  color:#fff;
-  font-size:10px;
-  padding:5px 7px;
-  cursor:pointer;
-  transition:all .15s;
-  font-family:'Syne',sans-serif;
-  font-weight:700;
-  white-space:nowrap;
-  text-align:center;
-  outline:none;
-  -webkit-tap-highlight-color:transparent;
-  letter-spacing:.02em;
-}
+.paste-hex-btn{flex-shrink:0;background:var(--text);border:1px solid var(--text);border-radius:var(--radius-sm);color:#fff;font-size:10px;padding:5px 7px;cursor:pointer;transition:all .15s;font-family:'Syne',sans-serif;font-weight:700;white-space:nowrap;text-align:center;outline:none;-webkit-tap-highlight-color:transparent;letter-spacing:.02em;}
 @media(hover:hover){.paste-hex-btn:hover{background:#333;border-color:#333}}
 .paste-hex-btn:active{transform:scale(.9)}
-/* コピーボタン: 明るめ・幅15px相当 */
-.copy-hex-btn{
-  flex-shrink:0;
-  background:var(--surface2);
-  border:1px solid var(--border);
-  border-radius:var(--radius-sm);
-  color:var(--text);
-  font-size:10px;
-  /* ★修正: 幅15px相当にするためpaddingを絞る */
-  padding:5px 12px;
-  min-width:15px;
-  cursor:pointer;
-  transition:all .15s;
-  font-family:'Syne',sans-serif;
-  font-weight:600;
-  white-space:nowrap;
-  text-align:center;
-  outline:none;
-  -webkit-tap-highlight-color:transparent;
-  letter-spacing:.02em;
-}
+.copy-hex-btn{flex-shrink:0;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:10px;padding:5px 12px;min-width:15px;cursor:pointer;transition:all .15s;font-family:'Syne',sans-serif;font-weight:600;white-space:nowrap;text-align:center;outline:none;-webkit-tap-highlight-color:transparent;letter-spacing:.02em;}
 @media(hover:hover){.copy-hex-btn:hover{background:#fff;border-color:#bbb}}
 .copy-hex-btn.pressed{background:#fff;border-color:#bbb}
-/* ▲ HEX入力行 */
 .name-input{width:100%;background:transparent;border:none;border-bottom:1px dashed var(--border);color:var(--text);font-family:'Syne',sans-serif;font-size:12px;padding:3px 2px;outline:none;margin-bottom:8px;transition:border-color .15s}
 .name-input::placeholder{color:var(--muted)}
 .name-input:focus{border-bottom-color:#aaa}
@@ -166,37 +124,39 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .icon-btn.active{background:var(--text);color:#fff;border-color:var(--text)}
 .icon-btn.active-lock{background:#d9363e;color:#fff;border-color:#d9363e}
 
-/* ===== ピン行（ヘッダーなし・横長チップ） ===== */
+/* ===== ピン行（一回り小さく） ===== */
 .pin-row-wrap{margin-bottom:12px}
-.pin-row-inner{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:8px 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);min-height:52px}
-/* 横長チップ */
+/* ★ ピン行自体を小さく: padding縮小・min-height縮小 */
+.pin-row-inner{
+  display:flex;gap:5px;flex-wrap:wrap;align-items:center;
+  padding:5px 8px;  /* 8px 10px → 5px 8px */
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  min-height:40px;  /* 52px → 40px */
+}
+/* ★ ピンチップ本体を小さく */
 .pin-chip{
   position:relative;
-  height:44px;
-  min-width:52px;
-  max-width:120px;
-  border-radius:22px;
+  height:34px;       /* 44px → 34px */
+  min-width:40px;    /* 52px → 40px */
+  max-width:100px;   /* 120px → 100px */
+  border-radius:17px;/* 22px → 17px */
   border:1.5px solid rgba(0,0,0,.08);
-  cursor:pointer;
-  flex-shrink:0;
-  transition:transform .15s,box-shadow .15s;
-  overflow:visible;
-  -webkit-touch-callout:none;
-  -webkit-user-select:none;
-  user-select:none;
-  touch-action:manipulation;
+  cursor:pointer;flex-shrink:0;
+  transition:transform .15s,box-shadow .15s;overflow:visible;
+  -webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:manipulation;
   display:flex;align-items:center;justify-content:center;
-  padding:0 14px;
+  padding:0 10px;   /* 0 14px → 0 10px */
 }
 @media(hover:hover){.pin-chip:hover{transform:scale(1.06);box-shadow:0 3px 10px rgba(0,0,0,.16)}}
 body.mode-edit .pin-chip{cursor:grab;touch-action:none}
 body.mode-edit .pin-chip.is-grabbing{cursor:grabbing}
+/* ★ ピンチップ内テキスト: フォント小さく・5文字以上で折り返し */
 .pin-chip-inner{
   font-family:'IBM Plex Sans',sans-serif;font-weight:600;letter-spacing:-0.01em;
   user-select:none;
   text-align:center;line-height:1.1;padding:2px 0;
   word-break:break-all;white-space:normal;
-  font-size:13px;
+  font-size:11px;  /* 13px → 11px */
 }
 .pin-chip-tooltip{
   position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);
@@ -206,7 +166,7 @@ body.mode-edit .pin-chip.is-grabbing{cursor:grabbing}
   pointer-events:none;opacity:0;transition:opacity .15s;z-index:10;
 }
 @media(hover:hover){.pin-chip:hover .pin-chip-tooltip:not(:empty){opacity:1}}
-.pin-chip.locked{border-radius:8px !important}
+.pin-chip.locked{border-radius:6px !important} /* 8px → 6px */
 body.mode-lock .pin-chip.locked{border-color:rgba(217,54,62,.4);box-shadow:0 0 0 1px rgba(217,54,62,.2)}
 
 @keyframes pinChipSelectPulse {
@@ -218,13 +178,20 @@ body.mode-lock .pin-chip.locked{border-color:rgba(217,54,62,.4);box-shadow:0 0 0
 .pin-chip.chip-drop-before::before,
 .pin-chip.chip-drop-after::after{
   content:'';position:absolute;top:50%;transform:translateY(-50%);
-  width:2.5px;height:44px;border-radius:2px;
+  width:2.5px;height:34px;border-radius:2px; /* 44px → 34px */
   background:#999aaa;box-shadow:0 0 6px rgba(0,0,0,.18);pointer-events:none;z-index:10;
 }
 .pin-chip.chip-drop-before::before{right:calc(100% + 3px);left:auto}
 .pin-chip.chip-drop-after::after{left:calc(100% + 3px);right:auto}
 
-.pin-add-btn{height:44px;min-width:44px;border-radius:22px;border:1.5px dashed var(--border);background:none;color:var(--muted);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;line-height:1;padding:0 12px}
+/* ★ 追加ボタンも小さく */
+.pin-add-btn{
+  height:34px;min-width:34px;  /* 44px → 34px */
+  border-radius:17px;           /* 22px → 17px */
+  border:1.5px dashed var(--border);background:none;color:var(--muted);font-size:15px; /* 18px → 15px */
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .15s;flex-shrink:0;line-height:1;padding:0 10px; /* 0 12px → 0 10px */
+}
 @media(hover:hover){.pin-add-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}}
 .pin-row-inner.drop-append-here{outline:2px dashed #b0b0bc;outline-offset:3px;border-radius:var(--radius)}
 
@@ -239,7 +206,7 @@ body.mode-lock .pin-chip.locked{border-color:rgba(217,54,62,.4);box-shadow:0 0 0
 .group-block.group-drag-over-right{box-shadow:3px 0 0 0 var(--accent)}
 body.mode-edit .group-header{cursor:grab}
 body.mode-edit .group-header.is-grabbing{cursor:grabbing}
-#groupDragGhost{position:fixed;pointer-events:none;z-index:9999;opacity:.82;border-radius:var(--radius);border:2px solid var(--accent);box-shadow:0 8px 32px rgba(0,0,0,.22);background:var(--surface);overflow:hidden;will-change:transform;}
+#groupDragGhost{position:fixed;pointer-events:none;z-index:9999;opacity:.82;border-radius:var(--radius);border:2px solid var(--accent);box-shadow:0 8px 32px rgba(0,0,0,.22);background:var(--surface);overflow:hidden;will-change:transform;display:none;}
 .group-name-display{font-family:'Syne',sans-serif;font-size:13px;font-weight:600;color:var(--text);text-align:center;cursor:text;padding:2px 6px;border-radius:4px;border:1px solid transparent;transition:border-color .15s,background .15s;min-width:40px;max-width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;outline:none}
 .group-name-display:focus-visible{border-color:#aaa;background:var(--bg)}
 @media(hover:hover){.group-name-display:hover{border-color:var(--border);background:var(--bg)}}
@@ -297,8 +264,6 @@ body.mode-lock .swatch-chip.locked{border-color:rgba(217,54,62,.4);box-shadow:0 
 .emoji-swatches.drop-append-here{outline:2px dashed #b0b0bc;outline-offset:3px;border-radius:6px}
 .emoji-row.drop-row-highlight{background:var(--surface2);outline:1.5px dashed #b0b0bc;outline-offset:2px;border-radius:6px}
 
-/* ゴースト */
-#groupDragGhost{display:none}
 #chipDragGhost{position:fixed;pointer-events:none;z-index:9998;opacity:.88;will-change:transform;transition:none;display:none}
 
 .emoji-add-btn{width:28px;height:28px;border-radius:50%;border:1.5px dashed var(--border);background:none;color:var(--muted);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;line-height:1}
@@ -442,8 +407,8 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
             <div class="hex-label">HEX</div>
             <div class="hex-copy-row">
               <input type="text" class="hex-input" id="bHex" value="#e8f4f8" maxlength="7" spellcheck="false">
-              <button class="paste-hex-btn" id="pasteHexBBtn" onclick="pasteHex('b');this.blur()" title="クリップボードからペースト">ペースト</button>
-              <button class="copy-hex-btn" id="copyHexBBtn" onclick="copyHex('b');this.blur()" title="HEXをコピー">コピー</button>
+              <button class="paste-hex-btn" id="pasteHexBBtn" onclick="pasteHex('b');this.blur()">ペースト</button>
+              <button class="copy-hex-btn" id="copyHexBBtn" onclick="copyHex('b');this.blur()">コピー</button>
             </div>
           </div>
         </div>
@@ -464,8 +429,8 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
             <div class="hex-label">HEX</div>
             <div class="hex-copy-row">
               <input type="text" class="hex-input" id="tHex" value="#1a1a2e" maxlength="7" spellcheck="false">
-              <button class="paste-hex-btn" id="pasteHexTBtn" onclick="pasteHex('t');this.blur()" title="クリップボードからペースト">ペースト</button>
-              <button class="copy-hex-btn" id="copyHexTBtn" onclick="copyHex('t');this.blur()" title="HEXをコピー">コピー</button>
+              <button class="paste-hex-btn" id="pasteHexTBtn" onclick="pasteHex('t');this.blur()">ペースト</button>
+              <button class="copy-hex-btn" id="copyHexTBtn" onclick="copyHex('t');this.blur()">コピー</button>
             </div>
           </div>
         </div>
@@ -516,12 +481,9 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
         <button class="icon-btn" onclick="openAddGroupModal()">＋ グループ</button>
       </div>
     </div>
-
-    <!-- ピン行（ヘッダーなし・横長チップ） -->
     <div class="pin-row-wrap">
       <div class="pin-row-inner" id="pinRowInner"></div>
     </div>
-
     <div class="groups-list" id="groupsList"></div>
   </div>
 
@@ -537,7 +499,8 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
     </div>
     <div class="sync-note" id="syncNote">
       <a href="https://github.com/settings/tokens/new?scopes=gist&description=ColorPreview" target="_blank">① GitHubでgistスコープのトークンを作成</a> →
-      ② 1人目が「接続/作成」→ 共有URLをコピーして相手に送る
+      ② 1人目が「接続/作成」→ 共有URLをコピーして相手に送る<br>
+      ⚠️ 同時編集対応: IDベースでマージします。同じチップを同時に編集した場合のみコンフリクトが発生します。
     </div>
     <div class="sync-share-url" id="syncShareUrlRow" style="display:none">
       <input type="text" class="sync-share-input" id="syncShareInput" readonly>
@@ -551,10 +514,8 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
   </footer>
 </div>
 
-<!-- ゴースト要素 -->
 <div id="groupDragGhost"></div>
 <div id="chipDragGhost"></div>
-
 <div class="copy-toast" id="copyToast"></div>
 
 <!-- モーダル: 新規登録 -->
@@ -714,11 +675,11 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
 const uid = () => Math.random().toString(36).slice(2, 9);
 
 const DEFAULT_GROUPS = [
-  { name: '🌃', rows: [
+  { id: 'grp_night', name: '🌃', rows: [
     { key: '👓', colors: [] }, { key: '🐹', colors: [] }, { key: '🥽', colors: [] },
     { key: '🕶️', colors: [] }, { key: '🐸', colors: [] }, { key: '🩰', colors: [] }
   ]},
-  { name: '🌆', rows: [
+  { id: 'grp_city', name: '🌆', rows: [
     { key: '🦍', colors: [] }, { key: '🐱', colors: [] },
     { key: '🐰', colors: [] }, { key: '🦊', colors: [] }, { key: '🧪', colors: [] }, { key: '🎀', colors: [] }
   ]}
@@ -749,7 +710,6 @@ let groups = (() => {
   return g;
 })();
 
-// ピン行データ
 let pinColors = (() => {
   try {
     const d = localStorage.getItem('cp_pin_row');
@@ -788,17 +748,23 @@ applyMigrations();
 
 function saveGroups() { localStorage.setItem('cp_groups5', JSON.stringify(groups)); syncPush(); }
 
+// ★ ensureIds: 既存グループが id を持っていない場合、name から一貫したIDを生成する
 function ensureIds(gs) {
-  return gs.map(g => ({
-    id: g.id || uid(), name: g.name || '',
-    rows: (g.rows || []).map(r => ({
-      key: r.key || '?',
-      colors: (r.colors || []).map(c => {
-        if (typeof c === 'string') return { id: uid(), t: '#1a1a2e', b: c, locked: false, label: '', copyTarget: 'b' };
-        return { id: c.id || uid(), t: c.t || '#1a1a2e', b: c.b, locked: c.locked || false, label: c.label || '', copyTarget: c.copyTarget || 'b' };
-      })
-    }))
-  }));
+  return gs.map(g => {
+    // idがない or 'undefined'文字列 → nameから生成
+    const gid = (g.id && g.id !== 'undefined') ? g.id : ('grp_' + (g.name || uid()).replace(/[^a-zA-Z0-9]/g, '_') + '_' + Math.random().toString(36).slice(2,6));
+    return {
+      id: gid,
+      name: g.name || '',
+      rows: (g.rows || []).map(r => ({
+        key: r.key || '?',
+        colors: (r.colors || []).map(c => {
+          if (typeof c === 'string') return { id: uid(), t: '#1a1a2e', b: c, locked: false, label: '', copyTarget: 'b' };
+          return { id: c.id || uid(), t: c.t || '#1a1a2e', b: c.b, locked: c.locked || false, label: c.label || '', copyTarget: c.copyTarget || 'b' };
+        })
+      }))
+    };
+  });
 }
 
 // ============================================================
@@ -810,24 +776,10 @@ let pendingOverwrite = null;
 let longPressTimer = null, longPressActive = false;
 let lpTarget = null, lpOldB = '', lpOldT = '', lpSnapB = '', lpSnapT = '';
 
-// DnD状態
-let chipDragSrc = null;
-let chipDropInfo = null;
-let chipDragActive = false;
-let chipPointerId = null;
-let chipGhost = null;
-
-let rowDragSrc = null;
-let rowDragActive = false;
-let rowPointerId = null;
-
-let grpDragSrc = null;
-let grpDragActive = false;
-let grpPointerId = null;
-let grpGhost = null;
-let grpDragOverGi = null;
-// ★グループDnD: ドロップ位置（before/after）を move中に追跡
-let grpDropInsertBefore = true;
+let chipDragSrc = null, chipDropInfo = null, chipDragActive = false, chipPointerId = null, chipGhost = null;
+let rowDragSrc = null, rowDragActive = false, rowPointerId = null;
+let grpDragSrc = null, grpDragActive = false, grpPointerId = null, grpGhost = null;
+let grpDragOverGi = null, grpDropInsertBefore = true;
 
 function setupCopyHexPressEffect(btnId) {
   const btn = document.getElementById(btnId);
@@ -877,12 +829,13 @@ function toggleEditMode() {
 
 function getChipLabel(c) { return (c.label && c.label.trim()) ? c.label.trim() : 'Aa'; }
 
+// ★ ピンチップ: 5文字以上で折り返し、全体サイズ小
 function applyPinChipLabelStyle(inner, label) {
   const vlen = [...label].reduce((n, ch) => { const cp = ch.codePointAt(0); return n + (cp > 0x7F ? 2 : 1); }, 0);
-  if (vlen <= 2)      { inner.style.fontSize = '15px'; inner.style.whiteSpace = 'nowrap'; }
-  else if (vlen <= 5) { inner.style.fontSize = '13px'; inner.style.wordBreak = 'break-all'; inner.style.whiteSpace = 'normal'; }
-  else if (vlen <= 8) { inner.style.fontSize = '11px'; inner.style.wordBreak = 'break-all'; inner.style.whiteSpace = 'normal'; }
-  else                { inner.style.fontSize = '9px';  inner.style.wordBreak = 'break-all'; inner.style.whiteSpace = 'normal'; }
+  if (vlen <= 2)      { inner.style.fontSize = '11px'; inner.style.whiteSpace = 'nowrap'; inner.style.wordBreak = 'normal'; }
+  else if (vlen <= 4) { inner.style.fontSize = '10px'; inner.style.wordBreak = 'break-all'; inner.style.whiteSpace = 'normal'; inner.style.lineHeight = '1.1'; }
+  else if (vlen <= 7) { inner.style.fontSize = '9px';  inner.style.wordBreak = 'break-word'; inner.style.whiteSpace = 'normal'; inner.style.lineHeight = '1.1'; }
+  else                { inner.style.fontSize = '7.5px';inner.style.wordBreak = 'break-all'; inner.style.whiteSpace = 'normal'; inner.style.lineHeight = '1.1'; }
 }
 
 function applyChipLabelStyle(inner, label) {
@@ -899,32 +852,18 @@ function doMoveChip(src, dst) {
     if (info.type === 'pin') return pinColors;
     return groups[info.gi].rows[info.ri].colors;
   }
-
   const srcRow = getRow(src);
   const [moved] = srcRow.splice(src.ci, 1);
-
-  let dstGi = dst.gi, dstRi = dst.ri, dstCi = dst.ci;
-  if (
-    dst.position !== 'append' &&
-    dst.type === 'group' && src.type === 'group' &&
-    src.gi === dstGi && src.ri === dstRi &&
-    src.ci < dstCi
-  ) {
-    dstCi--;
+  let dstCi = dst.ci;
+  if (dst.position !== 'append' && dst.type === src.type) {
+    if (dst.type === 'group' && src.gi === dst.gi && src.ri === dst.ri && src.ci < dst.ci) dstCi--;
+    if (dst.type === 'pin' && src.ci < dst.ci) dstCi--;
   }
-  if (
-    dst.position !== 'append' &&
-    dst.type === 'pin' && src.type === 'pin' &&
-    src.ci < dstCi
-  ) {
-    dstCi--;
-  }
-
   if (dst.position === 'append') {
-    if (dst.type === 'pin') { pinColors.push(moved); }
-    else { groups[dstGi].rows[dstRi].colors.push(moved); }
+    if (dst.type === 'pin') pinColors.push(moved);
+    else groups[dst.gi].rows[dst.ri].colors.push(moved);
   } else {
-    const dstRow = dst.type === 'pin' ? pinColors : groups[dstGi].rows[dstRi].colors;
+    const dstRow = dst.type === 'pin' ? pinColors : groups[dst.gi].rows[dst.ri].colors;
     let idx = dstCi;
     if (dst.position === 'after') idx++;
     dstRow.splice(idx, 0, moved);
@@ -933,17 +872,13 @@ function doMoveChip(src, dst) {
 }
 
 // ============================================================
-//  ★ グループDnD（完全修正版）
+//  グループDnD ★修正: idベースで確実にマッチング
 // ============================================================
 function cancelGrpDrag() {
   const ghost = document.getElementById('groupDragGhost');
   ghost.style.display = 'none';
-  if (grpDragSrc && grpDragSrc.block) {
-    grpDragSrc.block.classList.remove('group-dragging');
-  }
-  if (grpDragSrc && grpDragSrc.hdr) {
-    grpDragSrc.hdr.classList.remove('is-grabbing');
-  }
+  if (grpDragSrc && grpDragSrc.block) grpDragSrc.block.classList.remove('group-dragging');
+  if (grpDragSrc && grpDragSrc.hdr) grpDragSrc.hdr.classList.remove('is-grabbing');
   document.querySelectorAll('.group-block.group-drag-over-left,.group-block.group-drag-over-right')
     .forEach(b => b.classList.remove('group-drag-over-left','group-drag-over-right'));
   grpDragSrc = null; grpDragActive = false; grpPointerId = null;
@@ -951,6 +886,7 @@ function cancelGrpDrag() {
 }
 
 function setupGroupHeaderPointerDnD(hdr, block, gi) {
+  // ★ idを取得時に確実にキャプチャ（レンダリング時点のgroupsから）
   const srcGroupId = groups[gi].id;
 
   hdr.addEventListener('pointerdown', e => {
@@ -959,9 +895,7 @@ function setupGroupHeaderPointerDnD(hdr, block, gi) {
     if (e.target.closest('.group-del-btn')) return;
     e.preventDefault();
     grpDragSrc = { groupId: srcGroupId, block, hdr, startX: e.clientX, startY: e.clientY };
-    grpDragActive = false;
-    grpDragOverGi = null;
-    grpDropInsertBefore = true;
+    grpDragActive = false; grpDragOverGi = null; grpDropInsertBefore = true;
     grpPointerId = e.pointerId;
     try { hdr.setPointerCapture(e.pointerId); } catch(_) {}
   });
@@ -974,32 +908,28 @@ function setupGroupHeaderPointerDnD(hdr, block, gi) {
       grpDragSrc.block.classList.add('group-dragging');
       grpDragSrc.hdr.classList.add('is-grabbing');
       const ghost = document.getElementById('groupDragGhost');
-      ghost.style.width = '180px';
-      ghost.style.height = '44px';
-      ghost.style.display = 'block';
+      ghost.style.width = '180px'; ghost.style.height = '44px'; ghost.style.display = 'block';
       const nameEl = grpDragSrc.block.querySelector('.group-name-display');
-      ghost.innerHTML = '<div style="padding:8px 12px;font-family:\'Syne\',sans-serif;font-size:13px;font-weight:600;text-align:center;">'
-        + (nameEl ? nameEl.textContent : '') + '</div>';
+      ghost.innerHTML = '<div style="padding:8px 12px;font-family:\'Syne\',sans-serif;font-size:13px;font-weight:600;text-align:center;">' + (nameEl ? nameEl.textContent : '') + '</div>';
       ghost.style.transform = `translate(${e.clientX - 90}px,${e.clientY - 22}px)`;
       grpGhost = ghost;
     }
     if (!grpDragActive) return;
     e.preventDefault();
     grpGhost.style.transform = `translate(${e.clientX - 90}px,${e.clientY - 22}px)`;
-
     document.querySelectorAll('.group-block.group-drag-over-left,.group-block.group-drag-over-right')
       .forEach(b => b.classList.remove('group-drag-over-left','group-drag-over-right'));
-    grpDragOverGi = null;
-    grpDropInsertBefore = true;
+    grpDragOverGi = null; grpDropInsertBefore = true;
 
     try { hdr.releasePointerCapture(e.pointerId); } catch(_){}
     const elemBelow = document.elementFromPoint(e.clientX, e.clientY);
     try { hdr.setPointerCapture(e.pointerId); } catch(_){}
-
     if (!elemBelow) return;
+
     const targetBlock = elemBelow.closest('.group-block');
     if (targetBlock && targetBlock !== grpDragSrc.block) {
       const targetId = targetBlock.dataset.groupId;
+      // ★ dataset.groupId で groups配列から検索
       const targetDataIdx = groups.findIndex(g => g.id === targetId);
       if (targetDataIdx >= 0) {
         grpDragOverGi = targetDataIdx;
@@ -1018,15 +948,21 @@ function setupGroupHeaderPointerDnD(hdr, block, gi) {
     const dstDataIdx = grpDragOverGi;
     const insertBefore = grpDropInsertBefore;
     cancelGrpDrag();
-    if (wasActive && srcId && dstDataIdx !== null && dstDataIdx !== undefined && dstDataIdx >= 0) {
+
+    if (wasActive && srcId && dstDataIdx !== null && dstDataIdx >= 0) {
       const srcDataIdx = groups.findIndex(g => g.id === srcId);
       if (srcDataIdx < 0 || srcDataIdx === dstDataIdx) return;
+
+      // ★ 正しい挿入位置計算
       const moved = groups.splice(srcDataIdx, 1)[0];
-      let insertIdx = srcDataIdx < dstDataIdx ? dstDataIdx - 1 : dstDataIdx;
+      // splice後のインデックス補正
+      let insertIdx = dstDataIdx;
+      if (srcDataIdx < dstDataIdx) insertIdx = dstDataIdx - 1;
       if (!insertBefore) insertIdx++;
-      groups.splice(Math.max(0, Math.min(insertIdx, groups.length)), 0, moved);
-      saveGroups();
-      renderGroups();
+      insertIdx = Math.max(0, Math.min(insertIdx, groups.length));
+      groups.splice(insertIdx, 0, moved);
+
+      saveGroups(); renderGroups();
       showToast('グループを移動しました');
     }
   });
@@ -1035,7 +971,7 @@ function setupGroupHeaderPointerDnD(hdr, block, gi) {
 }
 
 // ============================================================
-//  行DnD（Pointer Events）
+//  行DnD
 // ============================================================
 function cancelRowDrag() {
   document.querySelectorAll('.emoji-row.row-dragging').forEach(r => r.classList.remove('row-dragging'));
@@ -1052,17 +988,13 @@ function setupRowKeyPointerDnD(keySpan, rowEl, gi, ri) {
     rowDragActive = false; rowPointerId = e.pointerId;
     keySpan.setPointerCapture(e.pointerId);
   });
-
   keySpan.addEventListener('pointermove', e => {
     if (rowPointerId === null || e.pointerId !== rowPointerId || !rowDragSrc) return;
     const dx = e.clientX - rowDragSrc.startX, dy = e.clientY - rowDragSrc.startY;
-    if (!rowDragActive && Math.sqrt(dx*dx + dy*dy) > 6) {
-      rowDragActive = true; rowEl.classList.add('row-dragging'); keySpan.classList.add('is-grabbing');
-    }
+    if (!rowDragActive && Math.sqrt(dx*dx + dy*dy) > 6) { rowDragActive = true; rowEl.classList.add('row-dragging'); keySpan.classList.add('is-grabbing'); }
     if (!rowDragActive) return;
     e.preventDefault();
-    document.querySelectorAll('.emoji-row.row-drag-over-top,.emoji-row.row-drag-over-bottom')
-      .forEach(r => r.classList.remove('row-drag-over-top','row-drag-over-bottom'));
+    document.querySelectorAll('.emoji-row.row-drag-over-top,.emoji-row.row-drag-over-bottom').forEach(r => r.classList.remove('row-drag-over-top','row-drag-over-bottom'));
     try { keySpan.releasePointerCapture(e.pointerId); } catch(_){}
     const elemBelow = document.elementFromPoint(e.clientX, e.clientY);
     try { keySpan.setPointerCapture(e.pointerId); } catch(_){}
@@ -1074,7 +1006,6 @@ function setupRowKeyPointerDnD(keySpan, rowEl, gi, ri) {
       else targetRow.classList.add('row-drag-over-bottom');
     }
   });
-
   keySpan.addEventListener('pointerup', e => {
     if (e.pointerId !== rowPointerId) return;
     const wasActive = rowDragActive, srcRi = rowDragSrc ? rowDragSrc.ri : -1, srcGi = rowDragSrc ? rowDragSrc.gi : -1;
@@ -1094,12 +1025,11 @@ function setupRowKeyPointerDnD(keySpan, rowEl, gi, ri) {
     rows.splice(Math.max(0, Math.min(insertIdx, rows.length)), 0, moved);
     saveGroups(); renderGroups(); showToast('行を移動しました');
   });
-
   keySpan.addEventListener('pointercancel', () => cancelRowDrag());
 }
 
 // ============================================================
-//  チップDnD（Pointer Events）
+//  チップDnD
 // ============================================================
 function clearChipDropHighlights() {
   document.querySelectorAll('.swatch-chip.chip-drop-before,.swatch-chip.chip-drop-after').forEach(c => c.classList.remove('chip-drop-before','chip-drop-after'));
@@ -1118,16 +1048,13 @@ function cancelChipDrag() {
 
 function setupChipPointerDnD(chip, c, srcInfo) {
   let startX = 0, startY = 0;
-
   chip.addEventListener('pointerdown', e => {
     if (appMode !== 'edit') return;
     if (e.button !== 0 && e.pointerType !== 'touch') return;
     startX = e.clientX; startY = e.clientY;
-    chipDragSrc = { ...srcInfo };
-    chipDragActive = false; chipPointerId = e.pointerId; chipDropInfo = null;
+    chipDragSrc = { ...srcInfo }; chipDragActive = false; chipPointerId = e.pointerId; chipDropInfo = null;
     chip.setPointerCapture(e.pointerId);
   });
-
   chip.addEventListener('pointermove', e => {
     if (chipPointerId === null || e.pointerId !== chipPointerId) return;
     const dx = e.clientX - startX, dy = e.clientY - startY;
@@ -1135,59 +1062,48 @@ function setupChipPointerDnD(chip, c, srcInfo) {
       chipDragActive = true; chip.classList.add('chip-dragging','is-grabbing');
       const g = document.getElementById('chipDragGhost');
       const isPin = srcInfo.type === 'pin';
-      g.style.width = isPin ? '52px' : '32px'; g.style.height = isPin ? '44px' : '32px';
+      g.style.width = isPin ? '40px' : '32px'; g.style.height = isPin ? '34px' : '32px';
       g.style.background = c.b;
-      g.style.borderRadius = isPin ? (c.locked ? '8px' : '22px') : (c.locked ? '5px' : '50%');
+      g.style.borderRadius = isPin ? (c.locked ? '6px' : '17px') : (c.locked ? '5px' : '50%');
       g.style.border = '2px solid rgba(255,255,255,.85)';
-      g.style.boxShadow = '0 4px 18px rgba(0,0,0,.32)';
-      g.style.display = 'block';
-      const ox = isPin ? 26 : 16, oy = isPin ? 22 : 16;
+      g.style.boxShadow = '0 4px 18px rgba(0,0,0,.32)'; g.style.display = 'block';
+      const ox = isPin ? 20 : 16, oy = isPin ? 17 : 16;
       g.style.transform = `translate(${e.clientX - ox}px,${e.clientY - oy}px)`;
       chipGhost = g;
     }
     if (!chipDragActive) return;
     e.preventDefault();
     const isPin = srcInfo.type === 'pin';
-    const ox = isPin ? 26 : 16, oy = isPin ? 22 : 16;
+    const ox = isPin ? 20 : 16, oy = isPin ? 17 : 16;
     chipGhost.style.transform = `translate(${e.clientX - ox}px,${e.clientY - oy}px)`;
     clearChipDropHighlights(); chipDropInfo = null;
-
     try { chip.releasePointerCapture(e.pointerId); } catch(_){}
     const elemBelow = document.elementFromPoint(e.clientX, e.clientY);
     try { chip.setPointerCapture(e.pointerId); } catch(_){}
-
     if (!elemBelow) return;
-
     const targetPinChip = elemBelow.closest('.pin-chip');
     if (targetPinChip && targetPinChip !== chip) {
       const dCi = +targetPinChip.dataset.ci;
       const rect = targetPinChip.getBoundingClientRect();
       const pos = e.clientX < rect.left + rect.width/2 ? 'before' : 'after';
       targetPinChip.classList.add(pos === 'before' ? 'chip-drop-before' : 'chip-drop-after');
-      chipDropInfo = { type: 'pin', ci: dCi, position: pos };
-      return;
+      chipDropInfo = { type: 'pin', ci: dCi, position: pos }; return;
     }
     const targetPinRow = elemBelow.closest('.pin-row-inner');
-    if (targetPinRow) {
-      targetPinRow.classList.add('drop-append-here');
-      chipDropInfo = { type: 'pin', ci: -1, position: 'append' };
-      return;
-    }
+    if (targetPinRow) { targetPinRow.classList.add('drop-append-here'); chipDropInfo = { type: 'pin', ci: -1, position: 'append' }; return; }
     const targetChip = elemBelow.closest('.swatch-chip');
     if (targetChip && targetChip !== chip) {
       const dGi = +targetChip.dataset.gi, dRi = +targetChip.dataset.ri, dCi = +targetChip.dataset.ci;
       const rect = targetChip.getBoundingClientRect();
       const pos = e.clientX < rect.left + rect.width/2 ? 'before' : 'after';
       targetChip.classList.add(pos === 'before' ? 'chip-drop-before' : 'chip-drop-after');
-      chipDropInfo = { type: 'group', gi: dGi, ri: dRi, ci: dCi, position: pos };
-      return;
+      chipDropInfo = { type: 'group', gi: dGi, ri: dRi, ci: dCi, position: pos }; return;
     }
     const targetSw = elemBelow.closest('.emoji-swatches');
     if (targetSw && targetSw.dataset.gi !== undefined) {
       const dGi = +targetSw.dataset.gi, dRi = +targetSw.dataset.ri;
       targetSw.classList.add('drop-append-here');
-      chipDropInfo = { type: 'group', gi: dGi, ri: dRi, ci: -1, position: 'append' };
-      return;
+      chipDropInfo = { type: 'group', gi: dGi, ri: dRi, ci: -1, position: 'append' }; return;
     }
     const targetRow = elemBelow.closest('.emoji-row');
     if (targetRow && targetRow.dataset.gi !== undefined) {
@@ -1198,14 +1114,10 @@ function setupChipPointerDnD(chip, c, srcInfo) {
       chipDropInfo = { type: 'group', gi: dGi, ri: dRi, ci: -1, position: 'append' };
     }
   });
-
   chip.addEventListener('pointerup', e => {
     if (e.pointerId !== chipPointerId) return;
-    const wasActive = chipDragActive;
-    const src = chipDragSrc;
-    const dst = chipDropInfo;
+    const wasActive = chipDragActive, src = chipDragSrc, dst = chipDropInfo;
     cancelChipDrag();
-
     if (wasActive) {
       if (dst !== null) {
         let isSelf = false;
@@ -1219,16 +1131,12 @@ function setupChipPointerDnD(chip, c, srcInfo) {
     } else {
       const tapKey = src.type === 'pin' ? `pin:${src.ci}` : `g:${src.gi}:${src.ri}:${src.ci}`;
       if (swapSelected === null) {
-        swapSelected = { ...src, _key: tapKey };
-        renderGroups(); renderPinRow();
+        swapSelected = { ...src, _key: tapKey }; renderGroups(); renderPinRow();
         showToast('入れ替え先のチップをタップ（同じチップでキャンセル）');
       } else if (swapSelected._key === tapKey) {
         swapSelected = null; renderGroups(); renderPinRow();
       } else {
-        function getCell(info) {
-          if (info.type === 'pin') return pinColors;
-          return groups[info.gi].rows[info.ri].colors;
-        }
+        function getCell(info) { return info.type === 'pin' ? pinColors : groups[info.gi].rows[info.ri].colors; }
         const rowA = getCell(swapSelected), rowB = getCell(src);
         const tmp = rowA[swapSelected.ci]; rowA[swapSelected.ci] = rowB[src.ci]; rowB[src.ci] = tmp;
         swapSelected = null;
@@ -1236,7 +1144,6 @@ function setupChipPointerDnD(chip, c, srcInfo) {
       }
     }
   });
-
   chip.addEventListener('pointercancel', () => cancelChipDrag());
 }
 
@@ -1245,46 +1152,26 @@ function setupChipPointerDnD(chip, c, srcInfo) {
 // ============================================================
 function renderPinRow() {
   const container = document.getElementById('pinRowInner');
-  container.innerHTML = '';
-  container.dataset.type = 'pin';
-
+  container.innerHTML = ''; container.dataset.type = 'pin';
   pinColors.forEach((c, ci) => {
     const chip = document.createElement('div');
-    chip.className = 'pin-chip';
-    chip.dataset.type = 'pin'; chip.dataset.ci = ci;
+    chip.className = 'pin-chip'; chip.dataset.type = 'pin'; chip.dataset.ci = ci;
     if (c.locked) chip.classList.add('locked');
-
     if (appMode === 'edit' && swapSelected && swapSelected.type === 'pin' && swapSelected.ci === ci) {
-      chip.classList.add('selected-for-swap');
-      chip.style.setProperty('--chip-sel-color', c.t);
+      chip.classList.add('selected-for-swap'); chip.style.setProperty('--chip-sel-color', c.t);
     }
-
     const inner = document.createElement('div');
-    inner.className = 'pin-chip-inner';
-    inner.style.background = c.b; inner.style.color = c.t;
-    const label = getChipLabel(c); inner.textContent = label;
-    applyPinChipLabelStyle(inner, label);
-
-    const tt = document.createElement('div');
-    tt.className = 'pin-chip-tooltip';
-    const updateTooltip = () => {
-      if (appMode === 'lock') tt.textContent = c.locked ? '🔓 タップで解除' : '🔒 タップでロック';
-      else tt.textContent = '';
-    };
-    updateTooltip();
-    chip.addEventListener('mouseenter', updateTooltip);
+    inner.className = 'pin-chip-inner'; inner.style.background = c.b; inner.style.color = c.t;
+    const label = getChipLabel(c); inner.textContent = label; applyPinChipLabelStyle(inner, label);
+    const tt = document.createElement('div'); tt.className = 'pin-chip-tooltip';
+    const updateTooltip = () => { if (appMode === 'lock') tt.textContent = c.locked ? '🔓 タップで解除' : '🔒 タップでロック'; else tt.textContent = ''; };
+    updateTooltip(); chip.addEventListener('mouseenter', updateTooltip);
     chip.append(inner, tt);
-    chip.style.background = c.b;
-    chip.style.color = c.t;
-
+    chip.style.background = c.b; chip.style.color = c.t;
     if (appMode === 'edit') {
-      chip.style.touchAction = 'none';
-      setupChipPointerDnD(chip, c, { type: 'pin', ci });
+      chip.style.touchAction = 'none'; setupChipPointerDnD(chip, c, { type: 'pin', ci });
     } else {
-      chip.addEventListener('touchstart', () => {
-        if (document.activeElement && document.activeElement !== chip) document.activeElement.blur();
-      }, { passive: true });
-
+      chip.addEventListener('touchstart', () => { if (document.activeElement && document.activeElement !== chip) document.activeElement.blur(); }, { passive: true });
       let chipTapCount = 0, chipTapTimer = null;
       ;(function(cC, cCi) {
         chip.addEventListener('pointerdown', e => {
@@ -1305,25 +1192,13 @@ function renderPinRow() {
           if (longPressActive) { longPressActive = false; return; }
           chipTapCount++;
           if (chipTapCount === 1) {
-            chipTapTimer = setTimeout(() => {
-              chipTapCount = 0;
-              applyHex('t', cC.t); applyHex('b', cC.b);
-              copyText(cC.b.toUpperCase()); showColorToast(cC.b.toUpperCase(), cC.b, cC.t, '背景色');
-            }, 280);
+            chipTapTimer = setTimeout(() => { chipTapCount = 0; applyHex('t', cC.t); applyHex('b', cC.b); copyText(cC.b.toUpperCase()); showColorToast(cC.b.toUpperCase(), cC.b, cC.t, '背景色'); }, 280);
           } else if (chipTapCount === 2) {
-            // ★修正: カウントを0にリセットせず、新しいタイマーを起動する
-            // これにより3回目のタップが chipTapCount===3 として正しく検出される
             clearTimeout(chipTapTimer);
-            chipTapTimer = setTimeout(() => {
-              chipTapCount = 0;
-              applyHex('t', cC.t); applyHex('b', cC.b);
-              copyText(cC.t.toUpperCase()); showColorToast(cC.t.toUpperCase(), cC.t, cC.b, '文字色');
-            }, 280);
+            chipTapTimer = setTimeout(() => { chipTapCount = 0; applyHex('t', cC.t); applyHex('b', cC.b); copyText(cC.t.toUpperCase()); showColorToast(cC.t.toUpperCase(), cC.t, cC.b, '文字色'); }, 280);
           } else if (chipTapCount >= 3) {
-            // ★修正: トリプルタップはコピーなし・プレビューのみ
             clearTimeout(chipTapTimer); chipTapTimer = null; chipTapCount = 0;
-            applyHex('t', cC.t); applyHex('b', cC.b);
-            showToast('プレビューに反映しました（コピーなし）');
+            applyHex('t', cC.t); applyHex('b', cC.b); showToast('プレビューに反映しました（コピーなし）');
           }
         });
       })(c, ci);
@@ -1331,16 +1206,10 @@ function renderPinRow() {
     chip.addEventListener('contextmenu', e => e.preventDefault());
     container.append(chip);
   });
-
   const addBtn = document.createElement('button');
   addBtn.className = 'pin-add-btn'; addBtn.textContent = '+'; addBtn.title = '現在の色をピン行に追加';
-  addBtn.onclick = () => {
-    const t = document.getElementById('tHex').value, b = document.getElementById('bHex').value;
-    pinColors.push({ id: uid(), t, b, locked: false, label: '', copyTarget: 'b' });
-    savePinColors(); renderPinRow();
-  };
+  addBtn.onclick = () => { const t = document.getElementById('tHex').value, b = document.getElementById('bHex').value; pinColors.push({ id: uid(), t, b, locked: false, label: '', copyTarget: 'b' }); savePinColors(); renderPinRow(); };
   container.append(addBtn);
-
   if (window._scheduleTwemoji) window._scheduleTwemoji();
 }
 
@@ -1350,61 +1219,44 @@ function renderPinRow() {
 function renderGroups() {
   const el = document.getElementById('groupsList'); el.innerHTML = '';
   groups.forEach((g, gi) => {
+    // ★ idが確実にあることを保証
+    if (!g.id || g.id === 'undefined') g.id = uid();
+
     const block = document.createElement('div');
     block.className = 'group-block';
-    block.dataset.groupId = g.id;
+    block.dataset.groupId = g.id; // ★ 必ずidをセット
 
-    const hdr = document.createElement('div');
-    hdr.className = 'group-header';
-
-    const nameEl = document.createElement('div');
-    nameEl.className = 'group-name-display';
-    nameEl.contentEditable = appMode === 'edit' ? 'false' : 'true';
-    nameEl.spellcheck = false;
-    nameEl.textContent = g.name;
+    const hdr = document.createElement('div'); hdr.className = 'group-header';
+    const nameEl = document.createElement('div'); nameEl.className = 'group-name-display';
+    nameEl.contentEditable = appMode === 'edit' ? 'false' : 'true'; nameEl.spellcheck = false; nameEl.textContent = g.name;
     if (appMode !== 'edit') {
       nameEl.addEventListener('input', () => { g.name = nameEl.textContent.trim() || g.name; saveGroups(); });
       nameEl.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); nameEl.blur(); } if (e.key === 'Escape') { nameEl.textContent = g.name; nameEl.blur(); } });
       nameEl.addEventListener('blur', () => { g.name = nameEl.textContent.trim() || g.name; nameEl.textContent = g.name; saveGroups(); });
     }
     hdr.append(nameEl);
-
-    const delBtn = document.createElement('button');
-    delBtn.className = 'group-del-btn'; delBtn.textContent = '×'; delBtn.title = 'グループを削除';
+    const delBtn = document.createElement('button'); delBtn.className = 'group-del-btn'; delBtn.textContent = '×'; delBtn.title = 'グループを削除';
     delBtn.addEventListener('mousedown', e => { e.stopPropagation(); e.preventDefault(); });
     ;(function(cgi) { delBtn.addEventListener('click', e => { e.stopPropagation(); e.preventDefault(); openDeleteGroupModal(cgi); }); })(gi);
-    hdr.append(delBtn);
-    block.append(hdr);
-
+    hdr.append(delBtn); block.append(hdr);
     if (appMode === 'edit') setupGroupHeaderPointerDnD(hdr, block, gi);
 
     const rowsEl = document.createElement('div'); rowsEl.className = 'emoji-rows';
     g.rows.forEach((row, ri) => {
-      const rowEl = document.createElement('div');
-      rowEl.className = 'emoji-row'; rowEl.dataset.gi = gi; rowEl.dataset.ri = ri;
-
-      const keySpan = document.createElement('span');
-      keySpan.className = 'emoji-key'; keySpan.textContent = row.key;
-
+      const rowEl = document.createElement('div'); rowEl.className = 'emoji-row'; rowEl.dataset.gi = gi; rowEl.dataset.ri = ri;
+      const keySpan = document.createElement('span'); keySpan.className = 'emoji-key'; keySpan.textContent = row.key;
       if (appMode === 'edit') {
         setupRowKeyPointerDnD(keySpan, rowEl, gi, ri);
       } else {
         let keyTapCount = 0, keyTapTimer = null;
         ;(function(cGi, cRi) {
-          keySpan.addEventListener('click', () => {
-            keyTapCount++;
-            if (keyTapCount === 1) { keyTapTimer = setTimeout(() => { keyTapCount = 0; }, 350); }
-            else if (keyTapCount >= 2) { clearTimeout(keyTapTimer); keyTapCount = 0; openEditRowModal(cGi, cRi); }
-          });
+          keySpan.addEventListener('click', () => { keyTapCount++; if (keyTapCount === 1) { keyTapTimer = setTimeout(() => { keyTapCount = 0; }, 350); } else if (keyTapCount >= 2) { clearTimeout(keyTapTimer); keyTapCount = 0; openEditRowModal(cGi, cRi); } });
           let lastTouch = 0;
           keySpan.addEventListener('touchend', e => { const now = Date.now(); if (now - lastTouch < 350) { e.preventDefault(); openEditRowModal(cGi, cRi); } lastTouch = now; });
         })(gi, ri);
       }
       rowEl.append(keySpan);
-
-      const swatchesEl = document.createElement('div');
-      swatchesEl.className = 'emoji-swatches'; swatchesEl.dataset.gi = gi; swatchesEl.dataset.ri = ri;
-
+      const swatchesEl = document.createElement('div'); swatchesEl.className = 'emoji-swatches'; swatchesEl.dataset.gi = gi; swatchesEl.dataset.ri = ri;
       row.colors.forEach((c, ci) => {
         const chip = document.createElement('div');
         chip.className = 'swatch-chip'; chip.dataset.gi = gi; chip.dataset.ri = ri; chip.dataset.ci = ci;
@@ -1412,25 +1264,16 @@ function renderGroups() {
         if (appMode === 'edit' && swapSelected && swapSelected.type === 'group' && swapSelected.gi === gi && swapSelected.ri === ri && swapSelected.ci === ci) {
           chip.classList.add('selected-for-swap'); chip.style.setProperty('--chip-sel-color', c.t);
         }
-        const inner = document.createElement('div');
-        inner.className = 'swatch-chip-inner'; inner.style.background = c.b; inner.style.color = c.t;
+        const inner = document.createElement('div'); inner.className = 'swatch-chip-inner'; inner.style.background = c.b; inner.style.color = c.t;
         const label = getChipLabel(c); inner.textContent = label; applyChipLabelStyle(inner, label);
         const tt = document.createElement('div'); tt.className = 'swatch-chip-tooltip';
-        const updateTooltip = () => {
-          if (appMode === 'lock') tt.textContent = c.locked ? '🔓 タップで解除' : '🔒 タップでロック';
-          else tt.textContent = '';
-        };
+        const updateTooltip = () => { if (appMode === 'lock') tt.textContent = c.locked ? '🔓 タップで解除' : '🔒 タップでロック'; else tt.textContent = ''; };
         updateTooltip(); chip.addEventListener('mouseenter', updateTooltip);
         chip.append(inner, tt);
-
         if (appMode === 'edit') {
-          chip.style.touchAction = 'none';
-          setupChipPointerDnD(chip, c, { type: 'group', gi, ri, ci });
+          chip.style.touchAction = 'none'; setupChipPointerDnD(chip, c, { type: 'group', gi, ri, ci });
         } else {
-          chip.addEventListener('touchstart', () => {
-            if (document.activeElement && document.activeElement !== chip) document.activeElement.blur();
-          }, { passive: true });
-
+          chip.addEventListener('touchstart', () => { if (document.activeElement && document.activeElement !== chip) document.activeElement.blur(); }, { passive: true });
           let chipTapCount = 0, chipTapTimer = null;
           ;(function(cC, cGi, cRi, cCi) {
             chip.addEventListener('pointerdown', e => {
@@ -1447,32 +1290,17 @@ function renderGroups() {
             chip.addEventListener('pointercancel', () => { if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; } longPressActive = false; });
             chip.addEventListener('click', e => {
               e.stopPropagation();
-              if (appMode === 'lock') {
-                cC.locked = !cC.locked; chip.classList.toggle('locked', cC.locked);
-                showToast(cC.locked ? '🔒 ロックしました' : '🔓 解除しました'); updateTooltip(); return;
-              }
+              if (appMode === 'lock') { cC.locked = !cC.locked; chip.classList.toggle('locked', cC.locked); showToast(cC.locked ? '🔒 ロックしました' : '🔓 解除しました'); updateTooltip(); return; }
               if (longPressActive) { longPressActive = false; return; }
               chipTapCount++;
               if (chipTapCount === 1) {
-                chipTapTimer = setTimeout(() => {
-                  chipTapCount = 0;
-                  applyHex('t', cC.t); applyHex('b', cC.b);
-                  copyText(cC.b.toUpperCase()); showColorToast(cC.b.toUpperCase(), cC.b, cC.t, '背景色');
-                }, 280);
+                chipTapTimer = setTimeout(() => { chipTapCount = 0; applyHex('t', cC.t); applyHex('b', cC.b); copyText(cC.b.toUpperCase()); showColorToast(cC.b.toUpperCase(), cC.b, cC.t, '背景色'); }, 280);
               } else if (chipTapCount === 2) {
-                // ★修正: カウントを0にリセットせず、新しいタイマーを起動する
-                // これにより3回目のタップが chipTapCount===3 として正しく検出される
                 clearTimeout(chipTapTimer);
-                chipTapTimer = setTimeout(() => {
-                  chipTapCount = 0;
-                  applyHex('t', cC.t); applyHex('b', cC.b);
-                  copyText(cC.t.toUpperCase()); showColorToast(cC.t.toUpperCase(), cC.t, cC.b, '文字色');
-                }, 280);
+                chipTapTimer = setTimeout(() => { chipTapCount = 0; applyHex('t', cC.t); applyHex('b', cC.b); copyText(cC.t.toUpperCase()); showColorToast(cC.t.toUpperCase(), cC.t, cC.b, '文字色'); }, 280);
               } else if (chipTapCount >= 3) {
-                // ★修正: トリプルタップはコピーなし・プレビューのみ
                 clearTimeout(chipTapTimer); chipTapTimer = null; chipTapCount = 0;
-                applyHex('t', cC.t); applyHex('b', cC.b);
-                showToast('プレビューに反映しました（コピーなし）');
+                applyHex('t', cC.t); applyHex('b', cC.b); showToast('プレビューに反映しました（コピーなし）');
               }
             });
           })(c, gi, ri, ci);
@@ -1480,20 +1308,16 @@ function renderGroups() {
         chip.addEventListener('contextmenu', e => e.preventDefault());
         swatchesEl.append(chip);
       });
-
-      const addRowBtn = document.createElement('button');
-      addRowBtn.className = 'emoji-add-btn'; addRowBtn.textContent = '+'; addRowBtn.title = '現在の色を追加';
+      const addRowBtn = document.createElement('button'); addRowBtn.className = 'emoji-add-btn'; addRowBtn.textContent = '+'; addRowBtn.title = '現在の色を追加';
       ;(function(cRow) { addRowBtn.onclick = () => { const t = document.getElementById('tHex').value, b = document.getElementById('bHex').value; cRow.colors.push({ id: uid(), t, b, locked: false, label: '', copyTarget: 'b' }); saveGroups(); renderGroups(); }; })(row);
       swatchesEl.append(addRowBtn); rowEl.append(swatchesEl); rowsEl.append(rowEl);
     });
-
     block.append(rowsEl);
     const addRow = document.createElement('div'); addRow.className = 'group-add-row';
     const addBtn = document.createElement('button'); addBtn.className = 'group-add-preset'; addBtn.innerHTML = '＋ 新規登録…';
     ;(function(cGi) { addBtn.onclick = () => openAddModal(cGi); })(gi);
     addRow.append(addBtn); block.append(addRow); el.append(block);
   });
-
   if (window._scheduleTwemoji) window._scheduleTwemoji();
 }
 
@@ -1507,7 +1331,6 @@ document.addEventListener('click', e => {
 //  新規登録モーダル
 // ============================================================
 let modalTargetGi = 0, selectedEmojiKey = null, modalTargetPin = false;
-
 function openAddModal(gi) {
   modalTargetPin = false; modalTargetGi = gi ?? 0;
   document.getElementById('modalGroupArea').style.display = 'block';
@@ -1518,7 +1341,6 @@ function openAddModal(gi) {
   const sel = document.getElementById('modalGroup'); sel.innerHTML = groups.map((g, i) => `<option value="${i}">${g.name}</option>`).join(''); sel.value = modalTargetGi;
   selectedEmojiKey = null; refreshEmojiKeySelect(); document.getElementById('addLabel').value = ''; document.getElementById('addModal').style.display = 'flex';
 }
-
 document.getElementById('addLabel').addEventListener('input', () => {
   const val = document.getElementById('addLabel').value.trim(), label = val || 'Aa';
   const chip = document.getElementById('modalChipPreview'); chip.textContent = label;
@@ -1541,10 +1363,7 @@ function closeModal() { document.getElementById('addModal').style.display = 'non
 function confirmAdd() {
   const t = document.getElementById('tHex').value, b = document.getElementById('bHex').value;
   const label = document.getElementById('addLabel').value.trim();
-  if (modalTargetPin) {
-    pinColors.push({ id: uid(), t, b, locked: false, label, copyTarget: 'b' });
-    savePinColors(); renderPinRow(); closeModal(); return;
-  }
+  if (modalTargetPin) { pinColors.push({ id: uid(), t, b, locked: false, label, copyTarget: 'b' }); savePinColors(); renderPinRow(); closeModal(); return; }
   const key = selectedEmojiKey === '__new__' ? document.getElementById('emojiNewInput').value.trim() : selectedEmojiKey;
   let row = groups[modalTargetGi].rows.find(r => r.key === (key || '⭐'));
   if (!row) { row = { key: key || '⭐', colors: [] }; groups[modalTargetGi].rows.push(row); }
@@ -1658,6 +1477,7 @@ document.getElementById('lpBHex').addEventListener('input', e => { let v = norma
 document.getElementById('lpTHex').addEventListener('input', e => { let v = normalizeHexInput(e.target.value); if (v !== e.target.value) e.target.value = v; if (validHex(v)) { document.getElementById('lpTPicker').value = v; document.getElementById('lpTSwatch').style.background = v; e.target.classList.remove('invalid'); } else e.target.classList.add('invalid'); lpUpdateCanvas(); updateLpOverwriteBtn(); });
 document.getElementById('lpLabelInput').addEventListener('input', lpUpdateCanvas);
 
+// ★ lpOverwrite: 上書き保存（色のみ変更。ラベルは別途「設定を保存」で保存）
 function lpOverwrite() {
   if (!lpTarget) return;
   const bVal = document.getElementById('lpBHex').value, tVal = document.getElementById('lpTHex').value;
@@ -1673,16 +1493,30 @@ function lpOverwrite() {
   document.getElementById('overwriteModal').style.display = 'flex';
 }
 
+// ★ lpSaveSettings: ラベル保存 + 色を設定するの内容も同時に保存（ロック中はスキップ）
 function lpSaveSettings() {
   if (!lpTarget) return;
   const rawLabel = document.getElementById('lpLabelInput').value.trim();
-  const targetC = lpTarget.c;
   const newLabel = rawLabel === 'Aa' ? '' : rawLabel;
+  const bVal = document.getElementById('lpBHex').value;
+  const tVal = document.getElementById('lpTHex').value;
+  const targetC = lpTarget.c;
   const chipType = lpTarget.chipType;
+  const isLocked = targetC.locked && !lpTarget.tempUnlocked;
+
   closeLpModal();
   longPressActive = false;
   if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+
+  // ラベルは常に保存
   targetC.label = newLabel;
+
+  // ★ 色もラベルと同時に保存（ロックされていない場合のみ）
+  if (!isLocked && validHex(bVal) && validHex(tVal)) {
+    targetC.b = bVal;
+    targetC.t = tVal;
+  }
+
   if (chipType === 'pin') { savePinColors(); renderPinRow(); }
   else { saveGroups(); renderGroups(); }
   showToast('設定を保存しました ✓');
@@ -1692,13 +1526,8 @@ function lpDelete() {
   if (!lpTarget) return;
   const { c, gi, ri, ci, chipType } = lpTarget;
   if (c.locked) { alert('🔒 ロックされているため削除できません。先にロックを解除してください。'); return; }
-  if (chipType === 'pin') {
-    pinColors.splice(ci, 1);
-    savePinColors(); renderPinRow();
-  } else {
-    groups[gi].rows[ri].colors.splice(ci, 1);
-    saveGroups(); renderGroups();
-  }
+  if (chipType === 'pin') { pinColors.splice(ci, 1); savePinColors(); renderPinRow(); }
+  else { groups[gi].rows[ri].colors.splice(ci, 1); saveGroups(); renderGroups(); }
   showToast('削除しました'); closeLpModal();
 }
 
@@ -1737,60 +1566,168 @@ function confirmAddGroup() {
 document.getElementById('addGroupNameInput').addEventListener('keydown', e => { if (e.key === 'Enter') confirmAddGroup(); if (e.key === 'Escape') closeAddGroupModal(); });
 
 // ============================================================
-//  Sync
+//  Sync — ★ IDベースマージで同時編集対応
 // ============================================================
 let syncConfig = { token: '', gistId: '' }, pollTimer = null, lastEtag = '';
-function setSyncBadge(state, label) { document.getElementById('syncBadge').className = 'sync-badge ' + (state || ''); document.getElementById('syncLabel').textContent = label; if (state === 'error') document.getElementById('syncSetup').style.display = 'block'; }
+let isSyncPushing = false;
+
+function setSyncBadge(state, label) {
+  document.getElementById('syncBadge').className = 'sync-badge ' + (state || '');
+  document.getElementById('syncLabel').textContent = label;
+  if (state === 'error') document.getElementById('syncSetup').style.display = 'block';
+}
 function toggleSyncSetupPanel() { const setup = document.getElementById('syncSetup'); setup.style.display = setup.style.display === 'none' ? 'block' : 'none'; }
 function loadSyncConfig() { try { const c = JSON.parse(localStorage.getItem('cp_sync') || '{}'); syncConfig.token = c.token || ''; syncConfig.gistId = c.gistId || ''; } catch (e) {} }
+
 async function gistGet() {
   if (!syncConfig.gistId || !syncConfig.token) return null;
   try {
     const headers = { 'Authorization': 'token ' + syncConfig.token, 'Accept': 'application/vnd.github.v3+json' };
     if (lastEtag) headers['If-None-Match'] = lastEtag;
     const r = await fetch('https://api.github.com/gists/' + syncConfig.gistId, { headers });
-    if (r.status === 304) return 'unchanged'; if (!r.ok) return null;
+    if (r.status === 304) return 'unchanged';
+    if (!r.ok) return null;
     const etag = r.headers.get('ETag'); if (etag) lastEtag = etag;
     const data = await r.json();
-    return { groups: JSON.parse(data.files['presets.json'].content), pin: data.files['pin.json'] ? JSON.parse(data.files['pin.json'].content) : null };
+    return {
+      groups: JSON.parse(data.files['presets.json'].content),
+      pin: data.files['pin.json'] ? JSON.parse(data.files['pin.json'].content) : null
+    };
   } catch (e) { return null; }
 }
+
 async function gistPut(gs, pin) {
   if (!syncConfig.gistId || !syncConfig.token) return false;
   const files = { 'presets.json': { content: JSON.stringify(gs) } };
   if (pin !== undefined) files['pin.json'] = { content: JSON.stringify(pin) };
-  const r = await fetch('https://api.github.com/gists/' + syncConfig.gistId, { method: 'PATCH', headers: { 'Authorization': 'token ' + syncConfig.token }, body: JSON.stringify({ files }) });
+  const r = await fetch('https://api.github.com/gists/' + syncConfig.gistId, {
+    method: 'PATCH',
+    headers: { 'Authorization': 'token ' + syncConfig.token },
+    body: JSON.stringify({ files })
+  });
   return r.ok;
 }
+
+// ★ IDベースマージ: remoteを優先しつつ、ローカルの新規チップ（remoteに存在しないid）を保持
+function mergeGroups(localGs, remoteGs) {
+  // ローカルのチップをidでマップ
+  const localChipMap = new Map();
+  localGs.forEach(g => g.rows.forEach(r => r.colors.forEach(c => { if (c.id) localChipMap.set(c.id, c); })));
+
+  // remoteをベースに、ローカルのみ存在するチップをremoteに追加
+  const remoteChipIds = new Set();
+  remoteGs.forEach(g => g.rows.forEach(r => r.colors.forEach(c => { if (c.id) remoteChipIds.add(c.id); })));
+
+  // ローカルにあってremoteにないチップ（新規追加分）を収集
+  const localOnlyChips = [];
+  localGs.forEach((lg, lgi) => lg.rows.forEach((lr, lri) => lr.colors.forEach(c => {
+    if (c.id && !remoteChipIds.has(c.id)) {
+      localOnlyChips.push({ chip: c, groupName: lg.name, rowKey: lr.key });
+    }
+  })));
+
+  // remoteをベースとした結果
+  const merged = ensureIds(remoteGs);
+
+  // ローカルのみのチップをremote上の同じgroup/rowに追加（なければskip）
+  localOnlyChips.forEach(({ chip, groupName, rowKey }) => {
+    const tg = merged.find(g => g.name === groupName);
+    if (!tg) return;
+    const tr = tg.rows.find(r => r.key === rowKey);
+    if (!tr) return;
+    tr.colors.push(chip);
+  });
+
+  return merged;
+}
+
+function mergePins(localPins, remotePins) {
+  if (!remotePins) return localPins;
+  const remoteIds = new Set(remotePins.map(c => c.id).filter(Boolean));
+  const localOnly = localPins.filter(c => c.id && !remoteIds.has(c.id));
+  return [...remotePins, ...localOnly];
+}
+
 async function setupSync() {
   const token = document.getElementById('gistTokenInput').value.trim(), gistId = document.getElementById('gistIdInput').value.trim();
   if (!token) return alert('Tokenが必要です');
   syncConfig.token = token; setSyncBadge('syncing', '接続中…');
   if (gistId) {
-    syncConfig.gistId = gistId; const data = await gistGet();
-    if (data && data !== 'unchanged') { if (data.groups) { groups = ensureIds(data.groups); renderGroups(); } if (data.pin) { pinColors = data.pin; renderPinRow(); } }
+    syncConfig.gistId = gistId;
+    const data = await gistGet();
+    if (data && data !== 'unchanged') {
+      if (data.groups) { groups = mergeGroups(groups, data.groups); renderGroups(); }
+      if (data.pin) { pinColors = mergePins(pinColors, data.pin); renderPinRow(); }
+    }
     localStorage.setItem('cp_sync', JSON.stringify(syncConfig)); startPolling(); updateSyncShareUrl(); document.getElementById('syncSetup').style.display = 'none';
   } else {
-    const r = await fetch('https://api.github.com/gists', { method: 'POST', headers: { 'Authorization': 'token ' + token }, body: JSON.stringify({ description: 'ColorPreview', public: false, files: { 'presets.json': { content: JSON.stringify(groups) }, 'pin.json': { content: JSON.stringify(pinColors) } } }) });
+    const r = await fetch('https://api.github.com/gists', {
+      method: 'POST', headers: { 'Authorization': 'token ' + token },
+      body: JSON.stringify({ description: 'ColorPreview', public: false, files: { 'presets.json': { content: JSON.stringify(groups) }, 'pin.json': { content: JSON.stringify(pinColors) } } })
+    });
     const d = await r.json();
     if (d.id) { syncConfig.gistId = d.id; localStorage.setItem('cp_sync', JSON.stringify(syncConfig)); startPolling(); updateSyncShareUrl(); document.getElementById('syncSetup').style.display = 'none'; }
   }
 }
+
 function clearSync() { stopPolling(); syncConfig = { token: '', gistId: '' }; localStorage.removeItem('cp_sync'); setSyncBadge('', '未接続'); document.getElementById('syncShareUrlRow').style.display = 'none'; document.getElementById('syncSetup').style.display = 'block'; }
-function startPolling() { stopPolling(); setSyncBadge('synced', '同期中'); pollTimer = setInterval(async () => { const data = await gistGet(); if (data === null) { setSyncBadge('error', 'エラー'); return; } if (data && data !== 'unchanged') { if (data.groups) { groups = ensureIds(data.groups); renderGroups(); } if (data.pin) { pinColors = data.pin; renderPinRow(); } } }, 8000); }
+
+function startPolling() {
+  stopPolling();
+  setSyncBadge('synced', '同期中');
+  pollTimer = setInterval(async () => {
+    if (isSyncPushing) return; // Push中はPollスキップ
+    const data = await gistGet();
+    if (data === null) { setSyncBadge('error', 'エラー'); return; }
+    if (data && data !== 'unchanged') {
+      if (data.groups) {
+        groups = mergeGroups(groups, data.groups);
+        localStorage.setItem('cp_groups5', JSON.stringify(groups));
+        renderGroups();
+      }
+      if (data.pin) {
+        pinColors = mergePins(pinColors, data.pin);
+        localStorage.setItem('cp_pin_row', JSON.stringify(pinColors));
+        renderPinRow();
+      }
+      lastEtag = ''; // 再チェック用にリセット
+    }
+  }, 3000); // ★ 8秒 → 3秒に短縮
+}
+
 function stopPolling() { if (pollTimer) clearInterval(pollTimer); }
 
-// ★修正: syncPush にデバウンス処理を追加
-// 連続して saveGroups() / savePinColors() が呼ばれても、
-// 最後の変更から500ms後に1回だけ Gist API を叩く
+// ★ syncPush: Push前にPullしてマージ → 最新状態をPush（競合を最小化）
 let syncPushDebounceTimer = null;
 async function syncPush() {
   if (!syncConfig.gistId) return;
   if (syncPushDebounceTimer) clearTimeout(syncPushDebounceTimer);
-  syncPushDebounceTimer = setTimeout(() => {
+  syncPushDebounceTimer = setTimeout(async () => {
     syncPushDebounceTimer = null;
-    gistPut(groups, pinColors);
-  }, 500);
+    isSyncPushing = true;
+    try {
+      // Push前に最新を取得してマージ
+      lastEtag = ''; // ETagをリセットして強制取得
+      const remote = await gistGet();
+      if (remote && remote !== 'unchanged') {
+        if (remote.groups) {
+          groups = mergeGroups(groups, remote.groups);
+          localStorage.setItem('cp_groups5', JSON.stringify(groups));
+          renderGroups();
+        }
+        if (remote.pin) {
+          pinColors = mergePins(pinColors, remote.pin);
+          localStorage.setItem('cp_pin_row', JSON.stringify(pinColors));
+          renderPinRow();
+        }
+      }
+      // マージ後の状態をPush
+      await gistPut(groups, pinColors);
+      lastEtag = ''; // Push後ETagリセット
+    } finally {
+      isSyncPushing = false;
+    }
+  }, 800); // デバウンス800ms
 }
 
 function updateSyncShareUrl() { if (!syncConfig.gistId) return; const url = location.href.split('?')[0] + '?gist=' + syncConfig.gistId; document.getElementById('syncShareUrlRow').style.display = 'flex'; document.getElementById('syncShareInput').value = url; }
@@ -1831,26 +1768,16 @@ function render() {
 }
 function copyText(t){ return navigator.clipboard.writeText(t); }
 
-// ============================================================
-//  ★ ペースト機能
-// ============================================================
 async function pasteHex(k) {
   try {
     const text = await navigator.clipboard.readText();
     let val = text.trim();
     if (/^[0-9a-fA-F]{6}$/.test(val)) val = '#' + val;
-    if (validHex(val)) {
-      applyHex(k, val);
-      showColorToast(val.toUpperCase(), val, k === 'b' ? document.getElementById('tHex').value : document.getElementById('bHex').value, k === 'b' ? '背景色' : '文字色');
-    } else {
-      showToast('有効な HEX カラーコードが見つかりません');
-    }
+    if (validHex(val)) { applyHex(k, val); showColorToast(val.toUpperCase(), val, k === 'b' ? document.getElementById('tHex').value : document.getElementById('bHex').value, k === 'b' ? '背景色' : '文字色'); }
+    else { showToast('有効な HEX カラーコードが見つかりません'); }
   } catch(e) {
     const inputEl = document.getElementById(k + 'Hex');
-    if (inputEl) {
-      inputEl.focus();
-      inputEl.select();
-    }
+    if (inputEl) { inputEl.focus(); inputEl.select(); }
     showToast('ここに直接ペーストしてください');
   }
 }
