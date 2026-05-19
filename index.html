@@ -7,7 +7,6 @@
 <title>Color Preview — 文字色 × 背景色チェッカー</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-
 <script src="https://cdn.jsdelivr.net/npm/@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
 <script>
 (function(){
@@ -32,7 +31,6 @@
   document.addEventListener('DOMContentLoaded', function(){ applyTw(document.body); });
 })();
 </script>
-
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -52,7 +50,6 @@ h1 span{color:var(--muted);font-weight:400;font-size:13px;margin-left:6px}
 .sync-badge.error{background:#fff2f0;border-color:#ffccc7;color:#cf1322}
 .sync-dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0}
 .sync-gear{font-size:9px;opacity:.55;flex-shrink:0}
-
 .panels-with-actions{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto;gap:8px;margin-bottom:12px;}
 .swap-btn,.match-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:8px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'Syne',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s;text-align:center;grid-row:1;outline:none;-webkit-tap-highlight-color:transparent;}
 .panel-col{display:flex;flex-direction:column;gap:0;grid-row:2}
@@ -94,7 +91,6 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .slider-step-btn{flex-shrink:0;width:18px;height:18px;border:none;background:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;border-radius:3px;transition:color .12s,background .12s;line-height:1;outline:none;-webkit-tap-highlight-color:transparent}
 @media(hover:hover){.slider-step-btn:hover{color:var(--text);background:var(--surface2)}}
 .slider-step-btn:active{transform:scale(.85)}
-
 .preview-wrap{border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);margin-bottom:16px}
 .preview-hint{font-size:10px;color:var(--muted);text-align:center;padding:5px 10px;font-style:italic;background:var(--bg);letter-spacing:.02em}
 .preview-box{padding:24px 20px;min-height:130px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;transition:background .12s,color .12s}
@@ -113,8 +109,6 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .chip-code{font-family:'DM Mono',monospace;font-size:12px;font-weight:500}
 .chip-name{font-size:10px;color:var(--muted);font-family:'Syne',sans-serif}
 .chip-copy-hint{font-size:9px;color:var(--accent);opacity:0;transition:opacity .15s}
-
-/* ===== プリセットセクション ===== */
 .presets-section{margin-bottom:20px}
 .presets-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .section-label{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
@@ -123,83 +117,29 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 @media(hover:hover){.icon-btn:hover{background:var(--surface2)}}
 .icon-btn.active{background:var(--text);color:#fff;border-color:var(--text)}
 .icon-btn.active-lock{background:#d9363e;color:#fff;border-color:#d9363e}
-
-/* ===== ピン行（一回り小さく） ===== */
 .pin-row-wrap{margin-bottom:12px}
-/* ★ ピン行自体を小さく: padding縮小・min-height縮小 */
-.pin-row-inner{
-  display:flex;gap:5px;flex-wrap:wrap;align-items:center;
-  padding:5px 8px;  /* 8px 10px → 5px 8px */
-  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
-  min-height:40px;  /* 52px → 40px */
-}
-/* ★ ピンチップ本体を小さく */
-.pin-chip{
-  position:relative;
-  height:34px;       /* 44px → 34px */
-  min-width:40px;    /* 52px → 40px */
-  max-width:100px;   /* 120px → 100px */
-  border-radius:17px;/* 22px → 17px */
-  border:1.5px solid rgba(0,0,0,.08);
-  cursor:pointer;flex-shrink:0;
-  transition:transform .15s,box-shadow .15s;overflow:visible;
-  -webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:manipulation;
-  display:flex;align-items:center;justify-content:center;
-  padding:0 10px;   /* 0 14px → 0 10px */
-}
+.pin-row-inner{display:flex;gap:5px;flex-wrap:wrap;align-items:center;padding:5px 8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);min-height:40px;}
+.pin-chip{position:relative;height:34px;min-width:40px;max-width:100px;border-radius:17px;border:1.5px solid rgba(0,0,0,.08);cursor:pointer;flex-shrink:0;transition:transform .15s,box-shadow .15s;overflow:visible;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:manipulation;display:flex;align-items:center;justify-content:center;padding:0 10px;}
 @media(hover:hover){.pin-chip:hover{transform:scale(1.06);box-shadow:0 3px 10px rgba(0,0,0,.16)}}
 body.mode-edit .pin-chip{cursor:grab;touch-action:none}
 body.mode-edit .pin-chip.is-grabbing{cursor:grabbing}
-/* ★ ピンチップ内テキスト: フォント小さく・5文字以上で折り返し */
-.pin-chip-inner{
-  font-family:'IBM Plex Sans',sans-serif;font-weight:600;letter-spacing:-0.01em;
-  user-select:none;
-  text-align:center;line-height:1.1;padding:2px 0;
-  word-break:break-all;white-space:normal;
-  font-size:11px;  /* 13px → 11px */
-}
-.pin-chip-tooltip{
-  position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);
-  background:rgba(20,20,30,.82);color:#fff;
-  font-family:'IBM Plex Sans',sans-serif;font-size:10px;font-weight:500;
-  padding:4px 8px;border-radius:6px;white-space:nowrap;
-  pointer-events:none;opacity:0;transition:opacity .15s;z-index:10;
-}
+.pin-chip-inner{font-family:'IBM Plex Sans',sans-serif;font-weight:600;letter-spacing:-0.01em;user-select:none;text-align:center;line-height:1.1;padding:2px 0;word-break:break-all;white-space:normal;font-size:11px;}
+.pin-chip-tooltip{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:rgba(20,20,30,.82);color:#fff;font-family:'IBM Plex Sans',sans-serif;font-size:10px;font-weight:500;padding:4px 8px;border-radius:6px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:10;}
 @media(hover:hover){.pin-chip:hover .pin-chip-tooltip:not(:empty){opacity:1}}
-.pin-chip.locked{border-radius:6px !important} /* 8px → 6px */
+.pin-chip.locked{border-radius:6px !important}
 body.mode-lock .pin-chip.locked{border-color:rgba(217,54,62,.4);box-shadow:0 0 0 1px rgba(217,54,62,.2)}
-
-@keyframes pinChipSelectPulse {
-  0%,100%{box-shadow:0 0 0 2px var(--chip-sel-color,#1a1a2e),0 0 0 4px rgba(26,26,46,.18);transform:scale(1.05)}
-  50%    {box-shadow:0 0 0 3.5px var(--chip-sel-color,#1a1a2e),0 0 0 7px rgba(26,26,46,.09);transform:scale(1.09)}
-}
+@keyframes pinChipSelectPulse{0%,100%{box-shadow:0 0 0 2px var(--chip-sel-color,#1a1a2e),0 0 0 4px rgba(26,26,46,.18);transform:scale(1.05)}50%{box-shadow:0 0 0 3.5px var(--chip-sel-color,#1a1a2e),0 0 0 7px rgba(26,26,46,.09);transform:scale(1.09)}}
 .pin-chip.selected-for-swap{animation:pinChipSelectPulse 1.4s ease-in-out infinite;border-color:var(--chip-sel-color,#1a1a2e)!important;z-index:2}
 .pin-chip.chip-dragging{opacity:.32;transform:scale(.88);filter:blur(.5px) grayscale(.3);pointer-events:none}
-.pin-chip.chip-drop-before::before,
-.pin-chip.chip-drop-after::after{
-  content:'';position:absolute;top:50%;transform:translateY(-50%);
-  width:2.5px;height:34px;border-radius:2px; /* 44px → 34px */
-  background:#999aaa;box-shadow:0 0 6px rgba(0,0,0,.18);pointer-events:none;z-index:10;
-}
+.pin-chip.chip-drop-before::before,.pin-chip.chip-drop-after::after{content:'';position:absolute;top:50%;transform:translateY(-50%);width:2.5px;height:34px;border-radius:2px;background:#999aaa;box-shadow:0 0 6px rgba(0,0,0,.18);pointer-events:none;z-index:10;}
 .pin-chip.chip-drop-before::before{right:calc(100% + 3px);left:auto}
 .pin-chip.chip-drop-after::after{left:calc(100% + 3px);right:auto}
-
-/* ★ 追加ボタンも小さく */
-.pin-add-btn{
-  height:34px;min-width:34px;  /* 44px → 34px */
-  border-radius:17px;           /* 22px → 17px */
-  border:1.5px dashed var(--border);background:none;color:var(--muted);font-size:15px; /* 18px → 15px */
-  cursor:pointer;display:flex;align-items:center;justify-content:center;
-  transition:all .15s;flex-shrink:0;line-height:1;padding:0 10px; /* 0 12px → 0 10px */
-}
+.pin-add-btn{height:34px;min-width:34px;border-radius:17px;border:1.5px dashed var(--border);background:none;color:var(--muted);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;line-height:1;padding:0 10px;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;}
 @media(hover:hover){.pin-add-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}}
 .pin-row-inner.drop-append-here{outline:2px dashed #b0b0bc;outline-offset:3px;border-radius:var(--radius)}
-
-/* ===== グループ一覧 ===== */
 .groups-list{display:flex;flex-direction:row;gap:12px;align-items:flex-start;flex-wrap:wrap}
-.group-block{flex:1 1 calc(33.333% - 8px);min-width:200px}
+.group-block{flex:1 1 calc(33.333% - 8px);min-width:200px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
 @media(max-width:540px){.groups-list{flex-direction:column}.group-block{flex:1 1 100%;min-width:0}}
-.group-block{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
 .group-header{display:flex;align-items:center;padding:7px 12px;background:var(--surface2);border-bottom:1px solid var(--border);justify-content:center;position:relative;min-height:36px;user-select:none;-webkit-user-select:none;}
 .group-block.group-dragging{opacity:.45;pointer-events:none}
 .group-block.group-drag-over-left{box-shadow:-3px 0 0 0 var(--accent)}
@@ -214,8 +154,10 @@ body.mode-edit .group-name-display{pointer-events:none}
 .group-del-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;transition:color .12s;flex-shrink:0;position:absolute;right:10px;top:50%;transform:translateY(-50%);display:none;padding:2px 4px}
 @media(hover:hover){.group-del-btn:hover{color:#d9363e}}
 body.mode-edit .group-del-btn{display:block}
-.emoji-rows{padding:10px 12px;display:flex;flex-direction:column;gap:8px}
-.emoji-row{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;border-radius:6px;transition:background .12s}
+.emoji-rows{padding:10px 12px;display:flex;flex-direction:column;gap:0}
+.emoji-row{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;border-radius:6px;transition:background .12s;padding:5px 0;position:relative;}
+.emoji-row + .emoji-row::before{content:'';position:absolute;top:0;left:4px;right:4px;height:1px;background:var(--border);opacity:0.55;pointer-events:none;}
+body.mode-edit .emoji-row + .emoji-row::before{display:none;}
 .emoji-key{font-size:15px;flex-shrink:0;width:auto;min-width:28px;text-align:center;padding:2px 4px;border-radius:4px;border:1px solid transparent;transition:all .15s;line-height:32px;cursor:default}
 body.mode-edit .emoji-key{border:1.5px dashed var(--muted);cursor:grab}
 body.mode-edit .emoji-key.is-grabbing{cursor:grabbing}
@@ -224,55 +166,30 @@ body.mode-edit .emoji-key.is-grabbing{cursor:grabbing}
 .emoji-row.row-drag-over-top{border-top:2.5px solid var(--accent)}
 .emoji-row.row-drag-over-bottom{border-bottom:2.5px solid var(--accent)}
 .emoji-swatches{display:flex;gap:4px;flex-wrap:wrap;align-items:flex-start;flex:1;min-width:0}
-
-/* ===== 通常チップ ===== */
-.swatch-chip{
-  position:relative;width:32px;height:32px;border-radius:50%;border:1.5px solid rgba(0,0,0,.08);
-  cursor:pointer;flex-shrink:0;transition:transform .15s,box-shadow .15s;overflow:visible;
-  -webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:manipulation;
-}
+.swatch-chip{position:relative;width:32px;height:32px;border-radius:50%;border:1.5px solid rgba(0,0,0,.08);cursor:pointer;flex-shrink:0;transition:transform .15s,box-shadow .15s;overflow:visible;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:manipulation;}
 @media(hover:hover){.swatch-chip:hover{transform:scale(1.12);box-shadow:0 2px 8px rgba(0,0,0,.15)}}
 body.mode-edit .swatch-chip{cursor:grab;touch-action:none}
 body.mode-edit .swatch-chip.is-grabbing{cursor:grabbing}
-.swatch-chip-inner{
-  width:100%;height:100%;display:flex;align-items:center;justify-content:center;
-  font-family:'IBM Plex Sans',sans-serif;font-weight:600;letter-spacing:-0.01em;
-  user-select:none;border-radius:50%;overflow:hidden;text-align:center;line-height:1;padding:2px;
-  word-break:break-all;white-space:normal;
-}
-.swatch-chip-tooltip{
-  position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);
-  background:rgba(20,20,30,.82);color:#fff;font-family:'IBM Plex Sans',sans-serif;font-size:10px;font-weight:500;
-  padding:4px 8px;border-radius:6px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:10;
-}
+.swatch-chip-inner{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Sans',sans-serif;font-weight:600;letter-spacing:-0.01em;user-select:none;border-radius:50%;overflow:hidden;text-align:center;line-height:1;padding:2px;word-break:break-all;white-space:normal;}
+.swatch-chip-tooltip{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:rgba(20,20,30,.82);color:#fff;font-family:'IBM Plex Sans',sans-serif;font-size:10px;font-weight:500;padding:4px 8px;border-radius:6px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:10;}
 @media(hover:hover){.swatch-chip:hover .swatch-chip-tooltip:not(:empty){opacity:1}}
 .swatch-chip.locked{border-radius:5px!important}
 .swatch-chip.locked .swatch-chip-inner{border-radius:3px!important}
 body.mode-lock .swatch-chip.locked{border-color:rgba(217,54,62,.4);box-shadow:0 0 0 1px rgba(217,54,62,.2)}
-@keyframes chipSelectPulse{
-  0%,100%{box-shadow:0 0 0 2px var(--chip-sel-color,#1a1a2e),0 0 0 4px rgba(26,26,46,.18);transform:scale(1.06)}
-  50%    {box-shadow:0 0 0 3.5px var(--chip-sel-color,#1a1a2e),0 0 0 7px rgba(26,26,46,.09);transform:scale(1.10)}
-}
+@keyframes chipSelectPulse{0%,100%{box-shadow:0 0 0 2px var(--chip-sel-color,#1a1a2e),0 0 0 4px rgba(26,26,46,.18);transform:scale(1.06)}50%{box-shadow:0 0 0 3.5px var(--chip-sel-color,#1a1a2e),0 0 0 7px rgba(26,26,46,.09);transform:scale(1.10)}}
 .swatch-chip.selected-for-swap{animation:chipSelectPulse 1.4s ease-in-out infinite;border-color:var(--chip-sel-color,#1a1a2e)!important;z-index:2}
 .swatch-chip.chip-dragging{opacity:.32;transform:scale(.88);filter:blur(.5px) grayscale(.3);pointer-events:none}
-.swatch-chip.chip-drop-before::before,.swatch-chip.chip-drop-after::after{
-  content:'';position:absolute;top:50%;transform:translateY(-50%);
-  width:2.5px;height:38px;border-radius:2px;background:#999aaa;box-shadow:0 0 6px rgba(0,0,0,.18);pointer-events:none;z-index:10;
-}
+.swatch-chip.chip-drop-before::before,.swatch-chip.chip-drop-after::after{content:'';position:absolute;top:50%;transform:translateY(-50%);width:2.5px;height:38px;border-radius:2px;background:#999aaa;box-shadow:0 0 6px rgba(0,0,0,.18);pointer-events:none;z-index:10;}
 .swatch-chip.chip-drop-before::before{right:calc(100% + 3px);left:auto}
 .swatch-chip.chip-drop-after::after{left:calc(100% + 3px);right:auto}
 .emoji-swatches.drop-append-here{outline:2px dashed #b0b0bc;outline-offset:3px;border-radius:6px}
 .emoji-row.drop-row-highlight{background:var(--surface2);outline:1.5px dashed #b0b0bc;outline-offset:2px;border-radius:6px}
-
 #chipDragGhost{position:fixed;pointer-events:none;z-index:9998;opacity:.88;will-change:transform;transition:none;display:none}
-
-.emoji-add-btn{width:28px;height:28px;border-radius:50%;border:1.5px dashed var(--border);background:none;color:var(--muted);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;line-height:1}
+.emoji-add-btn{width:28px;height:28px;border-radius:50%;border:1.5px dashed var(--border);background:none;color:var(--muted);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;line-height:1;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;}
 @media(hover:hover){.emoji-add-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}}
 .group-add-row{padding:6px 12px;border-top:1px solid var(--border)}
 .group-add-preset{display:flex;align-items:center;gap:5px;font-size:11px;font-family:'Syne',sans-serif;font-weight:600;color:var(--muted);cursor:pointer;background:none;border:none;width:100%;transition:color .15s;padding:0}
 @media(hover:hover){.group-add-preset:hover{color:var(--text)}}
-
-/* sync */
 .sync-setup{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-top:20px}
 .sync-setup-title{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
 .sync-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
@@ -291,17 +208,8 @@ body.mode-lock .swatch-chip.locked{border-color:rgba(217,54,62,.4);box-shadow:0 
 .sync-share-input{flex:1;min-width:120px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);padding:5px 8px;outline:none;user-select:all;cursor:text}
 .sync-copy-btn{font-family:'Syne',sans-serif;font-size:11px;font-weight:600;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);padding:5px 12px;cursor:pointer;transition:opacity .15s;flex-shrink:0}
 .sync-copy-btn:hover{opacity:.85}
-
-/* toast */
-.copy-toast{
-  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(10px);
-  font-family:'DM Mono',monospace;font-size:12px;font-weight:500;padding:8px 18px;border-radius:99px;
-  pointer-events:none;opacity:0;transition:opacity .2s,transform .2s,background .15s,color .15s;
-  z-index:200;white-space:nowrap;border:1.5px solid rgba(255,255,255,.18);box-shadow:0 4px 20px rgba(0,0,0,.22);
-}
+.copy-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(10px);font-family:'DM Mono',monospace;font-size:12px;font-weight:500;padding:8px 18px;border-radius:99px;pointer-events:none;opacity:0;transition:opacity .2s,transform .2s,background .15s,color .15s;z-index:200;white-space:nowrap;border:1.5px solid rgba(255,255,255,.18);box-shadow:0 4px 20px rgba(0,0,0,.22);}
 .copy-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-/* モーダル */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(4px)}
 .modal{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:22px;width:340px;box-shadow:0 8px 32px rgba(0,0,0,.14)}
 .modal h3{font-size:15px;font-weight:700;margin-bottom:14px;text-align:center}
@@ -311,20 +219,30 @@ body.mode-lock .swatch-chip.locked{border-color:rgba(217,54,62,.4);box-shadow:0 
 .modal-label{font-size:11px;color:var(--muted);letter-spacing:.05em;margin-bottom:5px;text-align:center}
 .modal-input,.group-select{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'Syne',sans-serif;font-size:13px;padding:7px 10px;outline:none;transition:border-color .15s;text-align:center}
 .modal-input:focus,.group-select:focus{border-color:#999}
-.emoji-key-select{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;justify-content:center}
-.emoji-key-btn{font-size:18px;padding:4px 6px;border:1.5px solid var(--border);border-radius:6px;cursor:pointer;background:var(--surface);transition:all .12s;line-height:1}
-@media(hover:hover){.emoji-key-btn:hover{background:var(--surface2)}}
-.emoji-key-btn.selected{border-color:var(--text);background:var(--surface2)}
-.emoji-new-input{margin-top:6px;display:none;width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'Syne',sans-serif;font-size:14px;padding:6px 10px;outline:none;text-align:center}
-.emoji-new-input.visible{display:block}
+/* ① グループ下「新規登録」改善 — 行キー: シンプル入力 */
+.modal-key-input-simple{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'Syne',sans-serif;font-size:15px;padding:8px 10px;outline:none;transition:border-color .15s;text-align:center;letter-spacing:.05em;}
+.modal-key-input-simple:focus{border-color:#999}
+/* ② 行内+長押し「チップの新規登録」— 行キー選択UI */
+.row-key-display{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:8px;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;}
+.row-key-display:hover{background:var(--surface2);border-color:#bbb}
+.row-key-display-emoji{font-size:20px;line-height:1}
+.row-key-display-label{font-family:'Syne',sans-serif;font-size:11px;color:var(--muted);flex:1;}
+.row-key-display-hint{font-family:'Syne',sans-serif;font-size:10px;color:var(--accent);font-weight:600;white-space:nowrap;}
+.row-key-all-panel{display:none;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;margin-bottom:8px}
+.row-key-all-panel.open{display:block}
+.row-key-all-title{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;text-align:center}
+.row-key-grid{display:flex;flex-wrap:wrap;gap:5px;justify-content:center}
+.row-key-grid-btn{font-size:18px;line-height:1;padding:5px 8px;border:1.5px solid var(--border);border-radius:7px;cursor:pointer;background:var(--bg);transition:all .12s;-webkit-tap-highlight-color:transparent;}
+@media(hover:hover){.row-key-grid-btn:hover{background:var(--surface2)}}
+.row-key-grid-btn.selected{border-color:var(--text);background:var(--surface2);box-shadow:0 0 0 1px var(--text)}
+.modal-row-chip-preview{display:flex;align-items:center;justify-content:center;gap:12px;background:#d0d0d8;border-radius:var(--radius);padding:12px;margin-bottom:14px;}
+.modal-row-chip-circle{width:48px;height:48px;border-radius:50%;border:3px solid rgba(255,255,255,.85);box-shadow:0 2px 10px rgba(0,0,0,.22);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:600;text-align:center;line-height:1;word-break:break-all;white-space:normal;padding:4px;overflow:hidden;}
 .modal-btns{display:flex;gap:8px;justify-content:center;margin-top:16px}
 .modal-btn{font-family:'Syne',sans-serif;font-size:12px;font-weight:600;padding:6px 14px;border-radius:var(--radius-sm);cursor:pointer;border:1px solid var(--border);transition:all .15s}
 .modal-btn.primary{background:var(--text);color:#fff;border-color:var(--text)}
 .modal-btn.primary:hover{opacity:.85}
 .modal-btn.secondary{background:none;color:var(--muted)}
 .modal-btn.secondary:hover{color:var(--text)}
-
-/* 長押し編集モーダル */
 #longPressEditModal .modal{width:380px;max-width:95vw;padding:0;overflow:hidden}
 .lp-canvas{min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:22px 20px 14px;position:relative;transition:background .1s;}
 .lp-lock-icon-btn{position:absolute;top:10px;left:12px;width:28px;height:28px;border-radius:50%;border:none;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:14px;line-height:1;box-shadow:0 2px 8px rgba(0,0,0,.22);transition:transform .15s;z-index:5;padding:0;}
@@ -369,7 +287,6 @@ body.mode-lock .swatch-chip.locked{border-color:rgba(217,54,62,.4);box-shadow:0 
 .lp-cancel-btn:hover{color:var(--text)}
 .lp-save-btn{font-family:'Syne',sans-serif;font-size:11px;font-weight:600;padding:6px 14px;border-radius:var(--radius-sm);cursor:pointer;border:none;background:var(--text);color:#fff;transition:opacity .15s}
 .lp-save-btn:hover{opacity:.8}
-
 #overwriteModal .modal{width:300px;text-align:center}
 .overwrite-compare{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:20px;background:#d0d0d8;border-radius:var(--radius);padding:20px 16px}
 .overwrite-side{display:flex;flex-direction:column;align-items:center;gap:7px}
@@ -388,7 +305,6 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
       <span class="sync-dot"></span><span id="syncLabel">未接続</span><span class="sync-gear">⚙</span>
     </div>
   </header>
-
   <div class="panels-with-actions">
     <button class="swap-btn" onclick="swapColors();this.blur()">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16V4m0 0L3 8m4-4l4 4"/><path d="M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
@@ -443,7 +359,6 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
       </div>
     </div>
   </div>
-
   <div class="preview-wrap">
     <div class="preview-hint">クリックして文字を編集できます</div>
     <div class="preview-box" id="preview">
@@ -471,7 +386,6 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
       </div>
     </div>
   </div>
-
   <div class="presets-section">
     <div class="presets-header">
       <span class="section-label">プリセット</span>
@@ -481,12 +395,9 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
         <button class="icon-btn" onclick="openAddGroupModal()">＋ グループ</button>
       </div>
     </div>
-    <div class="pin-row-wrap">
-      <div class="pin-row-inner" id="pinRowInner"></div>
-    </div>
+    <div class="pin-row-wrap"><div class="pin-row-inner" id="pinRowInner"></div></div>
     <div class="groups-list" id="groupsList"></div>
   </div>
-
   <div class="sync-setup" id="syncSetup">
     <div class="sync-setup-title">🔗 プリセット同期設定（GitHub Gist使用）</div>
     <div class="sync-row">
@@ -507,18 +418,16 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
       <button class="sync-copy-btn" onclick="copySyncUrl()">URLコピー</button>
     </div>
   </div>
-
   <footer>
     【通常】シングルタップ→背景色コピー ／ ダブルタップ→文字色コピー ／ トリプルタップ→プレビューのみ ／ 長押し(0.3秒)→編集<br>
     【並び替え】チップタップ→2色入れ替え ／ チップドラッグ→移動 ／ 行絵文字ドラッグ→行移動 ／ グループヘッダードラッグ→グループ移動
   </footer>
 </div>
-
 <div id="groupDragGhost"></div>
 <div id="chipDragGhost"></div>
 <div class="copy-toast" id="copyToast"></div>
 
-<!-- モーダル: 新規登録 -->
+<!-- ① グループ下「新規登録」モーダル（改善版） -->
 <div class="modal-overlay" id="addModal" style="display:none" onclick="if(event.target===this)closeModal()">
   <div class="modal">
     <h3>新規登録</h3>
@@ -529,16 +438,15 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
         <div class="modal-preview-info" id="modalInfo" style="font-size:10px;"></div>
       </div>
     </div>
-    <div id="modalGroupArea">
-      <div class="modal-field" style="display:flex;gap:8px;align-items:stretch;">
-        <div style="flex:1;display:flex;flex-direction:column;gap:4px;"><div class="modal-label">グループ</div><select class="group-select" id="modalGroup" onchange="onModalGroupChange()" style="text-align:center;text-align-last:center;flex:1;"></select></div>
-        <div style="flex:1;display:flex;flex-direction:column;gap:4px;"><div class="modal-label">　</div><button class="modal-btn secondary" style="width:100%;flex:1;border-color:var(--border);white-space:nowrap;" onclick="activateNewEmoji()">＋ 新規キー追加</button></div>
-      </div>
-      <div class="modal-field">
-        <div class="modal-label">グループのキーを選択</div>
-        <div class="emoji-key-select" id="emojiKeySelect"></div>
-        <input type="text" class="emoji-new-input" id="emojiNewInput" placeholder="文字や絵文字を入力" maxlength="10">
-      </div>
+    <!-- ① グループ選択（折りたたみなし・常時表示） -->
+    <div class="modal-field" id="modalGroupField">
+      <div class="modal-label">グループ</div>
+      <select class="group-select" id="modalGroup" onchange="onModalGroupChange()" style="text-align:center;text-align-last:center;"></select>
+    </div>
+    <!-- ① 行キー入力（プレビューなし・シンプル。最初にフォーカス） -->
+    <div class="modal-field" id="modalKeyField">
+      <div class="modal-label">追加先の行キー（絵文字・文字）</div>
+      <input type="text" class="modal-key-input-simple" id="modalKeyInput" maxlength="10" placeholder="絵文字や文字を入力">
     </div>
     <div class="modal-field">
       <div class="modal-label">チップの表示文字（任意・空欄で「Aa」）</div>
@@ -551,7 +459,45 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
   </div>
 </div>
 
-<!-- モーダル: 行編集 -->
+<!-- ② 行内+長押し「チップの新規登録」モーダル（新設） -->
+<div class="modal-overlay" id="addRowModal" style="display:none" onclick="if(event.target===this)closeAddRowModal()">
+  <div class="modal">
+    <h3>チップの新規登録</h3>
+    <div class="modal-row-chip-preview">
+      <div id="addRowChipPreview" class="modal-row-chip-circle">Aa</div>
+      <div style="display:flex;flex-direction:column;gap:5px;align-items:center;">
+        <div style="display:flex;gap:6px;">
+          <div id="addRowDotT" style="width:18px;height:18px;border-radius:50%;border:2px solid rgba(255,255,255,.8);box-shadow:0 1px 4px rgba(0,0,0,.2);flex-shrink:0;"></div>
+          <div id="addRowDotB" style="width:18px;height:18px;border-radius:50%;border:2px solid rgba(255,255,255,.8);box-shadow:0 1px 4px rgba(0,0,0,.2);flex-shrink:0;"></div>
+        </div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,.85);" id="addRowInfo"></div>
+      </div>
+    </div>
+    <!-- ② 行キー：現在行を表示。タップで全行グリッドに展開 -->
+    <div class="modal-field">
+      <div class="modal-label">追加先の行</div>
+      <div class="row-key-display" id="rowKeyDisplay" onclick="toggleRowKeyPanel()">
+        <span class="row-key-display-emoji" id="rowKeyDisplayEmoji">✨</span>
+        <span class="row-key-display-label" id="rowKeyDisplayLabel">この行に追加</span>
+        <span class="row-key-display-hint" id="rowKeyDisplayHint">▼ タップで切り替え</span>
+      </div>
+      <div class="row-key-all-panel" id="rowKeyAllPanel">
+        <div class="row-key-all-title">行を選択</div>
+        <div class="row-key-grid" id="rowKeyGrid"></div>
+      </div>
+    </div>
+    <div class="modal-field">
+      <div class="modal-label">チップの表示文字（任意・空欄で「Aa」）</div>
+      <input type="text" class="modal-input" id="addRowLabel" maxlength="10" placeholder="例: ccf / img / 本番">
+    </div>
+    <div class="modal-btns">
+      <button class="modal-btn secondary" onclick="closeAddRowModal()">キャンセル</button>
+      <button class="modal-btn primary" onclick="confirmAddRow()">登録</button>
+    </div>
+  </div>
+</div>
+
+<!-- 行編集モーダル -->
 <div class="modal-overlay" id="editRowModal" style="display:none" onclick="if(event.target===this)closeEditRowModal()">
   <div class="modal">
     <h3>行（キー）を編集</h3>
@@ -563,15 +509,14 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
   </div>
 </div>
 
-<!-- モーダル: 長押し編集 -->
+<!-- 長押し編集モーダル -->
 <div class="modal-overlay" id="longPressEditModal" style="display:none" onclick="if(event.target===this)closeLpModal()">
   <div class="modal">
     <div class="lp-canvas" id="lpCanvas">
-      <button class="lp-lock-icon-btn" id="lpLockIconBtn" onclick="lpToggleLock()" title="クリックで一時解除 / 再ロック">🔒</button>
+      <button class="lp-lock-icon-btn" id="lpLockIconBtn" onclick="lpToggleLock()">🔒</button>
       <div class="lp-chip-big" id="lpChipBig"></div>
       <div class="lp-compare-bar">
         <button class="lp-compare-btn" id="lpBtnNew" onclick="lpCompareTo('new')">ページ色をセット</button>
-        <div class="lp-compare-sep"></div>
         <button class="lp-compare-btn active-compare" id="lpBtnOld" onclick="lpCompareTo('old')">登録色をセット</button>
       </div>
     </div>
@@ -625,7 +570,7 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
   </div>
 </div>
 
-<!-- モーダル: 上書き確認 -->
+<!-- 上書き確認モーダル -->
 <div class="modal-overlay" id="overwriteModal" style="display:none" onclick="if(event.target===this)closeOverwriteModal()">
   <div class="modal">
     <h3>色を上書きしますか？</h3>
@@ -641,7 +586,7 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
   </div>
 </div>
 
-<!-- モーダル: グループ削除 -->
+<!-- グループ削除モーダル -->
 <div class="modal-overlay" id="deleteGroupModal" style="display:none">
   <div class="modal" style="width:300px;text-align:center;">
     <h3 style="color:#d9363e;">グループを削除しますか？</h3>
@@ -653,7 +598,7 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
   </div>
 </div>
 
-<!-- モーダル: グループ追加 -->
+<!-- グループ追加モーダル -->
 <div class="modal-overlay" id="addGroupModal" style="display:none" onclick="if(event.target===this)closeAddGroupModal()">
   <div class="modal" style="width:300px;">
     <div style="display:flex;align-items:center;margin-bottom:16px;">
@@ -669,11 +614,7 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
 </div>
 
 <script>
-// ============================================================
-//  ユーティリティ
-// ============================================================
 const uid = () => Math.random().toString(36).slice(2, 9);
-
 const DEFAULT_GROUPS = [
   { id: 'grp_night', name: '🌃', rows: [
     { key: '👓', colors: [] }, { key: '🐹', colors: [] }, { key: '🥽', colors: [] },
@@ -685,39 +626,23 @@ const DEFAULT_GROUPS = [
   ]}
 ];
 
-// ============================================================
-//  データロード
-// ============================================================
+function ensureIds(gs) {
+  return gs.map(g => {
+    const gid = (g.id && g.id !== 'undefined') ? g.id : ('grp_' + (g.name || uid()).replace(/[^a-zA-Z0-9]/g, '_') + '_' + Math.random().toString(36).slice(2,6));
+    return { id: gid, name: g.name || '', rows: (g.rows || []).map(r => ({ key: r.key || '?', colors: (r.colors || []).map(c => { if (typeof c === 'string') return { id: uid(), t: '#1a1a2e', b: c, locked: false, label: '', copyTarget: 'b' }; return { id: c.id || uid(), t: c.t || '#1a1a2e', b: c.b, locked: c.locked || false, label: c.label || '', copyTarget: c.copyTarget || 'b' }; }) })) };
+  });
+}
+
 let groups = (() => {
   let g;
-  try {
-    const d = localStorage.getItem('cp_groups5') || localStorage.getItem('cp_groups_v7') || localStorage.getItem('cp_groups');
-    if (d) g = ensureIds(JSON.parse(d));
-    else g = ensureIds(DEFAULT_GROUPS);
-  } catch (e) { g = ensureIds(DEFAULT_GROUPS); }
-  const injects = [
-    { key: '🐹', b: '#f9c89b' }, { key: '🥽', b: '#efea5a' }, { key: '🐸', b: '#eef1d0' }, { key: '🩰', b: '#ffe4e1' },
-    { key: '🐱', b: '#ffdab9' }, { key: '🐰', b: '#fff799' }, { key: '🎀', b: '#fff0f5' }
-  ];
-  g.forEach(group => {
-    group.rows.forEach(row => {
-      const target = injects.find(i => i.key === row.key);
-      if (target && !row.colors.some(c => c.b.toLowerCase() === target.b.toLowerCase())) {
-        row.colors.push({ id: uid(), t: '#1a1a2e', b: target.b, locked: false, label: '', copyTarget: 'b' });
-      }
-    });
-  });
+  try { const d = localStorage.getItem('cp_groups5') || localStorage.getItem('cp_groups_v7') || localStorage.getItem('cp_groups'); if (d) g = ensureIds(JSON.parse(d)); else g = ensureIds(DEFAULT_GROUPS); } catch (e) { g = ensureIds(DEFAULT_GROUPS); }
+  const injects = [{ key: '🐹', b: '#f9c89b' }, { key: '🥽', b: '#efea5a' }, { key: '🐸', b: '#eef1d0' }, { key: '🩰', b: '#ffe4e1' }, { key: '🐱', b: '#ffdab9' }, { key: '🐰', b: '#fff799' }, { key: '🎀', b: '#fff0f5' }];
+  g.forEach(group => { group.rows.forEach(row => { const target = injects.find(i => i.key === row.key); if (target && !row.colors.some(c => c.b.toLowerCase() === target.b.toLowerCase())) { row.colors.push({ id: uid(), t: '#1a1a2e', b: target.b, locked: false, label: '', copyTarget: 'b' }); } }); });
   return g;
 })();
 
 let pinColors = (() => {
-  try {
-    const d = localStorage.getItem('cp_pin_row');
-    if (d) return JSON.parse(d).map(c => ({
-      id: c.id || uid(), t: c.t || '#1a1a2e', b: c.b || '#ffffff',
-      locked: c.locked || false, label: c.label || '', copyTarget: c.copyTarget || 'b'
-    }));
-  } catch(e){}
+  try { const d = localStorage.getItem('cp_pin_row'); if (d) return JSON.parse(d).map(c => ({ id: c.id || uid(), t: c.t || '#1a1a2e', b: c.b || '#ffffff', locked: c.locked || false, label: c.label || '', copyTarget: c.copyTarget || 'b' })); } catch(e){}
   return [];
 })();
 
@@ -725,248 +650,137 @@ function savePinColors() { localStorage.setItem('cp_pin_row', JSON.stringify(pin
 
 function applyMigrations() {
   const KEY_V1 = 'cp_migrated_row_order_v1';
-  if (!localStorage.getItem(KEY_V1)) {
-    const nightGroup = groups.find(g => g.name === '🌃');
-    if (nightGroup) {
-      const desired = ['👓', '🐹', '🥽', '🕶️', '🐸', '🩰'];
-      const rowMap = new Map(nightGroup.rows.map(r => [r.key, r]));
-      const newRows = desired.map(key => rowMap.get(key) || { key, colors: [] });
-      nightGroup.rows.forEach(r => { if (!desired.includes(r.key) && r.key !== '🌃') newRows.push(r); });
-      nightGroup.rows = newRows;
-    }
-    localStorage.setItem(KEY_V1, '1');
-  }
+  if (!localStorage.getItem(KEY_V1)) { const nightGroup = groups.find(g => g.name === '🌃'); if (nightGroup) { const desired = ['👓', '🐹', '🥽', '🕶️', '🐸', '🩰']; const rowMap = new Map(nightGroup.rows.map(r => [r.key, r])); const newRows = desired.map(key => rowMap.get(key) || { key, colors: [] }); nightGroup.rows.forEach(r => { if (!desired.includes(r.key) && r.key !== '🌃') newRows.push(r); }); nightGroup.rows = newRows; } localStorage.setItem(KEY_V1, '1'); }
   const KEY_V2 = 'cp_migrated_remove_city_key_v2';
-  if (!localStorage.getItem(KEY_V2)) {
-    const cityGroup = groups.find(g => g.name === '🌆');
-    if (cityGroup) cityGroup.rows = cityGroup.rows.filter(r => r.key !== '🌆');
-    localStorage.setItem(KEY_V2, '1');
-  }
+  if (!localStorage.getItem(KEY_V2)) { const cityGroup = groups.find(g => g.name === '🌆'); if (cityGroup) cityGroup.rows = cityGroup.rows.filter(r => r.key !== '🌆'); localStorage.setItem(KEY_V2, '1'); }
   localStorage.setItem('cp_groups5', JSON.stringify(groups));
 }
 applyMigrations();
 
 function saveGroups() { localStorage.setItem('cp_groups5', JSON.stringify(groups)); syncPush(); }
 
-// ★ ensureIds: 既存グループが id を持っていない場合、name から一貫したIDを生成する
-function ensureIds(gs) {
-  return gs.map(g => {
-    // idがない or 'undefined'文字列 → nameから生成
-    const gid = (g.id && g.id !== 'undefined') ? g.id : ('grp_' + (g.name || uid()).replace(/[^a-zA-Z0-9]/g, '_') + '_' + Math.random().toString(36).slice(2,6));
-    return {
-      id: gid,
-      name: g.name || '',
-      rows: (g.rows || []).map(r => ({
-        key: r.key || '?',
-        colors: (r.colors || []).map(c => {
-          if (typeof c === 'string') return { id: uid(), t: '#1a1a2e', b: c, locked: false, label: '', copyTarget: 'b' };
-          return { id: c.id || uid(), t: c.t || '#1a1a2e', b: c.b, locked: c.locked || false, label: c.label || '', copyTarget: c.copyTarget || 'b' };
-        })
-      }))
-    };
-  });
-}
-
-// ============================================================
-//  モード管理
-// ============================================================
-let appMode = 'normal';
-let swapSelected = null;
-let pendingOverwrite = null;
+let appMode = 'normal', swapSelected = null, pendingOverwrite = null;
 let longPressTimer = null, longPressActive = false;
 let lpTarget = null, lpOldB = '', lpOldT = '', lpSnapB = '', lpSnapT = '';
-
 let chipDragSrc = null, chipDropInfo = null, chipDragActive = false, chipPointerId = null, chipGhost = null;
 let rowDragSrc = null, rowDragActive = false, rowPointerId = null;
 let grpDragSrc = null, grpDragActive = false, grpPointerId = null, grpGhost = null;
 let grpDragOverGi = null, grpDropInsertBefore = true;
 
-function setupCopyHexPressEffect(btnId) {
-  const btn = document.getElementById(btnId);
-  if (!btn) return;
-  btn.addEventListener('touchstart', () => { btn.classList.add('pressed'); setTimeout(() => btn.classList.remove('pressed'), 300); }, { passive: true });
-}
+function setupCopyHexPressEffect(btnId) { const btn = document.getElementById(btnId); if (!btn) return; btn.addEventListener('touchstart', () => { btn.classList.add('pressed'); setTimeout(() => btn.classList.remove('pressed'), 300); }, { passive: true }); }
 
 function toggleLockMode() {
   if (appMode !== 'lock') {
     if (appMode === 'edit') exitEditMode();
-    appMode = 'lock';
-    document.getElementById('lockModeBtn').classList.add('active-lock');
-    document.getElementById('lockModeIcon').textContent = '🔒';
-    document.getElementById('lockModeText').textContent = '終了';
-    document.body.classList.add('mode-lock');
-    showToast('タップでロック/解除を切り替えられます');
+    appMode = 'lock'; document.getElementById('lockModeBtn').classList.add('active-lock'); document.getElementById('lockModeIcon').textContent = '🔒'; document.getElementById('lockModeText').textContent = '終了'; document.body.classList.add('mode-lock'); showToast('タップでロック/解除を切り替えられます');
   } else {
-    saveGroups(); savePinColors(); appMode = 'normal';
-    document.getElementById('lockModeBtn').classList.remove('active-lock');
-    document.getElementById('lockModeIcon').textContent = '🔓';
-    document.getElementById('lockModeText').textContent = 'ロック選択';
-    document.body.classList.remove('mode-lock');
-    renderGroups(); renderPinRow(); showToast('ロック状態を保存しました');
+    saveGroups(); savePinColors(); appMode = 'normal'; document.getElementById('lockModeBtn').classList.remove('active-lock'); document.getElementById('lockModeIcon').textContent = '🔓'; document.getElementById('lockModeText').textContent = 'ロック選択'; document.body.classList.remove('mode-lock'); renderGroups(); renderPinRow(); showToast('ロック状態を保存しました');
   }
 }
 
-function exitEditMode() {
-  appMode = 'normal';
-  swapSelected = null;
-  cancelChipDrag(); cancelRowDrag(); cancelGrpDrag();
-  document.getElementById('editModeBtn').classList.remove('active');
-  document.body.classList.remove('mode-edit');
-}
+function exitEditMode() { appMode = 'normal'; swapSelected = null; cancelChipDrag(); cancelRowDrag(); cancelGrpDrag(); document.getElementById('editModeBtn').classList.remove('active'); document.body.classList.remove('mode-edit'); }
 
 function toggleEditMode() {
-  if (appMode !== 'edit') {
-    if (appMode === 'lock') toggleLockMode();
-    appMode = 'edit';
-    document.getElementById('editModeBtn').classList.add('active');
-    document.body.classList.add('mode-edit');
-    renderGroups(); renderPinRow();
-  } else {
-    exitEditMode();
-    renderGroups(); renderPinRow();
-  }
+  if (appMode !== 'edit') { if (appMode === 'lock') toggleLockMode(); appMode = 'edit'; document.getElementById('editModeBtn').classList.add('active'); document.body.classList.add('mode-edit'); renderGroups(); renderPinRow(); }
+  else { exitEditMode(); renderGroups(); renderPinRow(); }
 }
 
 function getChipLabel(c) { return (c.label && c.label.trim()) ? c.label.trim() : 'Aa'; }
 
-// ★ ピンチップ: 5文字以上で折り返し、全体サイズ小
 function applyPinChipLabelStyle(inner, label) {
   const vlen = [...label].reduce((n, ch) => { const cp = ch.codePointAt(0); return n + (cp > 0x7F ? 2 : 1); }, 0);
-  if (vlen <= 2)      { inner.style.fontSize = '11px'; inner.style.whiteSpace = 'nowrap'; inner.style.wordBreak = 'normal'; }
+  if (vlen <= 2) { inner.style.fontSize = '11px'; inner.style.whiteSpace = 'nowrap'; inner.style.wordBreak = 'normal'; }
   else if (vlen <= 4) { inner.style.fontSize = '10px'; inner.style.wordBreak = 'break-all'; inner.style.whiteSpace = 'normal'; inner.style.lineHeight = '1.1'; }
-  else if (vlen <= 7) { inner.style.fontSize = '9px';  inner.style.wordBreak = 'break-word'; inner.style.whiteSpace = 'normal'; inner.style.lineHeight = '1.1'; }
-  else                { inner.style.fontSize = '7.5px';inner.style.wordBreak = 'break-all'; inner.style.whiteSpace = 'normal'; inner.style.lineHeight = '1.1'; }
+  else if (vlen <= 7) { inner.style.fontSize = '9px'; inner.style.wordBreak = 'break-word'; inner.style.whiteSpace = 'normal'; inner.style.lineHeight = '1.1'; }
+  else { inner.style.fontSize = '7.5px'; inner.style.wordBreak = 'break-all'; inner.style.whiteSpace = 'normal'; inner.style.lineHeight = '1.1'; }
 }
 
 function applyChipLabelStyle(inner, label) {
   if (!label) return;
   const vlen = [...label].reduce((n, ch) => { const cp = ch.codePointAt(0); return n + (cp > 0x7F ? 2 : 1); }, 0);
-  if (vlen <= 2)      { inner.style.fontSize = '11px'; inner.style.whiteSpace = 'nowrap'; inner.style.wordBreak = 'normal'; }
-  else if (vlen <= 4) { inner.style.fontSize = '9px';  inner.style.wordBreak = 'break-all'; inner.style.whiteSpace = 'normal'; inner.style.lineHeight = '1.1'; }
-  else if (vlen <= 6) { inner.style.fontSize = '7.5px';inner.style.wordBreak = 'break-all'; inner.style.whiteSpace = 'normal'; inner.style.lineHeight = '1.1'; }
-  else                { inner.style.fontSize = '6px';  inner.style.wordBreak = 'break-all'; inner.style.whiteSpace = 'normal'; inner.style.lineHeight = '1.1'; }
+  if (vlen <= 2) { inner.style.fontSize = '11px'; inner.style.whiteSpace = 'nowrap'; inner.style.wordBreak = 'normal'; }
+  else if (vlen <= 4) { inner.style.fontSize = '9px'; inner.style.wordBreak = 'break-all'; inner.style.whiteSpace = 'normal'; inner.style.lineHeight = '1.1'; }
+  else if (vlen <= 6) { inner.style.fontSize = '7.5px'; inner.style.wordBreak = 'break-all'; inner.style.whiteSpace = 'normal'; inner.style.lineHeight = '1.1'; }
+  else { inner.style.fontSize = '6px'; inner.style.wordBreak = 'break-all'; inner.style.whiteSpace = 'normal'; inner.style.lineHeight = '1.1'; }
 }
 
 function doMoveChip(src, dst) {
-  function getRow(info) {
-    if (info.type === 'pin') return pinColors;
-    return groups[info.gi].rows[info.ri].colors;
-  }
-  const srcRow = getRow(src);
-  const [moved] = srcRow.splice(src.ci, 1);
-  let dstCi = dst.ci;
-  if (dst.position !== 'append' && dst.type === src.type) {
-    if (dst.type === 'group' && src.gi === dst.gi && src.ri === dst.ri && src.ci < dst.ci) dstCi--;
-    if (dst.type === 'pin' && src.ci < dst.ci) dstCi--;
-  }
-  if (dst.position === 'append') {
-    if (dst.type === 'pin') pinColors.push(moved);
-    else groups[dst.gi].rows[dst.ri].colors.push(moved);
-  } else {
-    const dstRow = dst.type === 'pin' ? pinColors : groups[dst.gi].rows[dst.ri].colors;
-    let idx = dstCi;
-    if (dst.position === 'after') idx++;
-    dstRow.splice(idx, 0, moved);
-  }
+  function getRow(info) { if (info.type === 'pin') return pinColors; return groups[info.gi].rows[info.ri].colors; }
+  const srcRow = getRow(src); const [moved] = srcRow.splice(src.ci, 1); let dstCi = dst.ci;
+  if (dst.position !== 'append' && dst.type === src.type) { if (dst.type === 'group' && src.gi === dst.gi && src.ri === dst.ri && src.ci < dst.ci) dstCi--; if (dst.type === 'pin' && src.ci < dst.ci) dstCi--; }
+  if (dst.position === 'append') { if (dst.type === 'pin') pinColors.push(moved); else groups[dst.gi].rows[dst.ri].colors.push(moved); }
+  else { const dstRow = dst.type === 'pin' ? pinColors : groups[dst.gi].rows[dst.ri].colors; let idx = dstCi; if (dst.position === 'after') idx++; dstRow.splice(idx, 0, moved); }
   saveGroups(); savePinColors(); renderGroups(); renderPinRow();
 }
 
 // ============================================================
-//  グループDnD ★修正: idベースで確実にマッチング
+//  グループDnD — IDベース（旧バージョンの修正を反映）
 // ============================================================
 function cancelGrpDrag() {
-  const ghost = document.getElementById('groupDragGhost');
-  ghost.style.display = 'none';
+  const ghost = document.getElementById('groupDragGhost'); ghost.style.display = 'none';
   if (grpDragSrc && grpDragSrc.block) grpDragSrc.block.classList.remove('group-dragging');
   if (grpDragSrc && grpDragSrc.hdr) grpDragSrc.hdr.classList.remove('is-grabbing');
-  document.querySelectorAll('.group-block.group-drag-over-left,.group-block.group-drag-over-right')
-    .forEach(b => b.classList.remove('group-drag-over-left','group-drag-over-right'));
-  grpDragSrc = null; grpDragActive = false; grpPointerId = null;
-  grpDragOverGi = null; grpDropInsertBefore = true;
+  document.querySelectorAll('.group-block.group-drag-over-left,.group-block.group-drag-over-right').forEach(b => b.classList.remove('group-drag-over-left','group-drag-over-right'));
+  grpDragSrc = null; grpDragActive = false; grpPointerId = null; grpDragOverGi = null; grpDropInsertBefore = true;
 }
 
 function setupGroupHeaderPointerDnD(hdr, block, gi) {
-  // ★ idを取得時に確実にキャプチャ（レンダリング時点のgroupsから）
-  const srcGroupId = groups[gi].id;
-
+  const srcGroupId = groups[gi].id; // IDをキャプチャ
   hdr.addEventListener('pointerdown', e => {
     if (appMode !== 'edit') return;
     if (e.button !== 0 && e.pointerType !== 'touch') return;
     if (e.target.closest('.group-del-btn')) return;
     e.preventDefault();
     grpDragSrc = { groupId: srcGroupId, block, hdr, startX: e.clientX, startY: e.clientY };
-    grpDragActive = false; grpDragOverGi = null; grpDropInsertBefore = true;
-    grpPointerId = e.pointerId;
+    grpDragActive = false; grpDragOverGi = null; grpDropInsertBefore = true; grpPointerId = e.pointerId;
     try { hdr.setPointerCapture(e.pointerId); } catch(_) {}
   });
-
   hdr.addEventListener('pointermove', e => {
     if (grpPointerId === null || e.pointerId !== grpPointerId || !grpDragSrc) return;
     const dx = e.clientX - grpDragSrc.startX, dy = e.clientY - grpDragSrc.startY;
     if (!grpDragActive && Math.sqrt(dx*dx + dy*dy) > 6) {
-      grpDragActive = true;
-      grpDragSrc.block.classList.add('group-dragging');
-      grpDragSrc.hdr.classList.add('is-grabbing');
+      grpDragActive = true; grpDragSrc.block.classList.add('group-dragging'); grpDragSrc.hdr.classList.add('is-grabbing');
       const ghost = document.getElementById('groupDragGhost');
       ghost.style.width = '180px'; ghost.style.height = '44px'; ghost.style.display = 'block';
       const nameEl = grpDragSrc.block.querySelector('.group-name-display');
       ghost.innerHTML = '<div style="padding:8px 12px;font-family:\'Syne\',sans-serif;font-size:13px;font-weight:600;text-align:center;">' + (nameEl ? nameEl.textContent : '') + '</div>';
-      ghost.style.transform = `translate(${e.clientX - 90}px,${e.clientY - 22}px)`;
-      grpGhost = ghost;
+      ghost.style.transform = `translate(${e.clientX - 90}px,${e.clientY - 22}px)`; grpGhost = ghost;
     }
     if (!grpDragActive) return;
     e.preventDefault();
     grpGhost.style.transform = `translate(${e.clientX - 90}px,${e.clientY - 22}px)`;
-    document.querySelectorAll('.group-block.group-drag-over-left,.group-block.group-drag-over-right')
-      .forEach(b => b.classList.remove('group-drag-over-left','group-drag-over-right'));
+    document.querySelectorAll('.group-block.group-drag-over-left,.group-block.group-drag-over-right').forEach(b => b.classList.remove('group-drag-over-left','group-drag-over-right'));
     grpDragOverGi = null; grpDropInsertBefore = true;
-
     try { hdr.releasePointerCapture(e.pointerId); } catch(_){}
     const elemBelow = document.elementFromPoint(e.clientX, e.clientY);
     try { hdr.setPointerCapture(e.pointerId); } catch(_){}
     if (!elemBelow) return;
-
     const targetBlock = elemBelow.closest('.group-block');
     if (targetBlock && targetBlock !== grpDragSrc.block) {
       const targetId = targetBlock.dataset.groupId;
-      // ★ dataset.groupId で groups配列から検索
-      const targetDataIdx = groups.findIndex(g => g.id === targetId);
+      const targetDataIdx = groups.findIndex(g => g.id === targetId); // IDベース検索
       if (targetDataIdx >= 0) {
         grpDragOverGi = targetDataIdx;
-        const bRect = targetBlock.getBoundingClientRect();
-        grpDropInsertBefore = e.clientX < bRect.left + bRect.width / 2;
-        if (grpDropInsertBefore) targetBlock.classList.add('group-drag-over-left');
-        else targetBlock.classList.add('group-drag-over-right');
+        const bRect = targetBlock.getBoundingClientRect(); grpDropInsertBefore = e.clientX < bRect.left + bRect.width / 2;
+        if (grpDropInsertBefore) targetBlock.classList.add('group-drag-over-left'); else targetBlock.classList.add('group-drag-over-right');
       }
     }
   });
-
   hdr.addEventListener('pointerup', e => {
     if (grpPointerId === null || e.pointerId !== grpPointerId) return;
-    const wasActive = grpDragActive;
-    const srcId = grpDragSrc ? grpDragSrc.groupId : null;
-    const dstDataIdx = grpDragOverGi;
-    const insertBefore = grpDropInsertBefore;
+    const wasActive = grpDragActive, srcId = grpDragSrc ? grpDragSrc.groupId : null;
+    const dstDataIdx = grpDragOverGi, insertBefore = grpDropInsertBefore;
     cancelGrpDrag();
-
     if (wasActive && srcId && dstDataIdx !== null && dstDataIdx >= 0) {
       const srcDataIdx = groups.findIndex(g => g.id === srcId);
       if (srcDataIdx < 0 || srcDataIdx === dstDataIdx) return;
-
-      // ★ 正しい挿入位置計算
       const moved = groups.splice(srcDataIdx, 1)[0];
-      // splice後のインデックス補正
-      let insertIdx = dstDataIdx;
-      if (srcDataIdx < dstDataIdx) insertIdx = dstDataIdx - 1;
-      if (!insertBefore) insertIdx++;
+      let insertIdx = dstDataIdx; if (srcDataIdx < dstDataIdx) insertIdx = dstDataIdx - 1; if (!insertBefore) insertIdx++;
       insertIdx = Math.max(0, Math.min(insertIdx, groups.length));
       groups.splice(insertIdx, 0, moved);
-
-      saveGroups(); renderGroups();
-      showToast('グループを移動しました');
+      saveGroups(); renderGroups(); showToast('グループを移動しました');
     }
   });
-
   hdr.addEventListener('pointercancel', () => cancelGrpDrag());
 }
 
@@ -975,52 +789,36 @@ function setupGroupHeaderPointerDnD(hdr, block, gi) {
 // ============================================================
 function cancelRowDrag() {
   document.querySelectorAll('.emoji-row.row-dragging').forEach(r => r.classList.remove('row-dragging'));
-  document.querySelectorAll('.emoji-row.row-drag-over-top,.emoji-row.row-drag-over-bottom')
-    .forEach(r => r.classList.remove('row-drag-over-top','row-drag-over-bottom'));
+  document.querySelectorAll('.emoji-row.row-drag-over-top,.emoji-row.row-drag-over-bottom').forEach(r => r.classList.remove('row-drag-over-top','row-drag-over-bottom'));
   rowDragSrc = null; rowDragActive = false; rowPointerId = null;
 }
 
 function setupRowKeyPointerDnD(keySpan, rowEl, gi, ri) {
-  keySpan.addEventListener('pointerdown', e => {
-    if (appMode !== 'edit') return;
-    if (e.button !== 0 && e.pointerType !== 'touch') return;
-    rowDragSrc = { gi, ri, rowEl, keySpan, startX: e.clientX, startY: e.clientY };
-    rowDragActive = false; rowPointerId = e.pointerId;
-    keySpan.setPointerCapture(e.pointerId);
-  });
+  keySpan.addEventListener('pointerdown', e => { if (appMode !== 'edit') return; if (e.button !== 0 && e.pointerType !== 'touch') return; rowDragSrc = { gi, ri, rowEl, keySpan, startX: e.clientX, startY: e.clientY }; rowDragActive = false; rowPointerId = e.pointerId; keySpan.setPointerCapture(e.pointerId); });
   keySpan.addEventListener('pointermove', e => {
     if (rowPointerId === null || e.pointerId !== rowPointerId || !rowDragSrc) return;
     const dx = e.clientX - rowDragSrc.startX, dy = e.clientY - rowDragSrc.startY;
     if (!rowDragActive && Math.sqrt(dx*dx + dy*dy) > 6) { rowDragActive = true; rowEl.classList.add('row-dragging'); keySpan.classList.add('is-grabbing'); }
-    if (!rowDragActive) return;
-    e.preventDefault();
+    if (!rowDragActive) return; e.preventDefault();
     document.querySelectorAll('.emoji-row.row-drag-over-top,.emoji-row.row-drag-over-bottom').forEach(r => r.classList.remove('row-drag-over-top','row-drag-over-bottom'));
     try { keySpan.releasePointerCapture(e.pointerId); } catch(_){}
     const elemBelow = document.elementFromPoint(e.clientX, e.clientY);
     try { keySpan.setPointerCapture(e.pointerId); } catch(_){}
     if (!elemBelow) return;
     const targetRow = elemBelow.closest('.emoji-row');
-    if (targetRow && targetRow !== rowEl && +targetRow.dataset.gi === gi) {
-      const rect = targetRow.getBoundingClientRect();
-      if (e.clientY < rect.top + rect.height / 2) targetRow.classList.add('row-drag-over-top');
-      else targetRow.classList.add('row-drag-over-bottom');
-    }
+    if (targetRow && targetRow !== rowEl && +targetRow.dataset.gi === gi) { const rect = targetRow.getBoundingClientRect(); if (e.clientY < rect.top + rect.height / 2) targetRow.classList.add('row-drag-over-top'); else targetRow.classList.add('row-drag-over-bottom'); }
   });
   keySpan.addEventListener('pointerup', e => {
     if (e.pointerId !== rowPointerId) return;
     const wasActive = rowDragActive, srcRi = rowDragSrc ? rowDragSrc.ri : -1, srcGi = rowDragSrc ? rowDragSrc.gi : -1;
     try { keySpan.releasePointerCapture(e.pointerId); } catch(_){}
-    const elemBelow = document.elementFromPoint(e.clientX, e.clientY);
-    cancelRowDrag();
+    const elemBelow = document.elementFromPoint(e.clientX, e.clientY); cancelRowDrag();
     if (!wasActive) { openEditRowModal(srcGi, srcRi); return; }
     if (srcRi < 0 || !elemBelow) return;
     const targetRow = elemBelow.closest('.emoji-row');
     if (!targetRow || targetRow === rowEl || +targetRow.dataset.gi !== srcGi) return;
-    const dstRi = +targetRow.dataset.ri;
-    const rect = targetRow.getBoundingClientRect();
-    const insertBefore = e.clientY < rect.top + rect.height / 2;
-    const rows = groups[srcGi].rows;
-    const [moved] = rows.splice(srcRi, 1);
+    const dstRi = +targetRow.dataset.ri; const rect = targetRow.getBoundingClientRect(); const insertBefore = e.clientY < rect.top + rect.height / 2;
+    const rows = groups[srcGi].rows; const [moved] = rows.splice(srcRi, 1);
     let insertIdx = dstRi; if (srcRi < dstRi) insertIdx = dstRi - 1; if (!insertBefore) insertIdx++;
     rows.splice(Math.max(0, Math.min(insertIdx, rows.length)), 0, moved);
     saveGroups(); renderGroups(); showToast('行を移動しました');
@@ -1037,44 +835,27 @@ function clearChipDropHighlights() {
   document.querySelectorAll('.emoji-swatches.drop-append-here,.pin-row-inner.drop-append-here').forEach(el => el.classList.remove('drop-append-here'));
   document.querySelectorAll('.emoji-row.drop-row-highlight').forEach(el => el.classList.remove('drop-row-highlight'));
 }
-
 function cancelChipDrag() {
-  const ghost = document.getElementById('chipDragGhost');
-  ghost.style.display = 'none';
+  const ghost = document.getElementById('chipDragGhost'); ghost.style.display = 'none';
   document.querySelectorAll('.swatch-chip.chip-dragging,.pin-chip.chip-dragging').forEach(c => c.classList.remove('chip-dragging','is-grabbing'));
-  clearChipDropHighlights();
-  chipDragSrc = null; chipDropInfo = null; chipDragActive = false; chipPointerId = null; chipGhost = null;
+  clearChipDropHighlights(); chipDragSrc = null; chipDropInfo = null; chipDragActive = false; chipPointerId = null; chipGhost = null;
 }
-
 function setupChipPointerDnD(chip, c, srcInfo) {
   let startX = 0, startY = 0;
-  chip.addEventListener('pointerdown', e => {
-    if (appMode !== 'edit') return;
-    if (e.button !== 0 && e.pointerType !== 'touch') return;
-    startX = e.clientX; startY = e.clientY;
-    chipDragSrc = { ...srcInfo }; chipDragActive = false; chipPointerId = e.pointerId; chipDropInfo = null;
-    chip.setPointerCapture(e.pointerId);
-  });
+  chip.addEventListener('pointerdown', e => { if (appMode !== 'edit') return; if (e.button !== 0 && e.pointerType !== 'touch') return; startX = e.clientX; startY = e.clientY; chipDragSrc = { ...srcInfo }; chipDragActive = false; chipPointerId = e.pointerId; chipDropInfo = null; chip.setPointerCapture(e.pointerId); });
   chip.addEventListener('pointermove', e => {
     if (chipPointerId === null || e.pointerId !== chipPointerId) return;
     const dx = e.clientX - startX, dy = e.clientY - startY;
     if (!chipDragActive && Math.sqrt(dx*dx + dy*dy) > 5) {
       chipDragActive = true; chip.classList.add('chip-dragging','is-grabbing');
-      const g = document.getElementById('chipDragGhost');
-      const isPin = srcInfo.type === 'pin';
-      g.style.width = isPin ? '40px' : '32px'; g.style.height = isPin ? '34px' : '32px';
-      g.style.background = c.b;
+      const g = document.getElementById('chipDragGhost'); const isPin = srcInfo.type === 'pin';
+      g.style.width = isPin ? '40px' : '32px'; g.style.height = isPin ? '34px' : '32px'; g.style.background = c.b;
       g.style.borderRadius = isPin ? (c.locked ? '6px' : '17px') : (c.locked ? '5px' : '50%');
-      g.style.border = '2px solid rgba(255,255,255,.85)';
-      g.style.boxShadow = '0 4px 18px rgba(0,0,0,.32)'; g.style.display = 'block';
-      const ox = isPin ? 20 : 16, oy = isPin ? 17 : 16;
-      g.style.transform = `translate(${e.clientX - ox}px,${e.clientY - oy}px)`;
-      chipGhost = g;
+      g.style.border = '2px solid rgba(255,255,255,.85)'; g.style.boxShadow = '0 4px 18px rgba(0,0,0,.32)'; g.style.display = 'block';
+      const ox = isPin ? 20 : 16, oy = isPin ? 17 : 16; g.style.transform = `translate(${e.clientX - ox}px,${e.clientY - oy}px)`; chipGhost = g;
     }
-    if (!chipDragActive) return;
-    e.preventDefault();
-    const isPin = srcInfo.type === 'pin';
-    const ox = isPin ? 20 : 16, oy = isPin ? 17 : 16;
+    if (!chipDragActive) return; e.preventDefault();
+    const isPin = srcInfo.type === 'pin'; const ox = isPin ? 20 : 16, oy = isPin ? 17 : 16;
     chipGhost.style.transform = `translate(${e.clientX - ox}px,${e.clientY - oy}px)`;
     clearChipDropHighlights(); chipDropInfo = null;
     try { chip.releasePointerCapture(e.pointerId); } catch(_){}
@@ -1082,66 +863,26 @@ function setupChipPointerDnD(chip, c, srcInfo) {
     try { chip.setPointerCapture(e.pointerId); } catch(_){}
     if (!elemBelow) return;
     const targetPinChip = elemBelow.closest('.pin-chip');
-    if (targetPinChip && targetPinChip !== chip) {
-      const dCi = +targetPinChip.dataset.ci;
-      const rect = targetPinChip.getBoundingClientRect();
-      const pos = e.clientX < rect.left + rect.width/2 ? 'before' : 'after';
-      targetPinChip.classList.add(pos === 'before' ? 'chip-drop-before' : 'chip-drop-after');
-      chipDropInfo = { type: 'pin', ci: dCi, position: pos }; return;
-    }
+    if (targetPinChip && targetPinChip !== chip) { const dCi = +targetPinChip.dataset.ci; const rect = targetPinChip.getBoundingClientRect(); const pos = e.clientX < rect.left + rect.width/2 ? 'before' : 'after'; targetPinChip.classList.add(pos === 'before' ? 'chip-drop-before' : 'chip-drop-after'); chipDropInfo = { type: 'pin', ci: dCi, position: pos }; return; }
     const targetPinRow = elemBelow.closest('.pin-row-inner');
     if (targetPinRow) { targetPinRow.classList.add('drop-append-here'); chipDropInfo = { type: 'pin', ci: -1, position: 'append' }; return; }
     const targetChip = elemBelow.closest('.swatch-chip');
-    if (targetChip && targetChip !== chip) {
-      const dGi = +targetChip.dataset.gi, dRi = +targetChip.dataset.ri, dCi = +targetChip.dataset.ci;
-      const rect = targetChip.getBoundingClientRect();
-      const pos = e.clientX < rect.left + rect.width/2 ? 'before' : 'after';
-      targetChip.classList.add(pos === 'before' ? 'chip-drop-before' : 'chip-drop-after');
-      chipDropInfo = { type: 'group', gi: dGi, ri: dRi, ci: dCi, position: pos }; return;
-    }
+    if (targetChip && targetChip !== chip) { const dGi = +targetChip.dataset.gi, dRi = +targetChip.dataset.ri, dCi = +targetChip.dataset.ci; const rect = targetChip.getBoundingClientRect(); const pos = e.clientX < rect.left + rect.width/2 ? 'before' : 'after'; targetChip.classList.add(pos === 'before' ? 'chip-drop-before' : 'chip-drop-after'); chipDropInfo = { type: 'group', gi: dGi, ri: dRi, ci: dCi, position: pos }; return; }
     const targetSw = elemBelow.closest('.emoji-swatches');
-    if (targetSw && targetSw.dataset.gi !== undefined) {
-      const dGi = +targetSw.dataset.gi, dRi = +targetSw.dataset.ri;
-      targetSw.classList.add('drop-append-here');
-      chipDropInfo = { type: 'group', gi: dGi, ri: dRi, ci: -1, position: 'append' }; return;
-    }
+    if (targetSw && targetSw.dataset.gi !== undefined) { const dGi = +targetSw.dataset.gi, dRi = +targetSw.dataset.ri; targetSw.classList.add('drop-append-here'); chipDropInfo = { type: 'group', gi: dGi, ri: dRi, ci: -1, position: 'append' }; return; }
     const targetRow = elemBelow.closest('.emoji-row');
-    if (targetRow && targetRow.dataset.gi !== undefined) {
-      const dGi = +targetRow.dataset.gi, dRi = +targetRow.dataset.ri;
-      targetRow.classList.add('drop-row-highlight');
-      const sw = targetRow.querySelector('.emoji-swatches');
-      if (sw) sw.classList.add('drop-append-here');
-      chipDropInfo = { type: 'group', gi: dGi, ri: dRi, ci: -1, position: 'append' };
-    }
+    if (targetRow && targetRow.dataset.gi !== undefined) { const dGi = +targetRow.dataset.gi, dRi = +targetRow.dataset.ri; targetRow.classList.add('drop-row-highlight'); const sw = targetRow.querySelector('.emoji-swatches'); if (sw) sw.classList.add('drop-append-here'); chipDropInfo = { type: 'group', gi: dGi, ri: dRi, ci: -1, position: 'append' }; }
   });
   chip.addEventListener('pointerup', e => {
     if (e.pointerId !== chipPointerId) return;
-    const wasActive = chipDragActive, src = chipDragSrc, dst = chipDropInfo;
-    cancelChipDrag();
+    const wasActive = chipDragActive, src = chipDragSrc, dst = chipDropInfo; cancelChipDrag();
     if (wasActive) {
-      if (dst !== null) {
-        let isSelf = false;
-        if (dst.position !== 'append' && dst.type === src.type) {
-          if (dst.type === 'pin') isSelf = (dst.ci === src.ci);
-          else isSelf = (dst.gi === src.gi && dst.ri === src.ri && dst.ci === src.ci);
-        }
-        if (!isSelf) { doMoveChip(src, dst); showToast('チップを移動しました'); }
-        else { renderGroups(); renderPinRow(); }
-      } else { renderGroups(); renderPinRow(); }
+      if (dst !== null) { let isSelf = false; if (dst.position !== 'append' && dst.type === src.type) { if (dst.type === 'pin') isSelf = (dst.ci === src.ci); else isSelf = (dst.gi === src.gi && dst.ri === src.ri && dst.ci === src.ci); } if (!isSelf) { doMoveChip(src, dst); showToast('チップを移動しました'); } else { renderGroups(); renderPinRow(); } } else { renderGroups(); renderPinRow(); }
     } else {
       const tapKey = src.type === 'pin' ? `pin:${src.ci}` : `g:${src.gi}:${src.ri}:${src.ci}`;
-      if (swapSelected === null) {
-        swapSelected = { ...src, _key: tapKey }; renderGroups(); renderPinRow();
-        showToast('入れ替え先のチップをタップ（同じチップでキャンセル）');
-      } else if (swapSelected._key === tapKey) {
-        swapSelected = null; renderGroups(); renderPinRow();
-      } else {
-        function getCell(info) { return info.type === 'pin' ? pinColors : groups[info.gi].rows[info.ri].colors; }
-        const rowA = getCell(swapSelected), rowB = getCell(src);
-        const tmp = rowA[swapSelected.ci]; rowA[swapSelected.ci] = rowB[src.ci]; rowB[src.ci] = tmp;
-        swapSelected = null;
-        saveGroups(); savePinColors(); renderGroups(); renderPinRow(); showToast('2色を入れ替えました ↔');
-      }
+      if (swapSelected === null) { swapSelected = { ...src, _key: tapKey }; renderGroups(); renderPinRow(); showToast('入れ替え先のチップをタップ（同じチップでキャンセル）'); }
+      else if (swapSelected._key === tapKey) { swapSelected = null; renderGroups(); renderPinRow(); }
+      else { function getCell(info) { return info.type === 'pin' ? pinColors : groups[info.gi].rows[info.ri].colors; } const rowA = getCell(swapSelected), rowB = getCell(src); const tmp = rowA[swapSelected.ci]; rowA[swapSelected.ci] = rowB[src.ci]; rowB[src.ci] = tmp; swapSelected = null; saveGroups(); savePinColors(); renderGroups(); renderPinRow(); showToast('2色を入れ替えました ↔'); }
     }
   });
   chip.addEventListener('pointercancel', () => cancelChipDrag());
@@ -1151,39 +892,23 @@ function setupChipPointerDnD(chip, c, srcInfo) {
 //  ピン行レンダリング
 // ============================================================
 function renderPinRow() {
-  const container = document.getElementById('pinRowInner');
-  container.innerHTML = ''; container.dataset.type = 'pin';
+  const container = document.getElementById('pinRowInner'); container.innerHTML = ''; container.dataset.type = 'pin';
   pinColors.forEach((c, ci) => {
-    const chip = document.createElement('div');
-    chip.className = 'pin-chip'; chip.dataset.type = 'pin'; chip.dataset.ci = ci;
+    const chip = document.createElement('div'); chip.className = 'pin-chip'; chip.dataset.type = 'pin'; chip.dataset.ci = ci;
     if (c.locked) chip.classList.add('locked');
-    if (appMode === 'edit' && swapSelected && swapSelected.type === 'pin' && swapSelected.ci === ci) {
-      chip.classList.add('selected-for-swap'); chip.style.setProperty('--chip-sel-color', c.t);
-    }
-    const inner = document.createElement('div');
-    inner.className = 'pin-chip-inner'; inner.style.background = c.b; inner.style.color = c.t;
+    if (appMode === 'edit' && swapSelected && swapSelected.type === 'pin' && swapSelected.ci === ci) { chip.classList.add('selected-for-swap'); chip.style.setProperty('--chip-sel-color', c.t); }
+    const inner = document.createElement('div'); inner.className = 'pin-chip-inner'; inner.style.background = c.b; inner.style.color = c.t;
     const label = getChipLabel(c); inner.textContent = label; applyPinChipLabelStyle(inner, label);
     const tt = document.createElement('div'); tt.className = 'pin-chip-tooltip';
     const updateTooltip = () => { if (appMode === 'lock') tt.textContent = c.locked ? '🔓 タップで解除' : '🔒 タップでロック'; else tt.textContent = ''; };
     updateTooltip(); chip.addEventListener('mouseenter', updateTooltip);
-    chip.append(inner, tt);
-    chip.style.background = c.b; chip.style.color = c.t;
-    if (appMode === 'edit') {
-      chip.style.touchAction = 'none'; setupChipPointerDnD(chip, c, { type: 'pin', ci });
-    } else {
+    chip.append(inner, tt); chip.style.background = c.b; chip.style.color = c.t;
+    if (appMode === 'edit') { chip.style.touchAction = 'none'; setupChipPointerDnD(chip, c, { type: 'pin', ci }); }
+    else {
       chip.addEventListener('touchstart', () => { if (document.activeElement && document.activeElement !== chip) document.activeElement.blur(); }, { passive: true });
       let chipTapCount = 0, chipTapTimer = null;
       ;(function(cC, cCi) {
-        chip.addEventListener('pointerdown', e => {
-          if (appMode !== 'normal') return;
-          longPressActive = false;
-          if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
-          longPressTimer = setTimeout(() => {
-            longPressActive = true; longPressTimer = null;
-            chipTapCount = 0; if (chipTapTimer) { clearTimeout(chipTapTimer); chipTapTimer = null; }
-            openLpModal(cC, null, null, cCi, 'pin');
-          }, 300);
-        });
+        chip.addEventListener('pointerdown', e => { if (appMode !== 'normal') return; longPressActive = false; if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; } longPressTimer = setTimeout(() => { longPressActive = true; longPressTimer = null; chipTapCount = 0; if (chipTapTimer) { clearTimeout(chipTapTimer); chipTapTimer = null; } openLpModal(cC, null, null, cCi, 'pin'); }, 300); });
         chip.addEventListener('pointerup', () => { if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; } });
         chip.addEventListener('pointercancel', () => { if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; } longPressActive = false; });
         chip.addEventListener('click', e => {
@@ -1191,24 +916,21 @@ function renderPinRow() {
           if (appMode === 'lock') { cC.locked = !cC.locked; chip.classList.toggle('locked', cC.locked); showToast(cC.locked ? '🔒 ロックしました' : '🔓 解除しました'); updateTooltip(); return; }
           if (longPressActive) { longPressActive = false; return; }
           chipTapCount++;
-          if (chipTapCount === 1) {
-            chipTapTimer = setTimeout(() => { chipTapCount = 0; applyHex('t', cC.t); applyHex('b', cC.b); copyText(cC.b.toUpperCase()); showColorToast(cC.b.toUpperCase(), cC.b, cC.t, '背景色'); }, 280);
-          } else if (chipTapCount === 2) {
-            clearTimeout(chipTapTimer);
-            chipTapTimer = setTimeout(() => { chipTapCount = 0; applyHex('t', cC.t); applyHex('b', cC.b); copyText(cC.t.toUpperCase()); showColorToast(cC.t.toUpperCase(), cC.t, cC.b, '文字色'); }, 280);
-          } else if (chipTapCount >= 3) {
-            clearTimeout(chipTapTimer); chipTapTimer = null; chipTapCount = 0;
-            applyHex('t', cC.t); applyHex('b', cC.b); showToast('プレビューに反映しました（コピーなし）');
-          }
+          if (chipTapCount === 1) { chipTapTimer = setTimeout(() => { chipTapCount = 0; applyHex('t', cC.t); applyHex('b', cC.b); copyText(cC.b.toUpperCase()); showColorToast(cC.b.toUpperCase(), cC.b, cC.t, '背景色'); }, 280); }
+          else if (chipTapCount === 2) { clearTimeout(chipTapTimer); chipTapTimer = setTimeout(() => { chipTapCount = 0; applyHex('t', cC.t); applyHex('b', cC.b); copyText(cC.t.toUpperCase()); showColorToast(cC.t.toUpperCase(), cC.t, cC.b, '文字色'); }, 280); }
+          else if (chipTapCount >= 3) { clearTimeout(chipTapTimer); chipTapTimer = null; chipTapCount = 0; applyHex('t', cC.t); applyHex('b', cC.b); showToast('プレビューに反映しました（コピーなし）'); }
         });
       })(c, ci);
     }
-    chip.addEventListener('contextmenu', e => e.preventDefault());
-    container.append(chip);
+    chip.addEventListener('contextmenu', e => e.preventDefault()); container.append(chip);
   });
-  const addBtn = document.createElement('button');
-  addBtn.className = 'pin-add-btn'; addBtn.textContent = '+'; addBtn.title = '現在の色をピン行に追加';
-  addBtn.onclick = () => { const t = document.getElementById('tHex').value, b = document.getElementById('bHex').value; pinColors.push({ id: uid(), t, b, locked: false, label: '', copyTarget: 'b' }); savePinColors(); renderPinRow(); };
+  const addBtn = document.createElement('button'); addBtn.className = 'pin-add-btn'; addBtn.textContent = '+'; addBtn.title = '短押し: 即追加 / 長押し: ラベル付き登録';
+  addBtn.addEventListener('contextmenu', e => e.preventDefault());
+  let pinAddPressTimer = null, pinAddLongPress = false;
+  addBtn.addEventListener('pointerdown', () => { pinAddLongPress = false; pinAddPressTimer = setTimeout(() => { pinAddLongPress = true; pinAddPressTimer = null; openAddModalForPin(); }, 400); });
+  addBtn.addEventListener('pointerup', () => { if (pinAddPressTimer) { clearTimeout(pinAddPressTimer); pinAddPressTimer = null; } });
+  addBtn.addEventListener('pointercancel', () => { if (pinAddPressTimer) { clearTimeout(pinAddPressTimer); pinAddPressTimer = null; } pinAddLongPress = false; });
+  addBtn.addEventListener('click', () => { if (pinAddLongPress) { pinAddLongPress = false; return; } const t = document.getElementById('tHex').value, b = document.getElementById('bHex').value; pinColors.push({ id: uid(), t, b, locked: false, label: '', copyTarget: 'b' }); savePinColors(); renderPinRow(); });
   container.append(addBtn);
   if (window._scheduleTwemoji) window._scheduleTwemoji();
 }
@@ -1219,13 +941,8 @@ function renderPinRow() {
 function renderGroups() {
   const el = document.getElementById('groupsList'); el.innerHTML = '';
   groups.forEach((g, gi) => {
-    // ★ idが確実にあることを保証
     if (!g.id || g.id === 'undefined') g.id = uid();
-
-    const block = document.createElement('div');
-    block.className = 'group-block';
-    block.dataset.groupId = g.id; // ★ 必ずidをセット
-
+    const block = document.createElement('div'); block.className = 'group-block'; block.dataset.groupId = g.id;
     const hdr = document.createElement('div'); hdr.className = 'group-header';
     const nameEl = document.createElement('div'); nameEl.className = 'group-name-display';
     nameEl.contentEditable = appMode === 'edit' ? 'false' : 'true'; nameEl.spellcheck = false; nameEl.textContent = g.name;
@@ -1240,52 +957,35 @@ function renderGroups() {
     ;(function(cgi) { delBtn.addEventListener('click', e => { e.stopPropagation(); e.preventDefault(); openDeleteGroupModal(cgi); }); })(gi);
     hdr.append(delBtn); block.append(hdr);
     if (appMode === 'edit') setupGroupHeaderPointerDnD(hdr, block, gi);
-
     const rowsEl = document.createElement('div'); rowsEl.className = 'emoji-rows';
     g.rows.forEach((row, ri) => {
       const rowEl = document.createElement('div'); rowEl.className = 'emoji-row'; rowEl.dataset.gi = gi; rowEl.dataset.ri = ri;
       const keySpan = document.createElement('span'); keySpan.className = 'emoji-key'; keySpan.textContent = row.key;
-      if (appMode === 'edit') {
-        setupRowKeyPointerDnD(keySpan, rowEl, gi, ri);
-      } else {
+      if (appMode === 'edit') { setupRowKeyPointerDnD(keySpan, rowEl, gi, ri); }
+      else {
         let keyTapCount = 0, keyTapTimer = null;
         ;(function(cGi, cRi) {
           keySpan.addEventListener('click', () => { keyTapCount++; if (keyTapCount === 1) { keyTapTimer = setTimeout(() => { keyTapCount = 0; }, 350); } else if (keyTapCount >= 2) { clearTimeout(keyTapTimer); keyTapCount = 0; openEditRowModal(cGi, cRi); } });
-          let lastTouch = 0;
-          keySpan.addEventListener('touchend', e => { const now = Date.now(); if (now - lastTouch < 350) { e.preventDefault(); openEditRowModal(cGi, cRi); } lastTouch = now; });
+          let lastTouch = 0; keySpan.addEventListener('touchend', e => { const now = Date.now(); if (now - lastTouch < 350) { e.preventDefault(); openEditRowModal(cGi, cRi); } lastTouch = now; });
         })(gi, ri);
       }
       rowEl.append(keySpan);
       const swatchesEl = document.createElement('div'); swatchesEl.className = 'emoji-swatches'; swatchesEl.dataset.gi = gi; swatchesEl.dataset.ri = ri;
       row.colors.forEach((c, ci) => {
-        const chip = document.createElement('div');
-        chip.className = 'swatch-chip'; chip.dataset.gi = gi; chip.dataset.ri = ri; chip.dataset.ci = ci;
+        const chip = document.createElement('div'); chip.className = 'swatch-chip'; chip.dataset.gi = gi; chip.dataset.ri = ri; chip.dataset.ci = ci;
         if (c.locked) chip.classList.add('locked');
-        if (appMode === 'edit' && swapSelected && swapSelected.type === 'group' && swapSelected.gi === gi && swapSelected.ri === ri && swapSelected.ci === ci) {
-          chip.classList.add('selected-for-swap'); chip.style.setProperty('--chip-sel-color', c.t);
-        }
+        if (appMode === 'edit' && swapSelected && swapSelected.type === 'group' && swapSelected.gi === gi && swapSelected.ri === ri && swapSelected.ci === ci) { chip.classList.add('selected-for-swap'); chip.style.setProperty('--chip-sel-color', c.t); }
         const inner = document.createElement('div'); inner.className = 'swatch-chip-inner'; inner.style.background = c.b; inner.style.color = c.t;
         const label = getChipLabel(c); inner.textContent = label; applyChipLabelStyle(inner, label);
         const tt = document.createElement('div'); tt.className = 'swatch-chip-tooltip';
         const updateTooltip = () => { if (appMode === 'lock') tt.textContent = c.locked ? '🔓 タップで解除' : '🔒 タップでロック'; else tt.textContent = ''; };
-        updateTooltip(); chip.addEventListener('mouseenter', updateTooltip);
-        chip.append(inner, tt);
-        if (appMode === 'edit') {
-          chip.style.touchAction = 'none'; setupChipPointerDnD(chip, c, { type: 'group', gi, ri, ci });
-        } else {
+        updateTooltip(); chip.addEventListener('mouseenter', updateTooltip); chip.append(inner, tt);
+        if (appMode === 'edit') { chip.style.touchAction = 'none'; setupChipPointerDnD(chip, c, { type: 'group', gi, ri, ci }); }
+        else {
           chip.addEventListener('touchstart', () => { if (document.activeElement && document.activeElement !== chip) document.activeElement.blur(); }, { passive: true });
           let chipTapCount = 0, chipTapTimer = null;
           ;(function(cC, cGi, cRi, cCi) {
-            chip.addEventListener('pointerdown', e => {
-              if (appMode !== 'normal') return;
-              longPressActive = false;
-              if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
-              longPressTimer = setTimeout(() => {
-                longPressActive = true; longPressTimer = null;
-                chipTapCount = 0; if (chipTapTimer) { clearTimeout(chipTapTimer); chipTapTimer = null; }
-                openLpModal(cC, cGi, cRi, cCi, 'group');
-              }, 300);
-            });
+            chip.addEventListener('pointerdown', e => { if (appMode !== 'normal') return; longPressActive = false; if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; } longPressTimer = setTimeout(() => { longPressActive = true; longPressTimer = null; chipTapCount = 0; if (chipTapTimer) { clearTimeout(chipTapTimer); chipTapTimer = null; } openLpModal(cC, cGi, cRi, cCi, 'group'); }, 300); });
             chip.addEventListener('pointerup', () => { if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; } });
             chip.addEventListener('pointercancel', () => { if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; } longPressActive = false; });
             chip.addEventListener('click', e => {
@@ -1293,81 +993,155 @@ function renderGroups() {
               if (appMode === 'lock') { cC.locked = !cC.locked; chip.classList.toggle('locked', cC.locked); showToast(cC.locked ? '🔒 ロックしました' : '🔓 解除しました'); updateTooltip(); return; }
               if (longPressActive) { longPressActive = false; return; }
               chipTapCount++;
-              if (chipTapCount === 1) {
-                chipTapTimer = setTimeout(() => { chipTapCount = 0; applyHex('t', cC.t); applyHex('b', cC.b); copyText(cC.b.toUpperCase()); showColorToast(cC.b.toUpperCase(), cC.b, cC.t, '背景色'); }, 280);
-              } else if (chipTapCount === 2) {
-                clearTimeout(chipTapTimer);
-                chipTapTimer = setTimeout(() => { chipTapCount = 0; applyHex('t', cC.t); applyHex('b', cC.b); copyText(cC.t.toUpperCase()); showColorToast(cC.t.toUpperCase(), cC.t, cC.b, '文字色'); }, 280);
-              } else if (chipTapCount >= 3) {
-                clearTimeout(chipTapTimer); chipTapTimer = null; chipTapCount = 0;
-                applyHex('t', cC.t); applyHex('b', cC.b); showToast('プレビューに反映しました（コピーなし）');
-              }
+              if (chipTapCount === 1) { chipTapTimer = setTimeout(() => { chipTapCount = 0; applyHex('t', cC.t); applyHex('b', cC.b); copyText(cC.b.toUpperCase()); showColorToast(cC.b.toUpperCase(), cC.b, cC.t, '背景色'); }, 280); }
+              else if (chipTapCount === 2) { clearTimeout(chipTapTimer); chipTapTimer = setTimeout(() => { chipTapCount = 0; applyHex('t', cC.t); applyHex('b', cC.b); copyText(cC.t.toUpperCase()); showColorToast(cC.t.toUpperCase(), cC.t, cC.b, '文字色'); }, 280); }
+              else if (chipTapCount >= 3) { clearTimeout(chipTapTimer); chipTapTimer = null; chipTapCount = 0; applyHex('t', cC.t); applyHex('b', cC.b); showToast('プレビューに反映しました（コピーなし）'); }
             });
           })(c, gi, ri, ci);
         }
-        chip.addEventListener('contextmenu', e => e.preventDefault());
-        swatchesEl.append(chip);
+        chip.addEventListener('contextmenu', e => e.preventDefault()); swatchesEl.append(chip);
       });
-      const addRowBtn = document.createElement('button'); addRowBtn.className = 'emoji-add-btn'; addRowBtn.textContent = '+'; addRowBtn.title = '現在の色を追加';
-      ;(function(cRow) { addRowBtn.onclick = () => { const t = document.getElementById('tHex').value, b = document.getElementById('bHex').value; cRow.colors.push({ id: uid(), t, b, locked: false, label: '', copyTarget: 'b' }); saveGroups(); renderGroups(); }; })(row);
+      // ② 行内追加ボタン: 短押し即追加 / 長押し→チップの新規登録モーダル
+      const addRowBtn = document.createElement('button'); addRowBtn.className = 'emoji-add-btn'; addRowBtn.textContent = '+'; addRowBtn.title = '短押し: 即追加 / 長押し: ラベル付き登録';
+      addRowBtn.addEventListener('contextmenu', e => e.preventDefault());
+      let rowAddPressTimer = null, rowAddLongPress = false;
+      ;(function(cRow, cGi, cRi) {
+        addRowBtn.addEventListener('pointerdown', () => { rowAddLongPress = false; rowAddPressTimer = setTimeout(() => { rowAddLongPress = true; rowAddPressTimer = null; openAddRowModal(cGi, cRi); }, 400); });
+        addRowBtn.addEventListener('pointerup', () => { if (rowAddPressTimer) { clearTimeout(rowAddPressTimer); rowAddPressTimer = null; } });
+        addRowBtn.addEventListener('pointercancel', () => { if (rowAddPressTimer) { clearTimeout(rowAddPressTimer); rowAddPressTimer = null; } rowAddLongPress = false; });
+        addRowBtn.addEventListener('click', () => { if (rowAddLongPress) { rowAddLongPress = false; return; } const t = document.getElementById('tHex').value, b = document.getElementById('bHex').value; cRow.colors.push({ id: uid(), t, b, locked: false, label: '', copyTarget: 'b' }); saveGroups(); renderGroups(); });
+      })(row, gi, ri);
       swatchesEl.append(addRowBtn); rowEl.append(swatchesEl); rowsEl.append(rowEl);
     });
     block.append(rowsEl);
     const addRow = document.createElement('div'); addRow.className = 'group-add-row';
-    const addBtn = document.createElement('button'); addBtn.className = 'group-add-preset'; addBtn.innerHTML = '＋ 新規登録…';
-    ;(function(cGi) { addBtn.onclick = () => openAddModal(cGi); })(gi);
-    addRow.append(addBtn); block.append(addRow); el.append(block);
+    const addBtn2 = document.createElement('button'); addBtn2.className = 'group-add-preset'; addBtn2.innerHTML = '＋ 新規登録…';
+    ;(function(cGi) { addBtn2.onclick = () => openAddModal(cGi); })(gi);
+    addRow.append(addBtn2); block.append(addRow); el.append(block);
   });
   if (window._scheduleTwemoji) window._scheduleTwemoji();
 }
 
 document.addEventListener('click', e => {
-  if (appMode === 'edit' && swapSelected !== null && !e.target.closest('.swatch-chip') && !e.target.closest('.pin-chip')) {
-    swapSelected = null; renderGroups(); renderPinRow();
-  }
+  if (appMode === 'edit' && swapSelected !== null && !e.target.closest('.swatch-chip') && !e.target.closest('.pin-chip')) { swapSelected = null; renderGroups(); renderPinRow(); }
 });
 
 // ============================================================
-//  新規登録モーダル
+//  ① グループ下「新規登録」モーダル（改善版）
 // ============================================================
-let modalTargetGi = 0, selectedEmojiKey = null, modalTargetPin = false;
+let modalTargetGi = 0, modalTargetPin = false;
+
 function openAddModal(gi) {
   modalTargetPin = false; modalTargetGi = gi ?? 0;
-  document.getElementById('modalGroupArea').style.display = 'block';
   const t = document.getElementById('tHex').value, b = document.getElementById('bHex').value;
   document.getElementById('modalDotT').style.background = t; document.getElementById('modalDotB').style.background = b;
   document.getElementById('modalInfo').innerHTML = `${t}&nbsp;/&nbsp;${b}`;
   const chip = document.getElementById('modalChipPreview'); chip.style.background = b; chip.style.color = t; chip.textContent = 'Aa'; chip.style.fontSize = '13px';
+  document.getElementById('addLabel').value = ''; document.getElementById('modalKeyInput').value = '';
   const sel = document.getElementById('modalGroup'); sel.innerHTML = groups.map((g, i) => `<option value="${i}">${g.name}</option>`).join(''); sel.value = modalTargetGi;
-  selectedEmojiKey = null; refreshEmojiKeySelect(); document.getElementById('addLabel').value = ''; document.getElementById('addModal').style.display = 'flex';
+  document.getElementById('modalGroupField').style.display = ''; document.getElementById('modalKeyField').style.display = '';
+  document.getElementById('addModal').style.display = 'flex';
+  // ① カーソルを行キー入力欄に
+  setTimeout(() => document.getElementById('modalKeyInput').focus(), 60);
 }
+
+function openAddModalForPin() {
+  modalTargetPin = true;
+  const t = document.getElementById('tHex').value, b = document.getElementById('bHex').value;
+  document.getElementById('modalDotT').style.background = t; document.getElementById('modalDotB').style.background = b;
+  document.getElementById('modalInfo').innerHTML = `${t}&nbsp;/&nbsp;${b}`;
+  const chip = document.getElementById('modalChipPreview'); chip.style.background = b; chip.style.color = t; chip.textContent = 'Aa'; chip.style.fontSize = '13px';
+  document.getElementById('addLabel').value = ''; document.getElementById('modalKeyInput').value = '';
+  document.getElementById('modalGroupField').style.display = 'none'; document.getElementById('modalKeyField').style.display = 'none';
+  document.getElementById('addModal').style.display = 'flex';
+  setTimeout(() => document.getElementById('addLabel').focus(), 60);
+}
+
+function onModalGroupChange() { modalTargetGi = +document.getElementById('modalGroup').value; }
+
 document.getElementById('addLabel').addEventListener('input', () => {
   const val = document.getElementById('addLabel').value.trim(), label = val || 'Aa';
   const chip = document.getElementById('modalChipPreview'); chip.textContent = label;
   const vlen = [...label].reduce((n,ch)=>{const cp=ch.codePointAt(0);return n+(cp>0x7F?2:1);},0);
   chip.style.fontSize = vlen<=2?'13px':vlen<=4?'9px':'7px';
 });
-function onModalGroupChange() { modalTargetGi = +document.getElementById('modalGroup').value; refreshEmojiKeySelect(); }
-function refreshEmojiKeySelect() {
-  const container = document.getElementById('emojiKeySelect'); container.innerHTML = '';
-  document.getElementById('emojiNewInput').classList.remove('visible'); document.getElementById('emojiNewInput').value = '';
-  if (modalTargetPin) return;
-  groups[modalTargetGi].rows.forEach(r => {
-    const b = document.createElement('button'); b.className = 'emoji-key-btn'; b.textContent = r.key;
-    b.onclick = () => { selectedEmojiKey = r.key; document.getElementById('emojiNewInput').classList.remove('visible'); container.querySelectorAll('.emoji-key-btn').forEach(btn => btn.classList.remove('selected')); b.classList.add('selected'); };
-    container.append(b);
-  });
-}
-function activateNewEmoji() { selectedEmojiKey = '__new__'; document.querySelectorAll('.emoji-key-btn').forEach(b => b.classList.remove('selected')); document.getElementById('emojiNewInput').classList.add('visible'); document.getElementById('emojiNewInput').focus(); }
+
 function closeModal() { document.getElementById('addModal').style.display = 'none'; }
+
 function confirmAdd() {
   const t = document.getElementById('tHex').value, b = document.getElementById('bHex').value;
   const label = document.getElementById('addLabel').value.trim();
   if (modalTargetPin) { pinColors.push({ id: uid(), t, b, locked: false, label, copyTarget: 'b' }); savePinColors(); renderPinRow(); closeModal(); return; }
-  const key = selectedEmojiKey === '__new__' ? document.getElementById('emojiNewInput').value.trim() : selectedEmojiKey;
-  let row = groups[modalTargetGi].rows.find(r => r.key === (key || '⭐'));
-  if (!row) { row = { key: key || '⭐', colors: [] }; groups[modalTargetGi].rows.push(row); }
-  row.colors.push({ id: uid(), t, b, locked: false, label, copyTarget: 'b' }); saveGroups(); renderGroups(); closeModal();
+  const keyInput = document.getElementById('modalKeyInput').value.trim();
+  const key = keyInput || '⭐';
+  let row = groups[modalTargetGi].rows.find(r => r.key === key);
+  if (!row) { row = { key, colors: [] }; groups[modalTargetGi].rows.push(row); }
+  row.colors.push({ id: uid(), t, b, locked: false, label, copyTarget: 'b' });
+  saveGroups(); renderGroups(); closeModal();
+}
+
+// ============================================================
+//  ② 行内+長押し「チップの新規登録」モーダル
+// ============================================================
+let addRowTargetGi = 0, addRowTargetRi = 0, addRowAllKeyShown = false;
+
+function openAddRowModal(gi, ri) {
+  addRowTargetGi = gi; addRowTargetRi = ri; addRowAllKeyShown = false;
+  const t = document.getElementById('tHex').value, b = document.getElementById('bHex').value;
+  const chip = document.getElementById('addRowChipPreview'); chip.style.background = b; chip.style.color = t; chip.textContent = 'Aa'; chip.style.fontSize = '13px';
+  document.getElementById('addRowDotT').style.background = t; document.getElementById('addRowDotB').style.background = b;
+  document.getElementById('addRowInfo').innerHTML = `${t}&nbsp;/&nbsp;${b}`;
+  document.getElementById('addRowLabel').value = '';
+  const currentKey = groups[gi].rows[ri].key;
+  document.getElementById('rowKeyDisplayEmoji').textContent = currentKey;
+  document.getElementById('rowKeyDisplayLabel').textContent = 'この行に追加';
+  document.getElementById('rowKeyDisplayHint').textContent = '▼ タップで切り替え';
+  document.getElementById('rowKeyAllPanel').classList.remove('open');
+  buildRowKeyGrid(gi, ri);
+  document.getElementById('addRowModal').style.display = 'flex';
+  setTimeout(() => document.getElementById('addRowLabel').focus(), 60);
+}
+
+function buildRowKeyGrid(gi, activeRi) {
+  const grid = document.getElementById('rowKeyGrid'); grid.innerHTML = '';
+  groups[gi].rows.forEach((row, ri) => {
+    const btn = document.createElement('button'); btn.className = 'row-key-grid-btn';
+    if (ri === activeRi) btn.classList.add('selected');
+    btn.textContent = row.key;
+    btn.addEventListener('click', () => {
+      addRowTargetRi = ri;
+      grid.querySelectorAll('.row-key-grid-btn').forEach(b => b.classList.remove('selected')); btn.classList.add('selected');
+      document.getElementById('rowKeyDisplayEmoji').textContent = row.key;
+      document.getElementById('rowKeyDisplayLabel').textContent = 'この行に追加';
+      document.getElementById('rowKeyAllPanel').classList.remove('open');
+      document.getElementById('rowKeyDisplayHint').textContent = '▼ タップで切り替え';
+      addRowAllKeyShown = false;
+    });
+    grid.append(btn);
+  });
+  if (window._scheduleTwemoji) window._scheduleTwemoji();
+}
+
+function toggleRowKeyPanel() {
+  addRowAllKeyShown = !addRowAllKeyShown;
+  document.getElementById('rowKeyAllPanel').classList.toggle('open', addRowAllKeyShown);
+  document.getElementById('rowKeyDisplayHint').textContent = addRowAllKeyShown ? '▲ 閉じる' : '▼ タップで切り替え';
+}
+
+document.getElementById('addRowLabel').addEventListener('input', () => {
+  const val = document.getElementById('addRowLabel').value.trim(), label = val || 'Aa';
+  const chip = document.getElementById('addRowChipPreview'); chip.textContent = label;
+  const vlen = [...label].reduce((n,ch)=>{const cp=ch.codePointAt(0);return n+(cp>0x7F?2:1);},0);
+  chip.style.fontSize = vlen<=2?'13px':vlen<=4?'9px':'7px';
+});
+
+function closeAddRowModal() { document.getElementById('addRowModal').style.display = 'none'; addRowAllKeyShown = false; }
+
+function confirmAddRow() {
+  const t = document.getElementById('tHex').value, b = document.getElementById('bHex').value;
+  const label = document.getElementById('addRowLabel').value.trim();
+  groups[addRowTargetGi].rows[addRowTargetRi].colors.push({ id: uid(), t, b, locked: false, label, copyTarget: 'b' });
+  saveGroups(); renderGroups(); closeAddRowModal();
 }
 
 // ============================================================
@@ -1384,37 +1158,23 @@ function closeEditRowModal() { document.getElementById('editRowModal').style.dis
 // ============================================================
 function lpUpdateCanvas() {
   const bVal = document.getElementById('lpBHex').value, tVal = document.getElementById('lpTHex').value;
-  const bOk = validHex(bVal), tOk = validHex(tVal);
-  const displayB = bOk ? bVal : lpOldB, displayT = tOk ? tVal : lpOldT;
+  const displayB = validHex(bVal) ? bVal : lpOldB, displayT = validHex(tVal) ? tVal : lpOldT;
   const canvas = document.getElementById('lpCanvas'), chip = document.getElementById('lpChipBig');
   canvas.style.background = displayB; chip.style.background = displayB; chip.style.color = displayT;
-  if (validHex(displayB)) {
-    const r = parseInt(displayB.slice(1,3),16), g = parseInt(displayB.slice(3,5),16), b2 = parseInt(displayB.slice(5,7),16);
-    const lum = (0.299*r + 0.587*g + 0.114*b2) / 255;
-    canvas.style.setProperty('--lp-btn-fg', lum > 0.45 ? 'rgba(0,0,0,.72)' : '#fff');
-    canvas.style.setProperty('--lp-btn-shadow', lum > 0.45 ? '0 1px 2px rgba(255,255,255,.6)' : '0 1px 4px rgba(0,0,0,.6),0 0 8px rgba(0,0,0,.3)');
-  }
+  if (validHex(displayB)) { const r = parseInt(displayB.slice(1,3),16), g = parseInt(displayB.slice(3,5),16), b2 = parseInt(displayB.slice(5,7),16); const lum = (0.299*r + 0.587*g + 0.114*b2) / 255; canvas.style.setProperty('--lp-btn-fg', lum > 0.45 ? 'rgba(0,0,0,.72)' : '#fff'); canvas.style.setProperty('--lp-btn-shadow', lum > 0.45 ? '0 1px 2px rgba(255,255,255,.6)' : '0 1px 4px rgba(0,0,0,.6),0 0 8px rgba(0,0,0,.3)'); }
   const rawText = document.getElementById('lpLabelInput').value.trim();
-  const displayText = rawText || (lpTarget ? getChipLabel(lpTarget.c) : 'Aa');
-  chip.textContent = displayText;
+  const displayText = rawText || (lpTarget ? getChipLabel(lpTarget.c) : 'Aa'); chip.textContent = displayText;
   const vlen = [...displayText].reduce((n,ch)=>{const cp=ch.codePointAt(0);return n+(cp>0x7F?2:1);},0);
-  if (vlen <= 2) { chip.style.fontSize = '15px'; chip.style.whiteSpace = 'nowrap'; }
-  else if (vlen <= 4) { chip.style.fontSize = '11px'; chip.style.lineHeight = '1.1'; chip.style.wordBreak = 'break-all'; chip.style.whiteSpace = 'normal'; }
-  else { chip.style.fontSize = '8px'; chip.style.lineHeight = '1.1'; chip.style.wordBreak = 'break-all'; chip.style.whiteSpace = 'normal'; }
+  if (vlen <= 2) { chip.style.fontSize = '15px'; chip.style.whiteSpace = 'nowrap'; } else if (vlen <= 4) { chip.style.fontSize = '11px'; chip.style.lineHeight = '1.1'; chip.style.wordBreak = 'break-all'; chip.style.whiteSpace = 'normal'; } else { chip.style.fontSize = '8px'; chip.style.lineHeight = '1.1'; chip.style.wordBreak = 'break-all'; chip.style.whiteSpace = 'normal'; }
 }
-
 function updateLpOverwriteBtn() {
   const bVal = document.getElementById('lpBHex').value, tVal = document.getElementById('lpTHex').value;
   const btn = document.getElementById('lpOverwriteBtn'), label = document.getElementById('lpOverwriteLabel');
-  if (lpTarget && lpTarget.c.locked && !lpTarget.tempUnlocked) {
-    btn.disabled = true; btn.style.background = 'var(--surface2)'; btn.style.color = 'var(--muted)'; btn.style.borderColor = 'var(--border)';
-    label.textContent = '🔒 ロック解除が必要です'; return;
-  }
+  if (lpTarget && lpTarget.c.locked && !lpTarget.tempUnlocked) { btn.disabled = true; btn.style.background = 'var(--surface2)'; btn.style.color = 'var(--muted)'; btn.style.borderColor = 'var(--border)'; label.textContent = '🔒 ロック解除が必要です'; return; }
   const ok = validHex(bVal) && validHex(tVal); btn.disabled = !ok;
   if (ok) { btn.style.background = bVal; btn.style.color = tVal; btn.style.borderColor = 'rgba(0,0,0,.08)'; label.textContent = 'この色で上書き保存'; }
   else { btn.style.background = 'var(--surface2)'; btn.style.color = 'var(--muted)'; btn.style.borderColor = 'var(--border)'; label.textContent = '有効なHEXを入力してください'; }
 }
-
 function lpUpdateLockIcon() {
   if (!lpTarget) return;
   const iconBtn = document.getElementById('lpLockIconBtn'), chip = document.getElementById('lpChipBig');
@@ -1422,314 +1182,123 @@ function lpUpdateLockIcon() {
   else if (!lpTarget.tempUnlocked) { iconBtn.style.display = 'flex'; iconBtn.className = 'lp-lock-icon-btn is-locked'; iconBtn.textContent = '🔒'; chip.classList.add('is-locked'); }
   else { iconBtn.style.display = 'flex'; iconBtn.className = 'lp-lock-icon-btn is-unlocked-temp'; iconBtn.textContent = '🔓'; chip.classList.remove('is-locked'); }
 }
-
-function lpToggleLock() {
-  if (!lpTarget) return;
-  lpTarget.tempUnlocked = !lpTarget.tempUnlocked;
-  lpUpdateLockIcon(); updateLpOverwriteBtn();
-  showToast(lpTarget.tempUnlocked ? '一時解除中 — 保存時に再ロック' : '再ロックしました');
-}
-
+function lpToggleLock() { if (!lpTarget) return; lpTarget.tempUnlocked = !lpTarget.tempUnlocked; lpUpdateLockIcon(); updateLpOverwriteBtn(); showToast(lpTarget.tempUnlocked ? '一時解除中 — 保存時に再ロック' : '再ロックしました'); }
 function lpSetInputs(bVal, tVal) {
   if (validHex(bVal)) { document.getElementById('lpBHex').value = bVal; document.getElementById('lpBPicker').value = bVal; document.getElementById('lpBSwatch').style.background = bVal; document.getElementById('lpBHex').classList.remove('invalid'); }
   if (validHex(tVal)) { document.getElementById('lpTHex').value = tVal; document.getElementById('lpTPicker').value = tVal; document.getElementById('lpTSwatch').style.background = tVal; document.getElementById('lpTHex').classList.remove('invalid'); }
 }
-
-function lpCompareTo(mode) {
-  lpSetInputs(mode === 'new' ? lpSnapB : lpOldB, mode === 'new' ? lpSnapT : lpOldT);
-  document.getElementById('lpBtnNew').classList.toggle('active-compare', mode === 'new');
-  document.getElementById('lpBtnOld').classList.toggle('active-compare', mode === 'old');
-  lpUpdateCanvas(); updateLpOverwriteBtn();
-}
-
-function lpSwapColors() {
-  const bVal = document.getElementById('lpBHex').value, tVal = document.getElementById('lpTHex').value;
-  if (!validHex(bVal) || !validHex(tVal)) { showToast('有効なHEXを入力してください'); return; }
-  lpSetInputs(tVal, bVal); lpUpdateCanvas(); updateLpOverwriteBtn(); showToast('入力欄の色を入れ替えました');
-}
-
-function lpMatchToPreview() {
-  const bVal = document.getElementById('lpBHex').value, tVal = document.getElementById('lpTHex').value;
-  const bOk = validHex(bVal), tOk = validHex(tVal);
-  if (!bOk && !tOk) { showToast('有効なHEXを入力してください'); return; }
-  const base = bOk ? bVal : tVal;
-  lpSetInputs(base, base); lpUpdateCanvas(); updateLpOverwriteBtn(); showToast('同じ色 ' + base.toUpperCase() + ' に揃えました');
-}
-
+function lpCompareTo(mode) { lpSetInputs(mode === 'new' ? lpSnapB : lpOldB, mode === 'new' ? lpSnapT : lpOldT); document.getElementById('lpBtnNew').classList.toggle('active-compare', mode === 'new'); document.getElementById('lpBtnOld').classList.toggle('active-compare', mode === 'old'); lpUpdateCanvas(); updateLpOverwriteBtn(); }
+function lpSwapColors() { const bVal = document.getElementById('lpBHex').value, tVal = document.getElementById('lpTHex').value; if (!validHex(bVal) || !validHex(tVal)) { showToast('有効なHEXを入力してください'); return; } lpSetInputs(tVal, bVal); lpUpdateCanvas(); updateLpOverwriteBtn(); showToast('入力欄の色を入れ替えました'); }
+function lpMatchToPreview() { const bVal = document.getElementById('lpBHex').value, tVal = document.getElementById('lpTHex').value; const bOk = validHex(bVal), tOk = validHex(tVal); if (!bOk && !tOk) { showToast('有効なHEXを入力してください'); return; } const base = bOk ? bVal : tVal; lpSetInputs(base, base); lpUpdateCanvas(); updateLpOverwriteBtn(); showToast('同じ色 ' + base.toUpperCase() + ' に揃えました'); }
 function openLpModal(c, gi, ri, ci, chipType) {
   lpTarget = { c, gi, ri, ci, chipType: chipType || 'group', tempUnlocked: false };
-  lpOldB = c.b; lpOldT = c.t;
-  lpSnapB = document.getElementById('bHex').value; lpSnapT = document.getElementById('tHex').value;
-  const rawLabel = (c.label && c.label.trim() && c.label.trim() !== 'Aa') ? c.label.trim() : '';
-  document.getElementById('lpLabelInput').value = rawLabel;
-  lpSetInputs(lpOldB, lpOldT);
-  document.getElementById('lpBtnNew').classList.remove('active-compare');
-  document.getElementById('lpBtnOld').classList.add('active-compare');
-  lpUpdateCanvas(); lpUpdateLockIcon(); updateLpOverwriteBtn();
-  document.getElementById('longPressEditModal').style.display = 'flex';
+  lpOldB = c.b; lpOldT = c.t; lpSnapB = document.getElementById('bHex').value; lpSnapT = document.getElementById('tHex').value;
+  const rawLabel = (c.label && c.label.trim() && c.label.trim() !== 'Aa') ? c.label.trim() : ''; document.getElementById('lpLabelInput').value = rawLabel;
+  lpSetInputs(lpOldB, lpOldT); document.getElementById('lpBtnNew').classList.remove('active-compare'); document.getElementById('lpBtnOld').classList.add('active-compare');
+  lpUpdateCanvas(); lpUpdateLockIcon(); updateLpOverwriteBtn(); document.getElementById('longPressEditModal').style.display = 'flex';
 }
-
 function closeLpModal() { lpTarget = null; document.getElementById('longPressEditModal').style.display = 'none'; }
-
 document.getElementById('lpBPicker').addEventListener('input', e => { document.getElementById('lpBHex').value = e.target.value; document.getElementById('lpBSwatch').style.background = e.target.value; document.getElementById('lpBHex').classList.remove('invalid'); lpUpdateCanvas(); updateLpOverwriteBtn(); });
 document.getElementById('lpTPicker').addEventListener('input', e => { document.getElementById('lpTHex').value = e.target.value; document.getElementById('lpTSwatch').style.background = e.target.value; document.getElementById('lpTHex').classList.remove('invalid'); lpUpdateCanvas(); updateLpOverwriteBtn(); });
 document.getElementById('lpBHex').addEventListener('input', e => { let v = normalizeHexInput(e.target.value); if (v !== e.target.value) e.target.value = v; if (validHex(v)) { document.getElementById('lpBPicker').value = v; document.getElementById('lpBSwatch').style.background = v; e.target.classList.remove('invalid'); } else e.target.classList.add('invalid'); lpUpdateCanvas(); updateLpOverwriteBtn(); });
 document.getElementById('lpTHex').addEventListener('input', e => { let v = normalizeHexInput(e.target.value); if (v !== e.target.value) e.target.value = v; if (validHex(v)) { document.getElementById('lpTPicker').value = v; document.getElementById('lpTSwatch').style.background = v; e.target.classList.remove('invalid'); } else e.target.classList.add('invalid'); lpUpdateCanvas(); updateLpOverwriteBtn(); });
 document.getElementById('lpLabelInput').addEventListener('input', lpUpdateCanvas);
-
-// ★ lpOverwrite: 上書き保存（色のみ変更。ラベルは別途「設定を保存」で保存）
 function lpOverwrite() {
   if (!lpTarget) return;
   const bVal = document.getElementById('lpBHex').value, tVal = document.getElementById('lpTHex').value;
   if (!validHex(bVal) || !validHex(tVal)) { showToast('有効な HEX 値を入力してください'); return; }
   if (lpTarget.c.locked && !lpTarget.tempUnlocked) { showToast('🔒 一時解除してから操作してください'); return; }
-  const rawLabel = document.getElementById('lpLabelInput').value.trim();
-  const pendingLabel = rawLabel === 'Aa' ? '' : rawLabel;
-  const savedC = lpTarget.c, oldChipLabel = getChipLabel(lpTarget.c), savedType = lpTarget.chipType;
-  closeLpModal();
+  const rawLabel = document.getElementById('lpLabelInput').value.trim(); const pendingLabel = rawLabel === 'Aa' ? '' : rawLabel;
+  const savedC = lpTarget.c, oldChipLabel = getChipLabel(lpTarget.c), savedType = lpTarget.chipType; closeLpModal();
   pendingOverwrite = { c: savedC, newT: tVal, newB: bVal, newLabel: pendingLabel, chipType: savedType };
   const before = document.getElementById('owBefore'); before.style.background = lpOldB; before.style.color = lpOldT; before.textContent = oldChipLabel;
   const after = document.getElementById('owAfter'); after.style.background = bVal; after.style.color = tVal; after.textContent = pendingLabel || oldChipLabel;
   document.getElementById('overwriteModal').style.display = 'flex';
 }
-
-// ★ lpSaveSettings: ラベル保存 + 色を設定するの内容も同時に保存（ロック中はスキップ）
 function lpSaveSettings() {
   if (!lpTarget) return;
-  const rawLabel = document.getElementById('lpLabelInput').value.trim();
-  const newLabel = rawLabel === 'Aa' ? '' : rawLabel;
-  const bVal = document.getElementById('lpBHex').value;
-  const tVal = document.getElementById('lpTHex').value;
-  const targetC = lpTarget.c;
-  const chipType = lpTarget.chipType;
-  const isLocked = targetC.locked && !lpTarget.tempUnlocked;
-
-  closeLpModal();
-  longPressActive = false;
-  if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
-
-  // ラベルは常に保存
+  const rawLabel = document.getElementById('lpLabelInput').value.trim(); const newLabel = rawLabel === 'Aa' ? '' : rawLabel;
+  const bVal = document.getElementById('lpBHex').value, tVal = document.getElementById('lpTHex').value;
+  const targetC = lpTarget.c, chipType = lpTarget.chipType, isLocked = targetC.locked && !lpTarget.tempUnlocked;
+  closeLpModal(); longPressActive = false; if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
   targetC.label = newLabel;
-
-  // ★ 色もラベルと同時に保存（ロックされていない場合のみ）
-  if (!isLocked && validHex(bVal) && validHex(tVal)) {
-    targetC.b = bVal;
-    targetC.t = tVal;
-  }
-
-  if (chipType === 'pin') { savePinColors(); renderPinRow(); }
-  else { saveGroups(); renderGroups(); }
+  if (!isLocked && validHex(bVal) && validHex(tVal)) { targetC.b = bVal; targetC.t = tVal; }
+  if (chipType === 'pin') { savePinColors(); renderPinRow(); } else { saveGroups(); renderGroups(); }
   showToast('設定を保存しました ✓');
 }
-
 function lpDelete() {
   if (!lpTarget) return;
-  const { c, gi, ri, ci, chipType } = lpTarget;
+  const c = lpTarget.c, gi = lpTarget.gi, ri = lpTarget.ri, chipType = lpTarget.chipType;
   if (c.locked) { alert('🔒 ロックされているため削除できません。先にロックを解除してください。'); return; }
-  if (chipType === 'pin') { pinColors.splice(ci, 1); savePinColors(); renderPinRow(); }
-  else { groups[gi].rows[ri].colors.splice(ci, 1); saveGroups(); renderGroups(); }
-  showToast('削除しました'); closeLpModal();
+  closeLpModal(); longPressActive = false; if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+  if (chipType === 'pin') { const idx = pinColors.indexOf(c); if (idx >= 0) pinColors.splice(idx, 1); savePinColors(); renderPinRow(); }
+  else { const targetRow = groups[gi].rows[ri]; if (targetRow) { const idx = targetRow.colors.indexOf(c); if (idx >= 0) targetRow.colors.splice(idx, 1); } saveGroups(); renderGroups(); }
+  showToast('削除しました');
 }
-
 function closeOverwriteModal() { pendingOverwrite = null; document.getElementById('overwriteModal').style.display = 'none'; }
 function confirmOverwrite() {
   if (!pendingOverwrite) return;
-  const { c, newT, newB, newLabel, chipType } = pendingOverwrite;
-  c.t = newT; c.b = newB; if (newLabel !== undefined) c.label = newLabel;
-  if (chipType === 'pin') { savePinColors(); renderPinRow(); }
-  else { saveGroups(); renderGroups(); }
-  showToast('色を上書きしました ✓');
-  pendingOverwrite = null; document.getElementById('overwriteModal').style.display = 'none';
+  const { c, newT, newB, newLabel, chipType } = pendingOverwrite; c.t = newT; c.b = newB; if (newLabel !== undefined) c.label = newLabel;
+  if (chipType === 'pin') { savePinColors(); renderPinRow(); } else { saveGroups(); renderGroups(); }
+  showToast('色を上書きしました ✓'); pendingOverwrite = null; document.getElementById('overwriteModal').style.display = 'none';
 }
-
 let deleteGroupIndex = -1;
-function openDeleteGroupModal(gi) {
-  deleteGroupIndex = gi; const g = groups[gi];
-  const colorCount = g.rows.reduce((n, r) => n + r.colors.length, 0);
-  const detail = colorCount > 0 ? `カラー ${colorCount} 件も削除されます。 ` : '';
-  document.getElementById('deleteGroupMsg').textContent = `「${g.name}」を削除します。${detail}この操作は取り消せません。`;
-  document.getElementById('deleteGroupModal').style.display = 'flex';
-}
+function openDeleteGroupModal(gi) { deleteGroupIndex = gi; const g = groups[gi]; const colorCount = g.rows.reduce((n, r) => n + r.colors.length, 0); const detail = colorCount > 0 ? `カラー ${colorCount} 件も削除されます。 ` : ''; document.getElementById('deleteGroupMsg').textContent = `「${g.name}」を削除します。${detail}この操作は取り消せません。`; document.getElementById('deleteGroupModal').style.display = 'flex'; }
 function closeDeleteGroupModal() { deleteGroupIndex = -1; document.getElementById('deleteGroupModal').style.display = 'none'; }
-function confirmDeleteGroup() {
-  if (deleteGroupIndex < 0 || deleteGroupIndex >= groups.length) { closeDeleteGroupModal(); return; }
-  const name = groups[deleteGroupIndex].name;
-  groups.splice(deleteGroupIndex, 1); saveGroups(); renderGroups(); showToast(`「${name}」を削除しました`); closeDeleteGroupModal();
-}
-
+function confirmDeleteGroup() { if (deleteGroupIndex < 0 || deleteGroupIndex >= groups.length) { closeDeleteGroupModal(); return; } const name = groups[deleteGroupIndex].name; groups.splice(deleteGroupIndex, 1); saveGroups(); renderGroups(); showToast(`「${name}」を削除しました`); closeDeleteGroupModal(); }
 function openAddGroupModal() { document.getElementById('addGroupNameInput').value = ''; document.getElementById('addGroupModal').style.display = 'flex'; setTimeout(() => document.getElementById('addGroupNameInput').focus(), 50); }
 function closeAddGroupModal() { document.getElementById('addGroupModal').style.display = 'none'; }
-function confirmAddGroup() {
-  const name = document.getElementById('addGroupNameInput').value.trim();
-  groups.push({ id: uid(), name: name || '新規', rows: [] }); saveGroups(); renderGroups(); closeAddGroupModal(); showToast('グループを追加しました');
-}
+function confirmAddGroup() { const name = document.getElementById('addGroupNameInput').value.trim(); groups.push({ id: uid(), name: name || '新規', rows: [] }); saveGroups(); renderGroups(); closeAddGroupModal(); showToast('グループを追加しました'); }
 document.getElementById('addGroupNameInput').addEventListener('keydown', e => { if (e.key === 'Enter') confirmAddGroup(); if (e.key === 'Escape') closeAddGroupModal(); });
 
 // ============================================================
-//  Sync — ★ IDベースマージで同時編集対応
+//  Sync
 // ============================================================
-let syncConfig = { token: '', gistId: '' }, pollTimer = null, lastEtag = '';
-let isSyncPushing = false;
-
-function setSyncBadge(state, label) {
-  document.getElementById('syncBadge').className = 'sync-badge ' + (state || '');
-  document.getElementById('syncLabel').textContent = label;
-  if (state === 'error') document.getElementById('syncSetup').style.display = 'block';
-}
+let syncConfig = { token: '', gistId: '' }, pollTimer = null, lastEtag = '', isSyncPushing = false;
+function setSyncBadge(state, label) { document.getElementById('syncBadge').className = 'sync-badge ' + (state || ''); document.getElementById('syncLabel').textContent = label; if (state === 'error') document.getElementById('syncSetup').style.display = 'block'; }
 function toggleSyncSetupPanel() { const setup = document.getElementById('syncSetup'); setup.style.display = setup.style.display === 'none' ? 'block' : 'none'; }
 function loadSyncConfig() { try { const c = JSON.parse(localStorage.getItem('cp_sync') || '{}'); syncConfig.token = c.token || ''; syncConfig.gistId = c.gistId || ''; } catch (e) {} }
-
 async function gistGet() {
   if (!syncConfig.gistId || !syncConfig.token) return null;
-  try {
-    const headers = { 'Authorization': 'token ' + syncConfig.token, 'Accept': 'application/vnd.github.v3+json' };
-    if (lastEtag) headers['If-None-Match'] = lastEtag;
-    const r = await fetch('https://api.github.com/gists/' + syncConfig.gistId, { headers });
-    if (r.status === 304) return 'unchanged';
-    if (!r.ok) return null;
-    const etag = r.headers.get('ETag'); if (etag) lastEtag = etag;
-    const data = await r.json();
-    return {
-      groups: JSON.parse(data.files['presets.json'].content),
-      pin: data.files['pin.json'] ? JSON.parse(data.files['pin.json'].content) : null
-    };
-  } catch (e) { return null; }
+  try { const headers = { 'Authorization': 'token ' + syncConfig.token, 'Accept': 'application/vnd.github.v3+json' }; if (lastEtag) headers['If-None-Match'] = lastEtag; const r = await fetch('https://api.github.com/gists/' + syncConfig.gistId, { headers }); if (r.status === 304) return 'unchanged'; if (!r.ok) return null; const etag = r.headers.get('ETag'); if (etag) lastEtag = etag; const data = await r.json(); return { groups: JSON.parse(data.files['presets.json'].content), pin: data.files['pin.json'] ? JSON.parse(data.files['pin.json'].content) : null }; } catch (e) { return null; }
 }
-
 async function gistPut(gs, pin) {
   if (!syncConfig.gistId || !syncConfig.token) return false;
-  const files = { 'presets.json': { content: JSON.stringify(gs) } };
-  if (pin !== undefined) files['pin.json'] = { content: JSON.stringify(pin) };
-  const r = await fetch('https://api.github.com/gists/' + syncConfig.gistId, {
-    method: 'PATCH',
-    headers: { 'Authorization': 'token ' + syncConfig.token },
-    body: JSON.stringify({ files })
-  });
-  return r.ok;
+  const files = { 'presets.json': { content: JSON.stringify(gs) } }; if (pin !== undefined) files['pin.json'] = { content: JSON.stringify(pin) };
+  const r = await fetch('https://api.github.com/gists/' + syncConfig.gistId, { method: 'PATCH', headers: { 'Authorization': 'token ' + syncConfig.token }, body: JSON.stringify({ files }) }); return r.ok;
 }
-
-// ★ IDベースマージ: remoteを優先しつつ、ローカルの新規チップ（remoteに存在しないid）を保持
 function mergeGroups(localGs, remoteGs) {
-  // ローカルのチップをidでマップ
-  const localChipMap = new Map();
-  localGs.forEach(g => g.rows.forEach(r => r.colors.forEach(c => { if (c.id) localChipMap.set(c.id, c); })));
-
-  // remoteをベースに、ローカルのみ存在するチップをremoteに追加
-  const remoteChipIds = new Set();
-  remoteGs.forEach(g => g.rows.forEach(r => r.colors.forEach(c => { if (c.id) remoteChipIds.add(c.id); })));
-
-  // ローカルにあってremoteにないチップ（新規追加分）を収集
-  const localOnlyChips = [];
-  localGs.forEach((lg, lgi) => lg.rows.forEach((lr, lri) => lr.colors.forEach(c => {
-    if (c.id && !remoteChipIds.has(c.id)) {
-      localOnlyChips.push({ chip: c, groupName: lg.name, rowKey: lr.key });
-    }
-  })));
-
-  // remoteをベースとした結果
+  const remoteChipIds = new Set(); remoteGs.forEach(g => g.rows.forEach(r => r.colors.forEach(c => { if (c.id) remoteChipIds.add(c.id); })));
+  const localOnlyChips = []; localGs.forEach(lg => lg.rows.forEach(lr => lr.colors.forEach(c => { if (c.id && !remoteChipIds.has(c.id)) localOnlyChips.push({ chip: c, groupName: lg.name, rowKey: lr.key }); })));
   const merged = ensureIds(remoteGs);
-
-  // ローカルのみのチップをremote上の同じgroup/rowに追加（なければskip）
-  localOnlyChips.forEach(({ chip, groupName, rowKey }) => {
-    const tg = merged.find(g => g.name === groupName);
-    if (!tg) return;
-    const tr = tg.rows.find(r => r.key === rowKey);
-    if (!tr) return;
-    tr.colors.push(chip);
-  });
-
+  localOnlyChips.forEach(({ chip, groupName, rowKey }) => { const tg = merged.find(g => g.name === groupName); if (!tg) return; const tr = tg.rows.find(r => r.key === rowKey); if (!tr) return; tr.colors.push(chip); });
   return merged;
 }
-
-function mergePins(localPins, remotePins) {
-  if (!remotePins) return localPins;
-  const remoteIds = new Set(remotePins.map(c => c.id).filter(Boolean));
-  const localOnly = localPins.filter(c => c.id && !remoteIds.has(c.id));
-  return [...remotePins, ...localOnly];
-}
-
+function mergePins(localPins, remotePins) { if (!remotePins) return localPins; const remoteIds = new Set(remotePins.map(c => c.id).filter(Boolean)); const localOnly = localPins.filter(c => c.id && !remoteIds.has(c.id)); return [...remotePins, ...localOnly]; }
 async function setupSync() {
   const token = document.getElementById('gistTokenInput').value.trim(), gistId = document.getElementById('gistIdInput').value.trim();
   if (!token) return alert('Tokenが必要です');
   syncConfig.token = token; setSyncBadge('syncing', '接続中…');
-  if (gistId) {
-    syncConfig.gistId = gistId;
-    const data = await gistGet();
-    if (data && data !== 'unchanged') {
-      if (data.groups) { groups = mergeGroups(groups, data.groups); renderGroups(); }
-      if (data.pin) { pinColors = mergePins(pinColors, data.pin); renderPinRow(); }
-    }
-    localStorage.setItem('cp_sync', JSON.stringify(syncConfig)); startPolling(); updateSyncShareUrl(); document.getElementById('syncSetup').style.display = 'none';
-  } else {
-    const r = await fetch('https://api.github.com/gists', {
-      method: 'POST', headers: { 'Authorization': 'token ' + token },
-      body: JSON.stringify({ description: 'ColorPreview', public: false, files: { 'presets.json': { content: JSON.stringify(groups) }, 'pin.json': { content: JSON.stringify(pinColors) } } })
-    });
-    const d = await r.json();
-    if (d.id) { syncConfig.gistId = d.id; localStorage.setItem('cp_sync', JSON.stringify(syncConfig)); startPolling(); updateSyncShareUrl(); document.getElementById('syncSetup').style.display = 'none'; }
-  }
+  if (gistId) { syncConfig.gistId = gistId; const data = await gistGet(); if (data && data !== 'unchanged') { if (data.groups) { groups = mergeGroups(groups, data.groups); renderGroups(); } if (data.pin) { pinColors = mergePins(pinColors, data.pin); renderPinRow(); } } localStorage.setItem('cp_sync', JSON.stringify(syncConfig)); startPolling(); updateSyncShareUrl(); document.getElementById('syncSetup').style.display = 'none'; }
+  else { const r = await fetch('https://api.github.com/gists', { method: 'POST', headers: { 'Authorization': 'token ' + token }, body: JSON.stringify({ description: 'ColorPreview', public: false, files: { 'presets.json': { content: JSON.stringify(groups) }, 'pin.json': { content: JSON.stringify(pinColors) } } }) }); const d = await r.json(); if (d.id) { syncConfig.gistId = d.id; localStorage.setItem('cp_sync', JSON.stringify(syncConfig)); startPolling(); updateSyncShareUrl(); document.getElementById('syncSetup').style.display = 'none'; } }
 }
-
 function clearSync() { stopPolling(); syncConfig = { token: '', gistId: '' }; localStorage.removeItem('cp_sync'); setSyncBadge('', '未接続'); document.getElementById('syncShareUrlRow').style.display = 'none'; document.getElementById('syncSetup').style.display = 'block'; }
-
 function startPolling() {
-  stopPolling();
-  setSyncBadge('synced', '同期中');
+  stopPolling(); setSyncBadge('synced', '同期中');
   pollTimer = setInterval(async () => {
-    if (isSyncPushing) return; // Push中はPollスキップ
-    const data = await gistGet();
-    if (data === null) { setSyncBadge('error', 'エラー'); return; }
-    if (data && data !== 'unchanged') {
-      if (data.groups) {
-        groups = mergeGroups(groups, data.groups);
-        localStorage.setItem('cp_groups5', JSON.stringify(groups));
-        renderGroups();
-      }
-      if (data.pin) {
-        pinColors = mergePins(pinColors, data.pin);
-        localStorage.setItem('cp_pin_row', JSON.stringify(pinColors));
-        renderPinRow();
-      }
-      lastEtag = ''; // 再チェック用にリセット
-    }
-  }, 3000); // ★ 8秒 → 3秒に短縮
+    if (isSyncPushing) return; const data = await gistGet(); if (data === null) { setSyncBadge('error', 'エラー'); return; }
+    if (data && data !== 'unchanged') { if (data.groups) { groups = mergeGroups(groups, data.groups); localStorage.setItem('cp_groups5', JSON.stringify(groups)); renderGroups(); } if (data.pin) { pinColors = mergePins(pinColors, data.pin); localStorage.setItem('cp_pin_row', JSON.stringify(pinColors)); renderPinRow(); } lastEtag = ''; }
+  }, 3000);
 }
-
 function stopPolling() { if (pollTimer) clearInterval(pollTimer); }
-
-// ★ syncPush: Push前にPullしてマージ → 最新状態をPush（競合を最小化）
 let syncPushDebounceTimer = null;
 async function syncPush() {
-  if (!syncConfig.gistId) return;
-  if (syncPushDebounceTimer) clearTimeout(syncPushDebounceTimer);
+  if (!syncConfig.gistId) return; if (syncPushDebounceTimer) clearTimeout(syncPushDebounceTimer);
   syncPushDebounceTimer = setTimeout(async () => {
-    syncPushDebounceTimer = null;
-    isSyncPushing = true;
-    try {
-      // Push前に最新を取得してマージ
-      lastEtag = ''; // ETagをリセットして強制取得
-      const remote = await gistGet();
-      if (remote && remote !== 'unchanged') {
-        if (remote.groups) {
-          groups = mergeGroups(groups, remote.groups);
-          localStorage.setItem('cp_groups5', JSON.stringify(groups));
-          renderGroups();
-        }
-        if (remote.pin) {
-          pinColors = mergePins(pinColors, remote.pin);
-          localStorage.setItem('cp_pin_row', JSON.stringify(pinColors));
-          renderPinRow();
-        }
-      }
-      // マージ後の状態をPush
-      await gistPut(groups, pinColors);
-      lastEtag = ''; // Push後ETagリセット
-    } finally {
-      isSyncPushing = false;
-    }
-  }, 800); // デバウンス800ms
+    syncPushDebounceTimer = null; isSyncPushing = true;
+    try { lastEtag = ''; const remote = await gistGet(); if (remote && remote !== 'unchanged') { if (remote.groups) { groups = mergeGroups(groups, remote.groups); localStorage.setItem('cp_groups5', JSON.stringify(groups)); requestAnimationFrame(() => { renderGroups(); renderPinRow(); }); } if (remote.pin) { pinColors = mergePins(pinColors, remote.pin); localStorage.setItem('cp_pin_row', JSON.stringify(pinColors)); } } await gistPut(groups, pinColors); lastEtag = ''; } finally { isSyncPushing = false; }
+  }, 800);
 }
-
 function updateSyncShareUrl() { if (!syncConfig.gistId) return; const url = location.href.split('?')[0] + '?gist=' + syncConfig.gistId; document.getElementById('syncShareUrlRow').style.display = 'flex'; document.getElementById('syncShareInput').value = url; }
 function copySyncUrl() { navigator.clipboard.writeText(document.getElementById('syncShareInput').value); showToast('同期用URLをコピーしました'); }
 
@@ -1737,88 +1306,28 @@ function copySyncUrl() { navigator.clipboard.writeText(document.getElementById('
 //  カラー操作
 // ============================================================
 const state = { t: { h: 229, s: 44, v: 18 }, b: { h: 200, s: 38, v: 97 } };
-function hexToHsv(hex) {
-  let r = parseInt(hex.slice(1,3),16)/255, g = parseInt(hex.slice(3,5),16)/255, b = parseInt(hex.slice(5,7),16)/255;
-  const max = Math.max(r,g,b), mn = Math.min(r,g,b), d = max-mn;
-  let h = 0, s = max===0?0:d/max, v = max;
-  if(d){if(max===r)h=((g-b)/d+6)%6;else if(max===g)h=(b-r)/d+2;else h=(r-g)/d+4;h=Math.round(h*60);}
-  return [h,Math.round(s*100),Math.round(v*100)];
-}
+function hexToHsv(hex) { let r = parseInt(hex.slice(1,3),16)/255, g = parseInt(hex.slice(3,5),16)/255, b = parseInt(hex.slice(5,7),16)/255; const max = Math.max(r,g,b), mn = Math.min(r,g,b), d = max-mn; let h = 0, s = max===0?0:d/max, v = max; if(d){if(max===r)h=((g-b)/d+6)%6;else if(max===g)h=(b-r)/d+2;else h=(r-g)/d+4;h=Math.round(h*60);} return [h,Math.round(s*100),Math.round(v*100)]; }
 function hsvToHex(h,s,v) { s/=100;v/=100; const f=n=>{const k=(n+h/60)%6;return v-v*s*Math.max(0,Math.min(k,4-k,1));}; const bx=x=>Math.round(x*255).toString(16).padStart(2,'0'); return '#'+bx(f(5))+bx(f(3))+bx(f(1)); }
 function validHex(h){return /^#[0-9a-fA-F]{6}$/.test(h);}
 function applyHex(k, hex) { if (!validHex(hex)) return; const [h,s,v] = hexToHsv(hex); state[k]={h,s,v}; document.getElementById(k+'Picker').value=hex; document.getElementById(k+'Hex').value=hex; syncUI(k); render(); }
-function syncUI(k) {
-  const {h,s,v}=state[k];
-  document.getElementById(k+'H').value=h; document.getElementById(k+'S').value=s; document.getElementById(k+'V').value=v;
-  document.getElementById(k+'Hval').textContent=h+'°'; document.getElementById(k+'Sval').textContent=s+'%'; document.getElementById(k+'Vval').textContent=v+'%';
-  const hex=hsvToHex(h,s,v); document.getElementById(k+'Swatch').style.background=hex;
-  document.getElementById(k+'S').style.background=`linear-gradient(to right,${hsvToHex(h,0,v)},${hsvToHex(h,100,v)})`;
-  document.getElementById(k+'V').style.background=`linear-gradient(to right,${hsvToHex(h,s,0)},${hsvToHex(h,s,100)})`;
-}
+function syncUI(k) { const {h,s,v}=state[k]; document.getElementById(k+'H').value=h; document.getElementById(k+'S').value=s; document.getElementById(k+'V').value=v; document.getElementById(k+'Hval').textContent=h+'°'; document.getElementById(k+'Sval').textContent=s+'%'; document.getElementById(k+'Vval').textContent=v+'%'; const hex=hsvToHex(h,s,v); document.getElementById(k+'Swatch').style.background=hex; document.getElementById(k+'S').style.background=`linear-gradient(to right,${hsvToHex(h,0,v)},${hsvToHex(h,100,v)})`; document.getElementById(k+'V').style.background=`linear-gradient(to right,${hsvToHex(h,s,0)},${hsvToHex(h,s,100)})`; }
 function fromSlider(k) { state[k].h=+document.getElementById(k+'H').value; state[k].s=+document.getElementById(k+'S').value; state[k].v=+document.getElementById(k+'V').value; const hex=hsvToHex(state[k].h,state[k].s,state[k].v); document.getElementById(k+'Picker').value=hex; document.getElementById(k+'Hex').value=hex; syncUI(k); render(); }
 function applyMatchBg() { const hex = document.getElementById('bHex').value; if (!validHex(hex)) return; applyHex('t', hex); showToast('文字色を背景色 ' + hex.toUpperCase() + ' に揃えました'); }
 function swapColors() { const th=document.getElementById('tHex').value, bh=document.getElementById('bHex').value; applyHex('t',bh); applyHex('b',th); }
-function render() {
-  const tc=document.getElementById('tHex').value, bc=document.getElementById('bHex').value;
-  document.getElementById('preview').style.background=bc; document.getElementById('preview').style.color=tc;
-  document.getElementById('tcDot').style.background=tc; document.getElementById('bcDot').style.background=bc;
-  document.getElementById('tcCode').textContent=tc.toUpperCase(); document.getElementById('bcCode').textContent=bc.toUpperCase();
-  document.getElementById('tcName').textContent=document.getElementById('tName').value?' ('+document.getElementById('tName').value+')':'';
-  document.getElementById('bcName').textContent=document.getElementById('bName').value?' ('+document.getElementById('bName').value+')':'';
-}
+function render() { const tc=document.getElementById('tHex').value, bc=document.getElementById('bHex').value; document.getElementById('preview').style.background=bc; document.getElementById('preview').style.color=tc; document.getElementById('tcDot').style.background=tc; document.getElementById('bcDot').style.background=bc; document.getElementById('tcCode').textContent=tc.toUpperCase(); document.getElementById('bcCode').textContent=bc.toUpperCase(); document.getElementById('tcName').textContent=document.getElementById('tName').value?' ('+document.getElementById('tName').value+')':''; document.getElementById('bcName').textContent=document.getElementById('bName').value?' ('+document.getElementById('bName').value+')':''; }
 function copyText(t){ return navigator.clipboard.writeText(t); }
-
 async function pasteHex(k) {
-  try {
-    const text = await navigator.clipboard.readText();
-    let val = text.trim();
-    if (/^[0-9a-fA-F]{6}$/.test(val)) val = '#' + val;
-    if (validHex(val)) { applyHex(k, val); showColorToast(val.toUpperCase(), val, k === 'b' ? document.getElementById('tHex').value : document.getElementById('bHex').value, k === 'b' ? '背景色' : '文字色'); }
-    else { showToast('有効な HEX カラーコードが見つかりません'); }
-  } catch(e) {
-    const inputEl = document.getElementById(k + 'Hex');
-    if (inputEl) { inputEl.focus(); inputEl.select(); }
-    showToast('ここに直接ペーストしてください');
-  }
+  try { const text = await navigator.clipboard.readText(); let val = text.trim(); if (/^[0-9a-fA-F]{6}$/.test(val)) val = '#' + val; if (validHex(val)) { applyHex(k, val); showColorToast(val.toUpperCase(), val, k === 'b' ? document.getElementById('tHex').value : document.getElementById('bHex').value, k === 'b' ? '背景色' : '文字色'); } else { showToast('有効な HEX カラーコードが見つかりません'); } }
+  catch(e) { const inputEl = document.getElementById(k + 'Hex'); if (inputEl) { inputEl.focus(); inputEl.select(); } showToast('ここに直接ペーストしてください'); }
 }
-
 let toastTimer = null;
-function contrastColor(hex) {
-  if (!validHex(hex)) return '#fff';
-  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
-  const lum = (0.299*r + 0.587*g + 0.114*b) / 255;
-  if (lum > 0.55) { const f=0.28; return '#'+[r,g,b].map(x=>Math.round(x*f).toString(16).padStart(2,'0')).join(''); }
-  const f=0.82; return '#'+[r,g,b].map(x=>Math.round(x+(255-x)*f).toString(16).padStart(2,'0')).join('');
-}
-function showColorToast(hexText, bgColor, _ig, label) {
-  const fg = contrastColor(bgColor);
-  const toast = document.getElementById('copyToast');
-  toast.style.background = bgColor; toast.style.color = fg;
-  toast.style.borderColor = fg.startsWith('#f')||fg.startsWith('#e')||fg.startsWith('#d') ? 'rgba(255,255,255,.22)' : 'rgba(0,0,0,.12)';
-  toast.textContent = label + ' ' + hexText + ' をコピー'; toast.classList.add('show');
-  if (toastTimer) clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { toast.classList.remove('show'); toastTimer = null; }, 2400);
-}
-function showToast(m) {
-  const toast = document.getElementById('copyToast');
-  toast.style.background = 'rgba(20,20,30,.84)'; toast.style.color = '#fff'; toast.style.borderColor = 'rgba(255,255,255,.12)';
-  toast.textContent = m; toast.classList.add('show');
-  if (toastTimer) clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { toast.classList.remove('show'); toastTimer = null; }, 2200);
-}
-function copyHex(k) {
-  const h = document.getElementById(k+'Hex').value; copyText(h);
-  if (k === 'b') { showColorToast(h.toUpperCase(), h, document.getElementById('tHex').value, '背景色'); }
-  else { showColorToast(h.toUpperCase(), h, document.getElementById('bHex').value, '文字色'); }
-}
-function copyAndShowHex(k) {
-  const h = document.getElementById(k==='t'?'tcCode':'bcCode').textContent; copyText(h);
-  if (k === 'b') showColorToast(h, h, document.getElementById('tHex').value, '背景色');
-  else showColorToast(h, h, document.getElementById('bHex').value, '文字色');
-}
+function contrastColor(hex) { if (!validHex(hex)) return '#fff'; const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16); const lum = (0.299*r + 0.587*g + 0.114*b) / 255; if (lum > 0.55) { const f=0.28; return '#'+[r,g,b].map(x=>Math.round(x*f).toString(16).padStart(2,'0')).join(''); } const f=0.82; return '#'+[r,g,b].map(x=>Math.round(x+(255-x)*f).toString(16).padStart(2,'0')).join(''); }
+function showColorToast(hexText, bgColor, _ig, label) { const fg = contrastColor(bgColor); const toast = document.getElementById('copyToast'); toast.style.background = bgColor; toast.style.color = fg; toast.style.borderColor = fg.startsWith('#f')||fg.startsWith('#e')||fg.startsWith('#d') ? 'rgba(255,255,255,.22)' : 'rgba(0,0,0,.12)'; toast.textContent = label + ' ' + hexText + ' をコピー'; toast.classList.add('show'); if (toastTimer) clearTimeout(toastTimer); toastTimer = setTimeout(() => { toast.classList.remove('show'); toastTimer = null; }, 2400); }
+function showToast(m) { const toast = document.getElementById('copyToast'); toast.style.background = 'rgba(20,20,30,.84)'; toast.style.color = '#fff'; toast.style.borderColor = 'rgba(255,255,255,.12)'; toast.textContent = m; toast.classList.add('show'); if (toastTimer) clearTimeout(toastTimer); toastTimer = setTimeout(() => { toast.classList.remove('show'); toastTimer = null; }, 2200); }
+function copyHex(k) { const h = document.getElementById(k+'Hex').value; copyText(h); if (k === 'b') { showColorToast(h.toUpperCase(), h, document.getElementById('tHex').value, '背景色'); } else { showColorToast(h.toUpperCase(), h, document.getElementById('bHex').value, '文字色'); } }
+function copyAndShowHex(k) { const h = document.getElementById(k==='t'?'tcCode':'bcCode').textContent; copyText(h); if (k === 'b') showColorToast(h, h, document.getElementById('tHex').value, '背景色'); else showColorToast(h, h, document.getElementById('bHex').value, '文字色'); }
 function stepSlider(id, k, delta, btn) { const el = document.getElementById(id); el.value = Math.min(+el.max, Math.max(+el.min, +el.value + delta)); fromSlider(k); if(btn) btn.blur(); }
 function normalizeHexInput(val) { val = val.trim(); if (!val) return val; if (!val.startsWith('#')) val = '#' + val; return val; }
-
 ['tH','tS','tV'].forEach(id=>document.getElementById(id).oninput=()=>fromSlider('t'));
 ['bH','bS','bV'].forEach(id=>document.getElementById(id).oninput=()=>fromSlider('b'));
 document.getElementById('tPicker').oninput=e=>applyHex('t',e.target.value);
@@ -1826,19 +1335,10 @@ document.getElementById('bPicker').oninput=e=>applyHex('b',e.target.value);
 document.getElementById('tHex').addEventListener('input', e => { let v = normalizeHexInput(e.target.value); if (v !== e.target.value) e.target.value = v; applyHex('t', v); });
 document.getElementById('bHex').addEventListener('input', e => { let v = normalizeHexInput(e.target.value); if (v !== e.target.value) e.target.value = v; applyHex('b', v); });
 document.getElementById('tName').oninput=render; document.getElementById('bName').oninput=render;
-
-document.addEventListener('touchstart', e => {
-  const active = document.activeElement;
-  if (active && active !== e.target && !active.contains(e.target)) {
-    if (active.tagName !== 'INPUT' && active.tagName !== 'TEXTAREA' && active.tagName !== 'SELECT') active.blur();
-  }
-}, { passive: true });
-
+document.addEventListener('touchstart', e => { const active = document.activeElement; if (active && active !== e.target && !active.contains(e.target)) { if (active.tagName !== 'INPUT' && active.tagName !== 'TEXTAREA' && active.tagName !== 'SELECT') active.blur(); } }, { passive: true });
 (function init() {
-  const params = new URLSearchParams(location.search);
-  const urlGistId = params.get('gist');
-  loadSyncConfig();
-  if (urlGistId) { syncConfig.gistId = urlGistId; document.getElementById('gistIdInput').value = urlGistId; }
+  const params = new URLSearchParams(location.search); const urlGistId = params.get('gist');
+  loadSyncConfig(); if (urlGistId) { syncConfig.gistId = urlGistId; document.getElementById('gistIdInput').value = urlGistId; }
   if (syncConfig.token && syncConfig.gistId) { startPolling(); updateSyncShareUrl(); document.getElementById('gistTokenInput').value = syncConfig.token; document.getElementById('gistIdInput').value = syncConfig.gistId; document.getElementById('syncSetup').style.display = 'none'; }
   syncUI('t'); syncUI('b'); render(); renderPinRow(); renderGroups();
   setupCopyHexPressEffect('copyHexBBtn'); setupCopyHexPressEffect('copyHexTBtn');
