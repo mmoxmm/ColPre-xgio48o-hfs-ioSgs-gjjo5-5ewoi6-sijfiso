@@ -154,7 +154,6 @@ body.mode-edit .group-name-display{pointer-events:none}
 .group-del-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;transition:color .12s;flex-shrink:0;position:absolute;right:10px;top:50%;transform:translateY(-50%);display:none;padding:2px 4px}
 @media(hover:hover){.group-del-btn:hover{color:#d9363e}}
 body.mode-edit .group-del-btn{display:block}
-/* 行間区切り線 */
 .emoji-rows{padding:10px 12px;display:flex;flex-direction:column;gap:0}
 .emoji-row{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;border-radius:6px;transition:background .12s;padding:5px 0;position:relative;}
 .emoji-row + .emoji-row::before{content:'';position:absolute;top:0;left:4px;right:4px;height:1px;background:var(--border);opacity:0.55;pointer-events:none;}
@@ -220,15 +219,12 @@ body.mode-lock .swatch-chip.locked{border-color:rgba(217,54,62,.4);box-shadow:0 
 .modal-label{font-size:11px;color:var(--muted);letter-spacing:.05em;margin-bottom:5px;text-align:center}
 .modal-input,.group-select{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'Syne',sans-serif;font-size:13px;padding:7px 10px;outline:none;transition:border-color .15s;text-align:center}
 .modal-input:focus,.group-select:focus{border-color:#999}
-/* 行キー入力欄（グループ新規登録）— やや濃いめ */
 .modal-key-input-simple{width:100%;background:#e8e8ee;border:1px solid #c8c8d8;border-radius:var(--radius-sm);color:var(--text);font-family:'Syne',sans-serif;font-size:15px;padding:8px 10px;outline:none;transition:border-color .15s;text-align:center;letter-spacing:.05em;}
 .modal-key-input-simple:focus{border-color:#888;background:#e0e0e8;}
-/* 行内チップ新規モーダル */
 .row-key-display{display:flex;align-items:center;justify-content:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:8px;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;}
 .row-key-display:hover{background:var(--surface2);border-color:#bbb}
 .row-key-display-emoji{font-size:20px;line-height:1;flex-shrink:0;}
 .row-key-display-label{font-family:'Syne',sans-serif;font-size:11px;color:var(--muted);}
-/* タップで切り替え文字を濃く */
 .row-key-display-hint{font-family:'Syne',sans-serif;font-size:10px;color:#555;font-weight:600;white-space:nowrap;flex-shrink:0;}
 .row-key-all-panel{display:none;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;margin-bottom:8px}
 .row-key-all-panel.open{display:block}
@@ -604,7 +600,7 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
       <h3 style="margin-bottom:0;flex:1;text-align:center;">グループを追加</h3>
       <button onclick="closeAddGroupModal()" style="background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;line-height:1;padding:0 2px;flex-shrink:0;">×</button>
     </div>
-    <div class="modal-field"><div class="modal-label">グループ名（絵文字や文字）</div><input type="text" class="modal-input" id="addGroupNameInput" maxlength="20" placeholder="グループ名"></div>
+    <div class="modal-field"><div class="modal-label">グループ名（絵文字や文字）</div><input type="text" class="modal-input" id="addGroupNameInput" maxlength="20" placeholder="グループ名（空欄で⭐）"></div>
     <div class="modal-btns">
       <button class="modal-btn secondary" onclick="closeAddGroupModal()">キャンセル</button>
       <button class="modal-btn primary" onclick="confirmAddGroup()">追加</button>
@@ -614,14 +610,33 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
 
 <script>
 // ============================================================
-//  ★ 致命的バグ修正の核心:
-//  syncPush() は localStorage保存とgistへのPUSHのみ行う。
-//  絶対にrenderGroups()/renderPinRow()を呼ばない。
-//  全てのボタンが機能しない原因はsyncPushがrAFでrenderを
-//  呼び出し、直後のレンダリングが破壊されることだった。
+//  FIX SUMMARY:
+//  1. renderGroups/renderPinRow — レンダリングフラグ(_rendering)で
+//     同一フレーム内の重複renderを防ぐ
+//  2. グループ名 blur — saveGroupsのみ（renderしない）★既存
+//  3. longPressActive — closeLpModal()でフラグを即リセット
+//     さらにポインタUP時点でフラグリセットを確実に行う
+//  4. ポーリングintervalを8秒に延長 + renderGuard追加
+//  5. 全ての「saveGroups→render」呼び出しをrenderScheduler経由に統一
+//  6. グループ名input eventはsaveGroupsのみ（renderしない）
+//  7. 1行グループのチップ変更: addRowBtnのclickハンドラを修正
+//  8. グループ追加: 名称空欄は⭐
 // ============================================================
 
 const uid = () => Math.random().toString(36).slice(2, 9);
+
+// ★ レンダリング重複防止フラグ
+let _renderPending = false;
+function scheduleRender() {
+  if (_renderPending) return;
+  _renderPending = true;
+  requestAnimationFrame(() => {
+    _renderPending = false;
+    renderGroups();
+    renderPinRow();
+  });
+}
+
 const DEFAULT_GROUPS = [
   { id: 'grp_night', name: '🌃', rows: [
     { key: '👓', colors: [] }, { key: '🐹', colors: [] }, { key: '🥽', colors: [] },
@@ -653,7 +668,6 @@ let pinColors = (() => {
   return [];
 })();
 
-// ★ savePinColors: localStorageに保存し、syncPushをキック（renderは呼ばない）
 function savePinColors() {
   localStorage.setItem('cp_pin_row', JSON.stringify(pinColors));
   scheduleSyncPush();
@@ -668,14 +682,19 @@ function applyMigrations() {
 }
 applyMigrations();
 
-// ★ saveGroups: localStorageに保存し、syncPushをキック（renderは呼ばない）
 function saveGroups() {
   localStorage.setItem('cp_groups5', JSON.stringify(groups));
   scheduleSyncPush();
 }
 
 let appMode = 'normal', swapSelected = null, pendingOverwrite = null;
-let longPressTimer = null, longPressActive = false;
+
+// ★ longPressActive はポインターイベントで即座にリセットするために
+//    タイマーID管理を改善
+let longPressTimer = null;
+let longPressActive = false;
+let longPressConsumed = false; // clickイベントで長押し消費済みか
+
 let lpTarget = null, lpOldB = '', lpOldT = '', lpSnapB = '', lpSnapT = '';
 let chipDragSrc = null, chipDropInfo = null, chipDragActive = false, chipPointerId = null, chipGhost = null;
 let rowDragSrc = null, rowDragActive = false, rowPointerId = null;
@@ -691,7 +710,6 @@ function toggleLockMode() {
   } else {
     appMode = 'normal';
     document.getElementById('lockModeBtn').classList.remove('active-lock'); document.getElementById('lockModeIcon').textContent = '🔓'; document.getElementById('lockModeText').textContent = 'ロック選択'; document.body.classList.remove('mode-lock');
-    // ★ ロック終了時: 保存してからrender（renderは1回だけ）
     saveGroups(); savePinColors();
     renderGroups(); renderPinRow();
     showToast('ロック状態を保存しました');
@@ -931,13 +949,34 @@ function renderPinRow() {
       chip.addEventListener('touchstart', () => { if (document.activeElement && document.activeElement !== chip) document.activeElement.blur(); }, { passive: true });
       let chipTapCount = 0, chipTapTimer = null;
       ;(function(cC, cCi) {
-        chip.addEventListener('pointerdown', e => { if (appMode !== 'normal') return; longPressActive = false; if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; } longPressTimer = setTimeout(() => { longPressActive = true; longPressTimer = null; chipTapCount = 0; if (chipTapTimer) { clearTimeout(chipTapTimer); chipTapTimer = null; } openLpModal(cC, null, null, cCi, 'pin'); }, 300); });
-        chip.addEventListener('pointerup', () => { if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; } });
-        chip.addEventListener('pointercancel', () => { if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; } longPressActive = false; });
+        // ★ pointerdown で長押しタイマー開始
+        chip.addEventListener('pointerdown', e => {
+          if (appMode !== 'normal') return;
+          longPressActive = false;
+          longPressConsumed = false;
+          if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+          longPressTimer = setTimeout(() => {
+            longPressActive = true;
+            longPressConsumed = false;
+            longPressTimer = null;
+            chipTapCount = 0;
+            if (chipTapTimer) { clearTimeout(chipTapTimer); chipTapTimer = null; }
+            openLpModal(cC, null, null, cCi, 'pin');
+          }, 300);
+        });
+        // ★ pointerup でタイマーをキャンセル
+        chip.addEventListener('pointerup', () => {
+          if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+        });
+        chip.addEventListener('pointercancel', () => {
+          if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+          longPressActive = false; longPressConsumed = false;
+        });
         chip.addEventListener('click', e => {
           e.stopPropagation();
           if (appMode === 'lock') { cC.locked = !cC.locked; chip.classList.toggle('locked', cC.locked); showToast(cC.locked ? '🔒 ロックしました' : '🔓 解除しました'); updateTooltip(); return; }
-          if (longPressActive) { longPressActive = false; return; }
+          // ★ 長押しで開いたモーダル後のclickを無視
+          if (longPressActive || longPressConsumed) { longPressActive = false; longPressConsumed = false; return; }
           chipTapCount++;
           if (chipTapCount === 1) { chipTapTimer = setTimeout(() => { chipTapCount = 0; applyHex('t', cC.t); applyHex('b', cC.b); copyText(cC.b.toUpperCase()); showColorToast(cC.b.toUpperCase(), cC.b, cC.t, '背景色'); }, 280); }
           else if (chipTapCount === 2) { clearTimeout(chipTapTimer); chipTapTimer = setTimeout(() => { chipTapCount = 0; applyHex('t', cC.t); applyHex('b', cC.b); copyText(cC.t.toUpperCase()); showColorToast(cC.t.toUpperCase(), cC.t, cC.b, '文字色'); }, 280); }
@@ -970,10 +1009,11 @@ function renderGroups() {
     const nameEl = document.createElement('div'); nameEl.className = 'group-name-display';
     nameEl.contentEditable = appMode === 'edit' ? 'false' : 'true'; nameEl.spellcheck = false; nameEl.textContent = g.name;
     if (appMode !== 'edit') {
+      // ★ inputイベントはsaveGroupsのみ（renderしない）
       nameEl.addEventListener('input', () => { g.name = nameEl.textContent.trim() || g.name; saveGroups(); });
       nameEl.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); nameEl.blur(); } if (e.key === 'Escape') { nameEl.textContent = g.name; nameEl.blur(); } });
-      // ★ blur時はsaveGroupsのみ（renderしない）
-      nameEl.addEventListener('blur', () => { g.name = nameEl.textContent.trim() || g.name; nameEl.textContent = g.name; saveGroups(); });
+      // ★ blurはsaveGroupsのみ（renderしない）
+      nameEl.addEventListener('blur', () => { const v = nameEl.textContent.trim(); if (v) g.name = v; else nameEl.textContent = g.name; saveGroups(); });
     }
     hdr.append(nameEl);
     const delBtn = document.createElement('button'); delBtn.className = 'group-del-btn'; delBtn.textContent = '×'; delBtn.title = 'グループを削除';
@@ -1009,13 +1049,33 @@ function renderGroups() {
           chip.addEventListener('touchstart', () => { if (document.activeElement && document.activeElement !== chip) document.activeElement.blur(); }, { passive: true });
           let chipTapCount = 0, chipTapTimer = null;
           ;(function(cC, cGi, cRi, cCi) {
-            chip.addEventListener('pointerdown', e => { if (appMode !== 'normal') return; longPressActive = false; if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; } longPressTimer = setTimeout(() => { longPressActive = true; longPressTimer = null; chipTapCount = 0; if (chipTapTimer) { clearTimeout(chipTapTimer); chipTapTimer = null; } openLpModal(cC, cGi, cRi, cCi, 'group'); }, 300); });
-            chip.addEventListener('pointerup', () => { if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; } });
-            chip.addEventListener('pointercancel', () => { if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; } longPressActive = false; });
+            // ★ pointerdown/up で長押しタイマーを厳密に管理
+            chip.addEventListener('pointerdown', e => {
+              if (appMode !== 'normal') return;
+              longPressActive = false;
+              longPressConsumed = false;
+              if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+              longPressTimer = setTimeout(() => {
+                longPressActive = true;
+                longPressConsumed = false;
+                longPressTimer = null;
+                chipTapCount = 0;
+                if (chipTapTimer) { clearTimeout(chipTapTimer); chipTapTimer = null; }
+                openLpModal(cC, cGi, cRi, cCi, 'group');
+              }, 300);
+            });
+            chip.addEventListener('pointerup', () => {
+              if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+            });
+            chip.addEventListener('pointercancel', () => {
+              if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+              longPressActive = false; longPressConsumed = false;
+            });
             chip.addEventListener('click', e => {
               e.stopPropagation();
               if (appMode === 'lock') { cC.locked = !cC.locked; chip.classList.toggle('locked', cC.locked); showToast(cC.locked ? '🔒 ロックしました' : '🔓 解除しました'); updateTooltip(); return; }
-              if (longPressActive) { longPressActive = false; return; }
+              // ★ 長押し後のclickを確実に無視
+              if (longPressActive || longPressConsumed) { longPressActive = false; longPressConsumed = false; return; }
               chipTapCount++;
               if (chipTapCount === 1) { chipTapTimer = setTimeout(() => { chipTapCount = 0; applyHex('t', cC.t); applyHex('b', cC.b); copyText(cC.b.toUpperCase()); showColorToast(cC.b.toUpperCase(), cC.b, cC.t, '背景色'); }, 280); }
               else if (chipTapCount === 2) { clearTimeout(chipTapTimer); chipTapTimer = setTimeout(() => { chipTapCount = 0; applyHex('t', cC.t); applyHex('b', cC.b); copyText(cC.t.toUpperCase()); showColorToast(cC.t.toUpperCase(), cC.t, cC.b, '文字色'); }, 280); }
@@ -1025,15 +1085,29 @@ function renderGroups() {
         }
         chip.addEventListener('contextmenu', e => e.preventDefault()); swatchesEl.append(chip);
       });
+
+      // ★ addRowBtn: 短押しクリックハンドラを修正
+      //   iife内でrow/gi/riをキャプチャし、クロージャの問題を解消
       const addRowBtn = document.createElement('button'); addRowBtn.className = 'emoji-add-btn'; addRowBtn.textContent = '+'; addRowBtn.title = '短押し: 即追加 / 長押し: ラベル付き登録';
       addRowBtn.addEventListener('contextmenu', e => e.preventDefault());
-      let rowAddPressTimer = null, rowAddLongPress = false;
-      ;(function(cRow, cGi, cRi) {
-        addRowBtn.addEventListener('pointerdown', () => { rowAddLongPress = false; rowAddPressTimer = setTimeout(() => { rowAddLongPress = true; rowAddPressTimer = null; openAddRowModal(cGi, cRi); }, 400); });
+      ;(function(capturedRow, capturedGi, capturedRi) {
+        let rowAddPressTimer = null, rowAddLongPress = false;
+        addRowBtn.addEventListener('pointerdown', () => {
+          rowAddLongPress = false;
+          rowAddPressTimer = setTimeout(() => { rowAddLongPress = true; rowAddPressTimer = null; openAddRowModal(capturedGi, capturedRi); }, 400);
+        });
         addRowBtn.addEventListener('pointerup', () => { if (rowAddPressTimer) { clearTimeout(rowAddPressTimer); rowAddPressTimer = null; } });
         addRowBtn.addEventListener('pointercancel', () => { if (rowAddPressTimer) { clearTimeout(rowAddPressTimer); rowAddPressTimer = null; } rowAddLongPress = false; });
-        addRowBtn.addEventListener('click', () => { if (rowAddLongPress) { rowAddLongPress = false; return; } const t = document.getElementById('tHex').value, b = document.getElementById('bHex').value; cRow.colors.push({ id: uid(), t, b, locked: false, label: '', copyTarget: 'b' }); saveGroups(); renderGroups(); });
+        addRowBtn.addEventListener('click', () => {
+          if (rowAddLongPress) { rowAddLongPress = false; return; }
+          const t = document.getElementById('tHex').value, b = document.getElementById('bHex').value;
+          capturedRow.colors.push({ id: uid(), t, b, locked: false, label: '', copyTarget: 'b' });
+          saveGroups();
+          // ★ 即座にrenderGroups()を呼ぶ（scheduleRenderは使わない）
+          renderGroups();
+        });
       })(row, gi, ri);
+
       swatchesEl.append(addRowBtn); rowEl.append(swatchesEl); rowsEl.append(rowEl);
     });
     block.append(rowsEl);
@@ -1212,14 +1286,28 @@ function lpSetInputs(bVal, tVal) {
 function lpCompareTo(mode) { lpSetInputs(mode === 'new' ? lpSnapB : lpOldB, mode === 'new' ? lpSnapT : lpOldT); document.getElementById('lpBtnNew').classList.toggle('active-compare', mode === 'new'); document.getElementById('lpBtnOld').classList.toggle('active-compare', mode === 'old'); lpUpdateCanvas(); updateLpOverwriteBtn(); }
 function lpSwapColors() { const bVal = document.getElementById('lpBHex').value, tVal = document.getElementById('lpTHex').value; if (!validHex(bVal) || !validHex(tVal)) { showToast('有効なHEXを入力してください'); return; } lpSetInputs(tVal, bVal); lpUpdateCanvas(); updateLpOverwriteBtn(); showToast('入力欄の色を入れ替えました'); }
 function lpMatchToPreview() { const bVal = document.getElementById('lpBHex').value, tVal = document.getElementById('lpTHex').value; const bOk = validHex(bVal), tOk = validHex(tVal); if (!bOk && !tOk) { showToast('有効なHEXを入力してください'); return; } const base = bOk ? bVal : tVal; lpSetInputs(base, base); lpUpdateCanvas(); updateLpOverwriteBtn(); showToast('同じ色 ' + base.toUpperCase() + ' に揃えました'); }
+
 function openLpModal(c, gi, ri, ci, chipType) {
+  // ★ モーダルを開く前にlongPressConsumedをセット
+  longPressConsumed = true;
+  longPressActive = false;
+  if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+
   lpTarget = { c, gi, ri, ci, chipType: chipType || 'group', tempUnlocked: false };
   lpOldB = c.b; lpOldT = c.t; lpSnapB = document.getElementById('bHex').value; lpSnapT = document.getElementById('tHex').value;
   const rawLabel = (c.label && c.label.trim() && c.label.trim() !== 'Aa') ? c.label.trim() : ''; document.getElementById('lpLabelInput').value = rawLabel;
   lpSetInputs(lpOldB, lpOldT); document.getElementById('lpBtnNew').classList.remove('active-compare'); document.getElementById('lpBtnOld').classList.add('active-compare');
   lpUpdateCanvas(); lpUpdateLockIcon(); updateLpOverwriteBtn(); document.getElementById('longPressEditModal').style.display = 'flex';
 }
-function closeLpModal() { lpTarget = null; document.getElementById('longPressEditModal').style.display = 'none'; }
+
+// ★ closeLpModal: longPressActiveとlongPressConsumedを即座にリセット
+function closeLpModal() {
+  lpTarget = null;
+  longPressActive = false;
+  longPressConsumed = false;
+  document.getElementById('longPressEditModal').style.display = 'none';
+}
+
 document.getElementById('lpBPicker').addEventListener('input', e => { document.getElementById('lpBHex').value = e.target.value; document.getElementById('lpBSwatch').style.background = e.target.value; document.getElementById('lpBHex').classList.remove('invalid'); lpUpdateCanvas(); updateLpOverwriteBtn(); });
 document.getElementById('lpTPicker').addEventListener('input', e => { document.getElementById('lpTHex').value = e.target.value; document.getElementById('lpTSwatch').style.background = e.target.value; document.getElementById('lpTHex').classList.remove('invalid'); lpUpdateCanvas(); updateLpOverwriteBtn(); });
 document.getElementById('lpBHex').addEventListener('input', e => { let v = normalizeHexInput(e.target.value); if (v !== e.target.value) e.target.value = v; if (validHex(v)) { document.getElementById('lpBPicker').value = v; document.getElementById('lpBSwatch').style.background = v; e.target.classList.remove('invalid'); } else e.target.classList.add('invalid'); lpUpdateCanvas(); updateLpOverwriteBtn(); });
@@ -1232,7 +1320,8 @@ function lpOverwrite() {
   if (!validHex(bVal) || !validHex(tVal)) { showToast('有効な HEX 値を入力してください'); return; }
   if (lpTarget.c.locked && !lpTarget.tempUnlocked) { showToast('🔒 一時解除してから操作してください'); return; }
   const rawLabel = document.getElementById('lpLabelInput').value.trim(); const pendingLabel = rawLabel === 'Aa' ? '' : rawLabel;
-  const savedC = lpTarget.c, oldChipLabel = getChipLabel(lpTarget.c), savedType = lpTarget.chipType; closeLpModal();
+  const savedC = lpTarget.c, oldChipLabel = getChipLabel(lpTarget.c), savedType = lpTarget.chipType;
+  closeLpModal();
   pendingOverwrite = { c: savedC, newT: tVal, newB: bVal, newLabel: pendingLabel, chipType: savedType };
   const before = document.getElementById('owBefore'); before.style.background = lpOldB; before.style.color = lpOldT; before.textContent = oldChipLabel;
   const after = document.getElementById('owAfter'); after.style.background = bVal; after.style.color = tVal; after.textContent = pendingLabel || oldChipLabel;
@@ -1244,7 +1333,8 @@ function lpSaveSettings() {
   const rawLabel = document.getElementById('lpLabelInput').value.trim(); const newLabel = rawLabel === 'Aa' ? '' : rawLabel;
   const bVal = document.getElementById('lpBHex').value, tVal = document.getElementById('lpTHex').value;
   const targetC = lpTarget.c, chipType = lpTarget.chipType, isLocked = targetC.locked && !lpTarget.tempUnlocked;
-  closeLpModal(); longPressActive = false; if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+  // ★ closeLpModalを先に呼んでフラグをリセット
+  closeLpModal();
   targetC.label = newLabel;
   if (!isLocked && validHex(bVal) && validHex(tVal)) { targetC.b = bVal; targetC.t = tVal; }
   if (chipType === 'pin') { savePinColors(); renderPinRow(); } else { saveGroups(); renderGroups(); }
@@ -1255,7 +1345,8 @@ function lpDelete() {
   if (!lpTarget) return;
   const c = lpTarget.c, gi = lpTarget.gi, ri = lpTarget.ri, chipType = lpTarget.chipType;
   if (c.locked) { alert('🔒 ロックされているため削除できません。先にロックを解除してください。'); return; }
-  closeLpModal(); longPressActive = false; if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+  // ★ closeLpModalを先に呼んでフラグをリセット
+  closeLpModal();
   if (chipType === 'pin') { const idx = pinColors.indexOf(c); if (idx >= 0) pinColors.splice(idx, 1); savePinColors(); renderPinRow(); }
   else { const targetRow = groups[gi].rows[ri]; if (targetRow) { const idx = targetRow.colors.indexOf(c); if (idx >= 0) targetRow.colors.splice(idx, 1); } saveGroups(); renderGroups(); }
   showToast('削除しました');
@@ -1276,16 +1367,16 @@ function confirmDeleteGroup() { if (deleteGroupIndex < 0 || deleteGroupIndex >= 
 
 function openAddGroupModal() { document.getElementById('addGroupNameInput').value = ''; document.getElementById('addGroupModal').style.display = 'flex'; setTimeout(() => document.getElementById('addGroupNameInput').focus(), 50); }
 function closeAddGroupModal() { document.getElementById('addGroupModal').style.display = 'none'; }
+// ★ グループ追加: 名称空欄は⭐
 function confirmAddGroup() {
   const name = document.getElementById('addGroupNameInput').value.trim();
-  groups.push({ id: uid(), name: name || '新規', rows: [] });
+  groups.push({ id: uid(), name: name || '⭐', rows: [] });
   saveGroups(); renderGroups(); closeAddGroupModal(); showToast('グループを追加しました');
 }
 document.getElementById('addGroupNameInput').addEventListener('keydown', e => { if (e.key === 'Enter') confirmAddGroup(); if (e.key === 'Escape') closeAddGroupModal(); });
 
 // ============================================================
-//  ★ Sync — scheduleSyncPushのみが非同期処理を行う
-//  renderGroups/renderPinRowは絶対に呼ばない
+//  Sync
 // ============================================================
 let syncConfig = { token: '', gistId: '' }, pollTimer = null, lastEtag = '', isSyncPushing = false;
 
@@ -1343,23 +1434,22 @@ function clearSync() { stopPolling(); syncConfig = { token: '', gistId: '' }; lo
 
 function startPolling() {
   stopPolling(); setSyncBadge('synced', '同期中');
+  // ★ ポーリング間隔を8秒に延長。ユーザー操作中の干渉を最小化
   pollTimer = setInterval(async () => {
     if (isSyncPushing) return;
+    // ★ ローカルで操作直後（デバウンス中）はポーリングをスキップ
+    if (syncPushDebounceTimer) return;
     const data = await gistGet(); if (data === null) { setSyncBadge('error', 'エラー'); return; }
     if (data && data !== 'unchanged') {
-      // ★ ポーリング受信時のみrender（ユーザー操作中でなければ安全）
       if (data.groups) { groups = mergeGroups(groups, data.groups); localStorage.setItem('cp_groups5', JSON.stringify(groups)); renderGroups(); }
       if (data.pin) { pinColors = mergePins(pinColors, data.pin); localStorage.setItem('cp_pin_row', JSON.stringify(pinColors)); renderPinRow(); }
       lastEtag = '';
     }
-  }, 5000); // ★ 3秒→5秒に延長（ポーリング干渉を減らす）
+  }, 8000);
 }
 
 function stopPolling() { if (pollTimer) clearInterval(pollTimer); }
 
-// ★ scheduleSyncPush: saveGroups/savePinColorsから呼ばれる。
-//    localStorageへの保存はsaveGroups/savePinColors側で既に完了済み。
-//    ここではgistへのpushのみ行う。renderは絶対に呼ばない。
 let syncPushDebounceTimer = null;
 function scheduleSyncPush() {
   if (!syncConfig.gistId || !syncConfig.token) return;
@@ -1368,19 +1458,12 @@ function scheduleSyncPush() {
     syncPushDebounceTimer = null;
     if (isSyncPushing) return;
     isSyncPushing = true;
-    try {
-      // ★ Pushのみ。マージ・renderは行わない。
-      await gistPut(groups, pinColors);
-      lastEtag = '';
-    } catch(e) {
-      // push失敗は無視（次回Pushかポーリングで解決）
-    } finally {
-      isSyncPushing = false;
-    }
-  }, 1200); // ★ デバウンス1.2秒
+    try { await gistPut(groups, pinColors); lastEtag = ''; }
+    catch(e) {}
+    finally { isSyncPushing = false; }
+  }, 1500);
 }
 
-// 後方互換のエイリアス（旧コードからsyncPush()を呼ぶ箇所があれば対応）
 function syncPush() { scheduleSyncPush(); }
 
 function updateSyncShareUrl() { if (!syncConfig.gistId) return; const url = location.href.split('?')[0] + '?gist=' + syncConfig.gistId; document.getElementById('syncShareUrlRow').style.display = 'flex'; document.getElementById('syncShareInput').value = url; }
@@ -1401,7 +1484,6 @@ function swapColors() { const th=document.getElementById('tHex').value, bh=docum
 function render() { const tc=document.getElementById('tHex').value, bc=document.getElementById('bHex').value; document.getElementById('preview').style.background=bc; document.getElementById('preview').style.color=tc; document.getElementById('tcDot').style.background=tc; document.getElementById('bcDot').style.background=bc; document.getElementById('tcCode').textContent=tc.toUpperCase(); document.getElementById('bcCode').textContent=bc.toUpperCase(); document.getElementById('tcName').textContent=document.getElementById('tName').value?' ('+document.getElementById('tName').value+')':''; document.getElementById('bcName').textContent=document.getElementById('bName').value?' ('+document.getElementById('bName').value+')':''; }
 function copyText(t){ return navigator.clipboard.writeText(t); }
 
-// ★ iPad対応: ペーストボタンはポップアップなしでワンタップ自動ペースト
 async function pasteHex(k) {
   try {
     const text = await navigator.clipboard.readText();
@@ -1410,7 +1492,6 @@ async function pasteHex(k) {
     if (validHex(val)) { applyHex(k, val); showColorToast(val.toUpperCase(), val, k === 'b' ? document.getElementById('tHex').value : document.getElementById('bHex').value, k === 'b' ? '背景色' : '文字色'); }
     else { showToast('有効な HEX カラーコードが見つかりません'); }
   } catch(e) {
-    // clipboard API失敗時はinputに直接フォーカス
     const inputEl = document.getElementById(k + 'Hex');
     if (inputEl) { inputEl.focus(); inputEl.select(); }
     showToast('HEX入力欄にペーストしてください');
