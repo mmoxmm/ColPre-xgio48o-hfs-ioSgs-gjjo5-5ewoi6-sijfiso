@@ -160,7 +160,6 @@ body.mode-edit .group-del-btn{display:block}
 .emoji-row + .emoji-row{border-top:1px solid rgba(224,224,232,0.55);}
 
 /* ===== 区切り行 ===== */
-/* FIX: position:relative + actions を absolute 右端に配置して中央揃えを保つ */
 .divider-row{
   display:flex;
   align-items:center;
@@ -168,20 +167,19 @@ body.mode-edit .group-del-btn{display:block}
   padding:7px 0;
   cursor:default;
   width:100%;
-  position:relative;  /* FIX: actions の absolute 配置の基準 */
+  position:relative;
   min-height:28px;
 }
 .divider-row + .emoji-row,
 .emoji-row + .divider-row,
 .divider-row + .divider-row{border-top:none;}
 
-/* FIX: 線を太く */
 .divider-line{
   flex:1;
-  height:2px;         /* FIX: 1px → 2px */
+  height:2px;
   border-radius:1px;
   background:var(--border);
-  opacity:0.75;       /* FIX: 0.7 → 0.75 (少し上げて視認性改善) */
+  opacity:0.75;
 }
 
 .divider-label-wrap{
@@ -192,19 +190,17 @@ body.mode-edit .group-del-btn{display:block}
   padding:0 10px;
 }
 
-/* FIX: フォント太く・サイズ大きく・視認性向上 */
 .divider-label{
   font-family:'Syne',sans-serif;
-  font-size:10px;         /* FIX: 9px → 10px */
-  font-weight:700;        /* Bold を明示 */
+  font-size:10px;
+  font-weight:700;
   letter-spacing:.12em;
   white-space:nowrap;
   flex-shrink:0;
   text-transform:uppercase;
-  opacity:0.7;            /* FIX: 0.55 → 0.7 (視認性) */
+  opacity:0.7;
 }
 
-/* FIX: actions を absolute 右端に配置 → 線の中央揃えに影響しない */
 .divider-actions{
   position:absolute;
   right:0;
@@ -216,7 +212,7 @@ body.mode-edit .group-del-btn{display:block}
   opacity:0;
   pointer-events:none;
   transition:opacity .15s;
-  background:var(--surface);  /* 背景を合わせて線と重なりを自然に */
+  background:var(--surface);
   padding-left:4px;
 }
 body.mode-edit .divider-actions{opacity:1;pointer-events:auto;}
@@ -230,12 +226,6 @@ body.mode-edit .divider-row.is-grabbing{cursor:grabbing;}
 .divider-drag-handle{font-size:11px;color:var(--muted);cursor:grab;padding:2px;}
 .divider-del-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;line-height:1;padding:2px 3px;border-radius:3px;display:flex;align-items:center;transition:color .12s;}
 @media(hover:hover){body.mode-edit .divider-del-btn:hover{color:#d9363e;}}
-
-.divider-color-swatch{width:12px;height:12px;border-radius:2px;border:1px solid rgba(0,0,0,.15);cursor:pointer;flex-shrink:0;position:relative;overflow:hidden;}
-.divider-color-swatch input[type=color]{position:absolute;inset:-4px;width:calc(100%+8px);height:calc(100%+8px);opacity:0;cursor:pointer;}
-
-.divider-add-btn{display:flex;align-items:center;gap:4px;font-size:11px;font-family:'Syne',sans-serif;font-weight:600;color:var(--muted);cursor:pointer;background:none;border:none;transition:color .15s;padding:0;flex-shrink:0;white-space:nowrap;}
-@media(hover:hover){.divider-add-btn:hover{color:var(--text);}}
 
 .emoji-key{font-size:15px;flex-shrink:0;width:auto;min-width:28px;text-align:center;padding:2px 4px;border-radius:4px;border:1px solid transparent;transition:all .15s;line-height:32px;cursor:default}
 body.mode-edit .emoji-key{border:1.5px dashed var(--muted);cursor:grab}
@@ -266,8 +256,9 @@ body.mode-lock .swatch-chip.locked{border-color:rgba(217,54,62,.4);box-shadow:0 
 #chipDragGhost{position:fixed;pointer-events:none;z-index:9998;opacity:.88;will-change:transform;transition:none;display:none}
 .emoji-add-btn{width:28px;height:28px;border-radius:50%;border:1.5px dashed var(--border);background:none;color:var(--muted);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;line-height:1;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;}
 @media(hover:hover){.emoji-add-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}}
+/* ===== ここが変更点1: flex:1 を追加 ===== */
 .group-add-row{padding:6px 12px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;}
-.group-add-preset{display:flex;align-items:center;gap:5px;font-size:11px;font-family:'Syne',sans-serif;font-weight:600;color:var(--muted);cursor:pointer;background:none;border:none;width:100%;transition:color .15s;padding:0}
+.group-add-preset{display:flex;align-items:center;gap:5px;font-size:11px;font-family:'Syne',sans-serif;font-weight:600;color:var(--muted);cursor:pointer;background:none;border:none;width:100%;transition:color .15s;padding:0;flex:1}
 @media(hover:hover){.group-add-preset:hover{color:var(--text)}}
 .sync-setup{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-top:20px}
 .sync-setup-title{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
@@ -373,8 +364,61 @@ body.mode-lock .swatch-chip.locked{border-color:rgba(217,54,62,.4);box-shadow:0 
 #deleteGroupModal .modal{width:300px;text-align:center}
 footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line-height:1.8}
 
+/* ===== 区切り線カラー系 ===== */
 .divider-color-picker-row{display:flex;align-items:center;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:6px;}
 .divider-color-presets-row{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;min-height:28px;margin-bottom:8px;}
+
+/* ===== 挿入位置ピッカー ===== */
+.divider-pos-list{
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  overflow:hidden;
+  max-height:230px;
+  overflow-y:auto;
+  background:var(--bg);
+}
+.divider-pos-slot{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  padding:7px 14px;
+  cursor:pointer;
+  font-family:'Syne',sans-serif;
+  font-size:11px;
+  font-weight:600;
+  color:var(--muted);
+  background:var(--surface);
+  border-left:3px solid transparent;
+  transition:background .12s,border-left-color .12s,color .12s;
+  user-select:none;
+  -webkit-tap-highlight-color:transparent;
+}
+.divider-pos-slot:hover{
+  background:var(--accent-light);
+  color:var(--accent);
+  border-left-color:var(--accent-border);
+}
+.divider-pos-slot.selected{
+  background:var(--accent-light);
+  color:var(--accent);
+  border-left-color:var(--accent);
+}
+.divider-pos-slot-arrow{font-size:10px;flex-shrink:0;}
+.divider-pos-item{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:5px 14px;
+  font-size:13px;
+  color:var(--text);
+  background:var(--bg);
+  border-left:3px solid transparent;
+  user-select:none;
+  min-height:28px;
+}
+.divider-pos-item.is-divider-item{
+  padding:7px 14px;
+}
 </style>
 </head>
 <body>
@@ -595,8 +639,8 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
       </div>
     </div>
     <div class="modal-field" style="margin-bottom:0;">
-      <div class="modal-label">挿入位置</div>
-      <select class="group-select" id="dividerPositionSelect" style="text-align:center;text-align-last:center;"></select>
+      <div class="modal-label">挿入位置をタップして選択</div>
+      <div class="divider-pos-list" id="dividerPositionPicker"></div>
     </div>
     <div class="modal-btns">
       <button class="modal-btn secondary" onclick="closeAddDividerModal()">キャンセル</button>
@@ -621,6 +665,7 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
           <input type="color" id="editDividerColorInput" style="position:absolute;inset:-4px;width:calc(100%+8px);height:calc(100%+8px);opacity:0;cursor:pointer;" value="#e0e0e8">
         </div>
         <input type="text" id="editDividerHexInput" class="modal-input" style="width:100px;font-family:'DM Mono',monospace;font-size:12px;" maxlength="7" placeholder="#rrggbb">
+        <button onclick="_addEditDividerUserColor()" style="font-family:'Syne',sans-serif;font-size:10px;font-weight:700;background:var(--text);color:#fff;border:none;border-radius:var(--radius-sm);padding:5px 8px;cursor:pointer;white-space:nowrap;">＋ 登録</button>
       </div>
     </div>
     <div class="modal-btns" style="justify-content:space-between;">
@@ -778,10 +823,17 @@ function ensureIds(gs) {
   return gs.map(g => {
     const gid = (g.id && g.id !== 'undefined') ? g.id : ('grp_' + (g.name || uid()).replace(/[^a-zA-Z0-9]/g, '_') + '_' + Math.random().toString(36).slice(2,6));
     return { id: gid, name: g.name || '', rows: (g.rows || []).map(r => {
-      if (r.divider) return { key: r.key || '---', divider: true, label: r.label || '', color: r.color || '', colors: [] };
+      if (r.divider) return {
+        id: (r.id && r.id !== 'undefined') ? r.id : ('div_' + uid()),
+        key: r.key || '---',
+        divider: true,
+        label: r.label || '',
+        color: r.color || '',
+        colors: []
+      };
       return { key: r.key || '?', colors: (r.colors || []).map(c => {
         if (typeof c === 'string') return { id: uid(), t: '#1a1a2e', b: c, locked: false, label: '', copyTarget: 'b' };
-        return { id: c.id || uid(), t: c.t || '#1a1a2e', b: c.b, locked: c.locked || false, label: c.label || '', copyTarget: c.copyTarget || 'b' };
+        return { id: c.id || uid(), t: c.t || '#1a1a2e', b: c.b || '#ffffff', locked: c.locked || false, label: c.label || '', copyTarget: c.copyTarget || 'b' };
       }) };
     }) };
   });
@@ -825,7 +877,7 @@ function savePinColors() {
 
 function applyMigrations() {
   const KEY_V1 = 'cp_migrated_row_order_v1';
-  if (!localStorage.getItem(KEY_V1)) { const nightGroup = groups.find(g => g.name === '🌃'); if (nightGroup) { const desired = ['👓', '🐹', '🥽', '🕶️', '🐸', '🩰']; const rowMap = new Map(nightGroup.rows.map(r => [r.key, r])); const newRows = desired.map(key => rowMap.get(key) || { key, colors: [] }); nightGroup.rows.forEach(r => { if (!desired.includes(r.key) && r.key !== '🌃') newRows.push(r); }); nightGroup.rows = newRows; } localStorage.setItem(KEY_V1, '1'); }
+  if (!localStorage.getItem(KEY_V1)) { const nightGroup = groups.find(g => g.name === '🌃'); if (nightGroup) { const desired = ['👓', '🐹', '🥽', '🕶️', '🐸', '🩰']; const rowMap = new Map(nightGroup.rows.filter(r => !r.divider).map(r => [r.key, r])); const newRows = desired.map(key => rowMap.get(key) || { key, colors: [] }); nightGroup.rows.forEach(r => { if (!r.divider && !desired.includes(r.key)) newRows.push(r); }); nightGroup.rows = newRows; } localStorage.setItem(KEY_V1, '1'); }
   const KEY_V2 = 'cp_migrated_remove_city_key_v2';
   if (!localStorage.getItem(KEY_V2)) { const cityGroup = groups.find(g => g.name === '🌆'); if (cityGroup) cityGroup.rows = cityGroup.rows.filter(r => r.key !== '🌆'); localStorage.setItem(KEY_V2, '1'); }
   localStorage.setItem('cp_groups5', JSON.stringify(groups));
@@ -896,9 +948,12 @@ function applyChipLabelStyle(inner, label) {
 function doMoveChip(src, dst) {
   function getRow(info) { if (info.type === 'pin') return pinColors; return groups[info.gi].rows[info.ri].colors; }
   const srcRow = getRow(src); const [moved] = srcRow.splice(src.ci, 1); let dstCi = dst.ci;
-  if (dst.position !== 'append' && dst.type === src.type) { if (dst.type === 'group' && src.gi === dst.gi && src.ri === dst.ri && src.ci < dst.ci) dstCi--; if (dst.type === 'pin' && src.ci < dst.ci) dstCi--; }
+  if (dst.position !== 'append' && dst.type === src.type) {
+    if (dst.type === 'group' && src.gi === dst.gi && src.ri === dst.ri && src.ci < dst.ci) dstCi--;
+    if (dst.type === 'pin' && src.ci < dst.ci) dstCi--;
+  }
   if (dst.position === 'append') { if (dst.type === 'pin') pinColors.push(moved); else groups[dst.gi].rows[dst.ri].colors.push(moved); }
-  else { const dstRow = dst.type === 'pin' ? pinColors : groups[dst.gi].rows[dst.ri].colors; let idx = dstCi; if (dst.position === 'after') idx++; dstRow.splice(idx, 0, moved); }
+  else { const dstRow = dst.type === 'pin' ? pinColors : groups[dst.gi].rows[dst.ri].colors; let idx = dstCi; if (dst.position === 'after') idx++; dstRow.splice(Math.max(0, idx), 0, moved); }
   saveGroups(); savePinColors(); renderGroups(); renderPinRow();
 }
 
@@ -930,14 +985,14 @@ function setupGroupHeaderPointerDnD(hdr, block, gi) {
     if (!grpDragActive && Math.sqrt(dx*dx + dy*dy) > 6) {
       grpDragActive = true; grpDragSrc.block.classList.add('group-dragging'); grpDragSrc.hdr.classList.add('is-grabbing');
       const ghost = document.getElementById('groupDragGhost');
-      ghost.style.width = '180px'; ghost.style.height = '44px'; ghost.style.display = 'block';
+      ghost.style.width = '160px'; ghost.style.height = '44px'; ghost.style.display = 'block';
       const nameEl = grpDragSrc.block.querySelector('.group-name-display');
       ghost.innerHTML = '<div style="padding:8px 12px;font-family:\'Syne\',sans-serif;font-size:13px;font-weight:600;text-align:center;">' + (nameEl ? nameEl.textContent : '') + '</div>';
-      ghost.style.transform = `translate(${e.clientX - 90}px,${e.clientY - 22}px)`; grpGhost = ghost;
+      ghost.style.transform = `translate(${e.clientX - 80}px,${e.clientY - 22}px)`; grpGhost = ghost;
     }
     if (!grpDragActive) return;
     e.preventDefault();
-    grpGhost.style.transform = `translate(${e.clientX - 90}px,${e.clientY - 22}px)`;
+    grpGhost.style.transform = `translate(${e.clientX - 80}px,${e.clientY - 22}px)`;
     document.querySelectorAll('.group-block.group-drag-over-left,.group-block.group-drag-over-right').forEach(b => b.classList.remove('group-drag-over-left','group-drag-over-right'));
     grpDragOverGi = null; grpDropInsertBefore = true;
     try { hdr.releasePointerCapture(e.pointerId); } catch(_){}
@@ -977,8 +1032,9 @@ function setupGroupHeaderPointerDnD(hdr, block, gi) {
 //  行DnD
 // ============================================================
 function cancelRowDrag() {
-  document.querySelectorAll('.emoji-row.row-dragging').forEach(r => r.classList.remove('row-dragging'));
+  document.querySelectorAll('.emoji-row.row-dragging,.divider-row.row-dragging').forEach(r => r.classList.remove('row-dragging'));
   document.querySelectorAll('.emoji-row.row-drag-over-top,.emoji-row.row-drag-over-bottom,.divider-row.row-drag-over-top,.divider-row.row-drag-over-bottom').forEach(r => r.classList.remove('row-drag-over-top','row-drag-over-bottom'));
+  if (rowDragSrc && rowDragSrc.keySpan) rowDragSrc.keySpan.classList.remove('is-grabbing');
   rowDragSrc = null; rowDragActive = false; rowPointerId = null;
 }
 
@@ -986,14 +1042,19 @@ function setupRowKeyPointerDnD(keySpan, rowEl, gi, ri) {
   keySpan.addEventListener('pointerdown', e => {
     if (appMode !== 'edit') return;
     if (e.button !== 0 && e.pointerType !== 'touch') return;
-    if (e.target.closest('.divider-del-btn,.divider-color-swatch')) return;
+    if (e.target.closest('.divider-del-btn')) return;
     rowDragSrc = { gi, ri, rowEl, keySpan, startX: e.clientX, startY: e.clientY };
-    rowDragActive = false; rowPointerId = e.pointerId; keySpan.setPointerCapture(e.pointerId);
+    rowDragActive = false; rowPointerId = e.pointerId;
+    try { keySpan.setPointerCapture(e.pointerId); } catch(_){}
   });
   keySpan.addEventListener('pointermove', e => {
     if (rowPointerId === null || e.pointerId !== rowPointerId || !rowDragSrc) return;
     const dx = e.clientX - rowDragSrc.startX, dy = e.clientY - rowDragSrc.startY;
-    if (!rowDragActive && Math.sqrt(dx*dx + dy*dy) > 6) { rowDragActive = true; rowEl.classList.add('row-dragging'); keySpan.classList.add('is-grabbing'); }
+    if (!rowDragActive && Math.sqrt(dx*dx + dy*dy) > 6) {
+      rowDragActive = true;
+      rowEl.classList.add('row-dragging');
+      keySpan.classList.add('is-grabbing');
+    }
     if (!rowDragActive) return; e.preventDefault();
     document.querySelectorAll('.emoji-row.row-drag-over-top,.emoji-row.row-drag-over-bottom,.divider-row.row-drag-over-top,.divider-row.row-drag-over-bottom').forEach(r => r.classList.remove('row-drag-over-top','row-drag-over-bottom'));
     try { keySpan.releasePointerCapture(e.pointerId); } catch(_){}
@@ -1001,13 +1062,17 @@ function setupRowKeyPointerDnD(keySpan, rowEl, gi, ri) {
     try { keySpan.setPointerCapture(e.pointerId); } catch(_){}
     if (!elemBelow) return;
     const targetRow = elemBelow.closest('.emoji-row,.divider-row');
-    if (targetRow && targetRow !== rowEl && +targetRow.dataset.gi === gi) { const rect = targetRow.getBoundingClientRect(); if (e.clientY < rect.top + rect.height / 2) targetRow.classList.add('row-drag-over-top'); else targetRow.classList.add('row-drag-over-bottom'); }
+    if (targetRow && targetRow !== rowEl && +targetRow.dataset.gi === gi) {
+      const rect = targetRow.getBoundingClientRect();
+      if (e.clientY < rect.top + rect.height / 2) targetRow.classList.add('row-drag-over-top'); else targetRow.classList.add('row-drag-over-bottom');
+    }
   });
   keySpan.addEventListener('pointerup', e => {
-    if (e.pointerId !== rowPointerId) return;
+    if (rowPointerId === null || e.pointerId !== rowPointerId) return;
     const wasActive = rowDragActive, srcRi = rowDragSrc ? rowDragSrc.ri : -1, srcGi = rowDragSrc ? rowDragSrc.gi : -1;
     try { keySpan.releasePointerCapture(e.pointerId); } catch(_){}
-    const elemBelow = document.elementFromPoint(e.clientX, e.clientY); cancelRowDrag();
+    const elemBelow = document.elementFromPoint(e.clientX, e.clientY);
+    cancelRowDrag();
     if (!wasActive) {
       if (groups[srcGi] && groups[srcGi].rows[srcRi] && groups[srcGi].rows[srcRi].divider) {
         openEditDividerModal(srcGi, srcRi); return;
@@ -1017,7 +1082,8 @@ function setupRowKeyPointerDnD(keySpan, rowEl, gi, ri) {
     if (srcRi < 0 || !elemBelow) return;
     const targetRow = elemBelow.closest('.emoji-row,.divider-row');
     if (!targetRow || targetRow === rowEl || +targetRow.dataset.gi !== srcGi) return;
-    const dstRi = +targetRow.dataset.ri; const rect = targetRow.getBoundingClientRect(); const insertBefore = e.clientY < rect.top + rect.height / 2;
+    const dstRi = +targetRow.dataset.ri;
+    const rect = targetRow.getBoundingClientRect(); const insertBefore = e.clientY < rect.top + rect.height / 2;
     const rows = groups[srcGi].rows; const [moved] = rows.splice(srcRi, 1);
     let insertIdx = dstRi; if (srcRi < dstRi) insertIdx = dstRi - 1; if (!insertBefore) insertIdx++;
     rows.splice(Math.max(0, Math.min(insertIdx, rows.length)), 0, moved);
@@ -1036,13 +1102,19 @@ function clearChipDropHighlights() {
   document.querySelectorAll('.emoji-row.drop-row-highlight').forEach(el => el.classList.remove('drop-row-highlight'));
 }
 function cancelChipDrag() {
-  const ghost = document.getElementById('chipDragGhost'); ghost.style.display = 'none';
+  const ghost = document.getElementById('chipDragGhost'); if (ghost) ghost.style.display = 'none';
   document.querySelectorAll('.swatch-chip.chip-dragging,.pin-chip.chip-dragging').forEach(c => c.classList.remove('chip-dragging','is-grabbing'));
   clearChipDropHighlights(); chipDragSrc = null; chipDropInfo = null; chipDragActive = false; chipPointerId = null; chipGhost = null;
 }
 function setupChipPointerDnD(chip, c, srcInfo) {
   let startX = 0, startY = 0;
-  chip.addEventListener('pointerdown', e => { if (appMode !== 'edit') return; if (e.button !== 0 && e.pointerType !== 'touch') return; startX = e.clientX; startY = e.clientY; chipDragSrc = { ...srcInfo }; chipDragActive = false; chipPointerId = e.pointerId; chipDropInfo = null; chip.setPointerCapture(e.pointerId); });
+  chip.addEventListener('pointerdown', e => {
+    if (appMode !== 'edit') return;
+    if (e.button !== 0 && e.pointerType !== 'touch') return;
+    startX = e.clientX; startY = e.clientY;
+    chipDragSrc = { ...srcInfo }; chipDragActive = false; chipPointerId = e.pointerId; chipDropInfo = null;
+    try { chip.setPointerCapture(e.pointerId); } catch(_){}
+  });
   chip.addEventListener('pointermove', e => {
     if (chipPointerId === null || e.pointerId !== chipPointerId) return;
     const dx = e.clientX - startX, dy = e.clientY - startY;
@@ -1052,7 +1124,8 @@ function setupChipPointerDnD(chip, c, srcInfo) {
       g.style.width = isPin ? '40px' : '32px'; g.style.height = isPin ? '34px' : '32px'; g.style.background = c.b;
       g.style.borderRadius = isPin ? (c.locked ? '6px' : '17px') : (c.locked ? '5px' : '50%');
       g.style.border = '2px solid rgba(255,255,255,.85)'; g.style.boxShadow = '0 4px 18px rgba(0,0,0,.32)'; g.style.display = 'block';
-      const ox = isPin ? 20 : 16, oy = isPin ? 17 : 16; g.style.transform = `translate(${e.clientX - ox}px,${e.clientY - oy}px)`; chipGhost = g;
+      const ox = isPin ? 20 : 16, oy = isPin ? 17 : 16;
+      g.style.transform = `translate(${e.clientX - ox}px,${e.clientY - oy}px)`; chipGhost = g;
     }
     if (!chipDragActive) return; e.preventDefault();
     const isPin = srcInfo.type === 'pin'; const ox = isPin ? 20 : 16, oy = isPin ? 17 : 16;
@@ -1063,26 +1136,64 @@ function setupChipPointerDnD(chip, c, srcInfo) {
     try { chip.setPointerCapture(e.pointerId); } catch(_){}
     if (!elemBelow) return;
     const targetPinChip = elemBelow.closest('.pin-chip');
-    if (targetPinChip && targetPinChip !== chip) { const dCi = +targetPinChip.dataset.ci; const rect = targetPinChip.getBoundingClientRect(); const pos = e.clientX < rect.left + rect.width/2 ? 'before' : 'after'; targetPinChip.classList.add(pos === 'before' ? 'chip-drop-before' : 'chip-drop-after'); chipDropInfo = { type: 'pin', ci: dCi, position: pos }; return; }
+    if (targetPinChip && targetPinChip !== chip) {
+      const dCi = +targetPinChip.dataset.ci; const rect = targetPinChip.getBoundingClientRect();
+      const pos = e.clientX < rect.left + rect.width/2 ? 'before' : 'after';
+      targetPinChip.classList.add(pos === 'before' ? 'chip-drop-before' : 'chip-drop-after');
+      chipDropInfo = { type: 'pin', ci: dCi, position: pos }; return;
+    }
     const targetPinRow = elemBelow.closest('.pin-row-inner');
     if (targetPinRow) { targetPinRow.classList.add('drop-append-here'); chipDropInfo = { type: 'pin', ci: -1, position: 'append' }; return; }
     const targetChip = elemBelow.closest('.swatch-chip');
-    if (targetChip && targetChip !== chip) { const dGi = +targetChip.dataset.gi, dRi = +targetChip.dataset.ri, dCi = +targetChip.dataset.ci; const rect = targetChip.getBoundingClientRect(); const pos = e.clientX < rect.left + rect.width/2 ? 'before' : 'after'; targetChip.classList.add(pos === 'before' ? 'chip-drop-before' : 'chip-drop-after'); chipDropInfo = { type: 'group', gi: dGi, ri: dRi, ci: dCi, position: pos }; return; }
+    if (targetChip && targetChip !== chip) {
+      const dGi = +targetChip.dataset.gi, dRi = +targetChip.dataset.ri, dCi = +targetChip.dataset.ci;
+      const rect = targetChip.getBoundingClientRect(); const pos = e.clientX < rect.left + rect.width/2 ? 'before' : 'after';
+      targetChip.classList.add(pos === 'before' ? 'chip-drop-before' : 'chip-drop-after');
+      chipDropInfo = { type: 'group', gi: dGi, ri: dRi, ci: dCi, position: pos }; return;
+    }
     const targetSw = elemBelow.closest('.emoji-swatches');
-    if (targetSw && targetSw.dataset.gi !== undefined) { const dGi = +targetSw.dataset.gi, dRi = +targetSw.dataset.ri; targetSw.classList.add('drop-append-here'); chipDropInfo = { type: 'group', gi: dGi, ri: dRi, ci: -1, position: 'append' }; return; }
+    if (targetSw && targetSw.dataset.gi !== undefined) {
+      const dGi = +targetSw.dataset.gi, dRi = +targetSw.dataset.ri;
+      targetSw.classList.add('drop-append-here'); chipDropInfo = { type: 'group', gi: dGi, ri: dRi, ci: -1, position: 'append' }; return;
+    }
     const targetRow = elemBelow.closest('.emoji-row');
-    if (targetRow && targetRow.dataset.gi !== undefined) { const dGi = +targetRow.dataset.gi, dRi = +targetRow.dataset.ri; targetRow.classList.add('drop-row-highlight'); const sw = targetRow.querySelector('.emoji-swatches'); if (sw) sw.classList.add('drop-append-here'); chipDropInfo = { type: 'group', gi: dGi, ri: dRi, ci: -1, position: 'append' }; }
+    if (targetRow && targetRow.dataset.gi !== undefined) {
+      const dGi = +targetRow.dataset.gi, dRi = +targetRow.dataset.ri;
+      targetRow.classList.add('drop-row-highlight');
+      const sw = targetRow.querySelector('.emoji-swatches'); if (sw) sw.classList.add('drop-append-here');
+      chipDropInfo = { type: 'group', gi: dGi, ri: dRi, ci: -1, position: 'append' };
+    }
   });
   chip.addEventListener('pointerup', e => {
     if (e.pointerId !== chipPointerId) return;
-    const wasActive = chipDragActive, src = chipDragSrc, dst = chipDropInfo; cancelChipDrag();
+    const wasActive = chipDragActive, src = { ...chipDragSrc }, dst = chipDropInfo;
+    cancelChipDrag();
     if (wasActive) {
-      if (dst !== null) { let isSelf = false; if (dst.position !== 'append' && dst.type === src.type) { if (dst.type === 'pin') isSelf = (dst.ci === src.ci); else isSelf = (dst.gi === src.gi && dst.ri === src.ri && dst.ci === src.ci); } if (!isSelf) { doMoveChip(src, dst); showToast('チップを移動しました'); } else { renderGroups(); renderPinRow(); } } else { renderGroups(); renderPinRow(); }
+      if (dst !== null) {
+        let isSelf = false;
+        if (dst.position !== 'append' && dst.type === src.type) {
+          if (dst.type === 'pin') isSelf = (dst.ci === src.ci);
+          else isSelf = (dst.gi === src.gi && dst.ri === src.ri && dst.ci === src.ci);
+        }
+        if (!isSelf) { doMoveChip(src, dst); showToast('チップを移動しました'); }
+        else { renderGroups(); renderPinRow(); }
+      } else { renderGroups(); renderPinRow(); }
     } else {
       const tapKey = src.type === 'pin' ? `pin:${src.ci}` : `g:${src.gi}:${src.ri}:${src.ci}`;
-      if (swapSelected === null) { swapSelected = { ...src, _key: tapKey }; renderGroups(); renderPinRow(); showToast('入れ替え先のチップをタップ（同じチップでキャンセル）'); }
-      else if (swapSelected._key === tapKey) { swapSelected = null; renderGroups(); renderPinRow(); }
-      else { function getCell(info) { return info.type === 'pin' ? pinColors : groups[info.gi].rows[info.ri].colors; } const rowA = getCell(swapSelected), rowB = getCell(src); const tmp = rowA[swapSelected.ci]; rowA[swapSelected.ci] = rowB[src.ci]; rowB[src.ci] = tmp; swapSelected = null; saveGroups(); savePinColors(); renderGroups(); renderPinRow(); showToast('2色を入れ替えました ↔'); }
+      if (swapSelected === null) {
+        swapSelected = { ...src, _key: tapKey }; renderGroups(); renderPinRow();
+        showToast('入れ替え先のチップをタップ（同じチップでキャンセル）');
+      } else if (swapSelected._key === tapKey) {
+        swapSelected = null; renderGroups(); renderPinRow();
+      } else {
+        function getCell(info) { return info.type === 'pin' ? pinColors : groups[info.gi].rows[info.ri].colors; }
+        const rowA = getCell(swapSelected), rowB = getCell(src);
+        if (!rowA || !rowB || swapSelected.ci >= rowA.length || src.ci >= rowB.length) {
+          swapSelected = null; renderGroups(); renderPinRow(); return;
+        }
+        const tmp = rowA[swapSelected.ci]; rowA[swapSelected.ci] = rowB[src.ci]; rowB[src.ci] = tmp;
+        swapSelected = null; saveGroups(); savePinColors(); renderGroups(); renderPinRow(); showToast('2色を入れ替えました ↔');
+      }
     }
   });
   chip.addEventListener('pointercancel', () => cancelChipDrag());
@@ -1099,7 +1210,9 @@ function renderPinRow() {
   pinColors.forEach((c, ci) => {
     const chip = document.createElement('div'); chip.className = 'pin-chip'; chip.dataset.type = 'pin'; chip.dataset.ci = ci;
     if (c.locked) chip.classList.add('locked');
-    if (appMode === 'edit' && swapSelected && swapSelected.type === 'pin' && swapSelected.ci === ci) { chip.classList.add('selected-for-swap'); chip.style.setProperty('--chip-sel-color', c.t); }
+    if (appMode === 'edit' && swapSelected && swapSelected.type === 'pin' && swapSelected.ci === ci) {
+      chip.classList.add('selected-for-swap'); chip.style.setProperty('--chip-sel-color', c.t || '#1a1a2e');
+    }
     const inner = document.createElement('div'); inner.className = 'pin-chip-inner'; inner.style.background = c.b; inner.style.color = c.t;
     const label = getChipLabel(c); inner.textContent = label; applyPinChipLabelStyle(inner, label);
     const tt = document.createElement('div'); tt.className = 'pin-chip-tooltip';
@@ -1144,11 +1257,15 @@ function renderPinRow() {
   addBtn.addEventListener('pointerdown', () => { pinAddLongPress = false; pinAddPressTimer = setTimeout(() => { pinAddLongPress = true; pinAddPressTimer = null; openAddModalForPin(); }, 400); });
   addBtn.addEventListener('pointerup', () => { if (pinAddPressTimer) { clearTimeout(pinAddPressTimer); pinAddPressTimer = null; } });
   addBtn.addEventListener('pointercancel', () => { if (pinAddPressTimer) { clearTimeout(pinAddPressTimer); pinAddPressTimer = null; } pinAddLongPress = false; });
-  addBtn.addEventListener('click', () => { if (pinAddLongPress) { pinAddLongPress = false; return; } const t = document.getElementById('tHex').value, b = document.getElementById('bHex').value; pinColors.push({ id: uid(), t, b, locked: false, label: '', copyTarget: 'b' }); savePinColors(); renderPinRow(); });
+  addBtn.addEventListener('click', () => {
+    if (pinAddLongPress) { pinAddLongPress = false; return; }
+    const t = document.getElementById('tHex').value, b = document.getElementById('bHex').value;
+    pinColors.push({ id: uid(), t, b, locked: false, label: '', copyTarget: 'b' });
+    savePinColors(); renderPinRow();
+  });
   frag.append(addBtn);
 
   container.replaceChildren(frag);
-
   if (window._scheduleTwemoji) window._scheduleTwemoji();
 }
 
@@ -1186,41 +1303,30 @@ function renderGroups() {
         const lineColor = row.color || '';
 
         if (row.label) {
-          // ラベルあり: 線 — ラベル — 線 (中央配置)
-          // FIX: actions を absolute にしたので lines は flex:1 で均等に広がる
           const lineL = document.createElement('div'); lineL.className = 'divider-line';
           if (lineColor) { lineL.style.background = lineColor; lineL.style.opacity = '0.8'; }
-
           const labelWrap = document.createElement('div'); labelWrap.className = 'divider-label-wrap';
           const lbl = document.createElement('span'); lbl.className = 'divider-label'; lbl.textContent = row.label;
           if (lineColor) lbl.style.color = lineColor;
           labelWrap.append(lbl);
-
           const lineR = document.createElement('div'); lineR.className = 'divider-line';
           if (lineColor) { lineR.style.background = lineColor; lineR.style.opacity = '0.8'; }
-
-          // FIX: actions は position:absolute (右端) → 線の中央揃えに影響しない
           const actions = document.createElement('div'); actions.className = 'divider-actions';
           const delBtn2 = document.createElement('button'); delBtn2.className = 'divider-del-btn'; delBtn2.title = '区切りを削除'; delBtn2.textContent = '×';
-          delBtn2.addEventListener('pointerdown', e => e.stopPropagation());
+          delBtn2.addEventListener('pointerdown', e => { e.stopPropagation(); });
           ;(function(cGi, cRi){ delBtn2.addEventListener('click', e => { e.stopPropagation(); groups[cGi].rows.splice(cRi, 1); saveGroups(); renderGroups(); showToast('区切りを削除しました'); }); })(gi, ri);
           const handle = document.createElement('span'); handle.className = 'divider-drag-handle'; handle.textContent = '⠿';
           actions.append(delBtn2, handle);
-
           divEl.append(lineL, labelWrap, lineR, actions);
         } else {
-          // ラベルなし: 線のみ（中央均等）
           const lineOnly = document.createElement('div'); lineOnly.className = 'divider-line';
           if (lineColor) { lineOnly.style.background = lineColor; lineOnly.style.opacity = '0.8'; }
-
-          // FIX: actions は position:absolute → 線が右端まで伸びる
           const actions = document.createElement('div'); actions.className = 'divider-actions';
           const delBtn2 = document.createElement('button'); delBtn2.className = 'divider-del-btn'; delBtn2.title = '区切りを削除'; delBtn2.textContent = '×';
-          delBtn2.addEventListener('pointerdown', e => e.stopPropagation());
+          delBtn2.addEventListener('pointerdown', e => { e.stopPropagation(); });
           ;(function(cGi, cRi){ delBtn2.addEventListener('click', e => { e.stopPropagation(); groups[cGi].rows.splice(cRi, 1); saveGroups(); renderGroups(); showToast('区切りを削除しました'); }); })(gi, ri);
           const handle = document.createElement('span'); handle.className = 'divider-drag-handle'; handle.textContent = '⠿';
           actions.append(delBtn2, handle);
-
           divEl.append(lineOnly, actions);
         }
 
@@ -1236,7 +1342,10 @@ function renderGroups() {
       else {
         let keyTapCount = 0, keyTapTimer = null;
         ;(function(cGi, cRi) {
-          keySpan.addEventListener('click', () => { keyTapCount++; if (keyTapCount === 1) { keyTapTimer = setTimeout(() => { keyTapCount = 0; }, 350); } else if (keyTapCount >= 2) { clearTimeout(keyTapTimer); keyTapCount = 0; openEditRowModal(cGi, cRi); } });
+          keySpan.addEventListener('click', () => {
+            keyTapCount++; if (keyTapCount === 1) { keyTapTimer = setTimeout(() => { keyTapCount = 0; }, 350); }
+            else if (keyTapCount >= 2) { clearTimeout(keyTapTimer); keyTapCount = 0; openEditRowModal(cGi, cRi); }
+          });
           let lastTouch = 0; keySpan.addEventListener('touchend', e => { const now = Date.now(); if (now - lastTouch < 350) { e.preventDefault(); openEditRowModal(cGi, cRi); } lastTouch = now; });
         })(gi, ri);
       }
@@ -1246,7 +1355,9 @@ function renderGroups() {
       row.colors.forEach((c, ci) => {
         const chip = document.createElement('div'); chip.className = 'swatch-chip'; chip.dataset.gi = gi; chip.dataset.ri = ri; chip.dataset.ci = ci;
         if (c.locked) chip.classList.add('locked');
-        if (appMode === 'edit' && swapSelected && swapSelected.type === 'group' && swapSelected.gi === gi && swapSelected.ri === ri && swapSelected.ci === ci) { chip.classList.add('selected-for-swap'); chip.style.setProperty('--chip-sel-color', c.t); }
+        if (appMode === 'edit' && swapSelected && swapSelected.type === 'group' && swapSelected.gi === gi && swapSelected.ri === ri && swapSelected.ci === ci) {
+          chip.classList.add('selected-for-swap'); chip.style.setProperty('--chip-sel-color', c.t || '#1a1a2e');
+        }
         const inner = document.createElement('div'); inner.className = 'swatch-chip-inner'; inner.style.background = c.b; inner.style.color = c.t;
         const label = getChipLabel(c); inner.textContent = label; applyChipLabelStyle(inner, label);
         const tt = document.createElement('div'); tt.className = 'swatch-chip-tooltip';
@@ -1305,7 +1416,8 @@ function renderGroups() {
     const addRow = document.createElement('div'); addRow.className = 'group-add-row';
     const addBtn2 = document.createElement('button'); addBtn2.className = 'group-add-preset'; addBtn2.innerHTML = '＋ 新規登録…';
     ;(function(cGi) { addBtn2.onclick = () => openAddModal(cGi); })(gi);
-    const divBtn = document.createElement('button'); divBtn.className = 'divider-add-btn';
+    // ===== ここが変更点2: divider-add-btn → group-add-preset =====
+    const divBtn = document.createElement('button'); divBtn.className = 'group-add-preset';
     divBtn.innerHTML = '─&thinsp;区切り';
     ;(function(cGi){ divBtn.onclick = () => openAddDividerModal(cGi); })(gi);
     addRow.append(addBtn2); addRow.append(divBtn); block.append(addRow);
@@ -1313,12 +1425,13 @@ function renderGroups() {
   });
 
   el.replaceChildren(frag);
-
   if (window._scheduleTwemoji) window._scheduleTwemoji();
 }
 
 document.addEventListener('click', e => {
-  if (appMode === 'edit' && swapSelected !== null && !e.target.closest('.swatch-chip') && !e.target.closest('.pin-chip')) { swapSelected = null; renderGroups(); renderPinRow(); }
+  if (appMode === 'edit' && swapSelected !== null && !e.target.closest('.swatch-chip') && !e.target.closest('.pin-chip')) {
+    swapSelected = null; renderGroups(); renderPinRow();
+  }
 });
 
 // ============================================================
@@ -1327,7 +1440,7 @@ document.addEventListener('click', e => {
 let modalTargetGi = 0, modalTargetPin = false;
 
 function openAddModal(gi) {
-  modalTargetPin = false; modalTargetGi = gi ?? 0;
+  modalTargetPin = false; modalTargetGi = gi != null ? gi : 0;
   const t = document.getElementById('tHex').value, b = document.getElementById('bHex').value;
   document.getElementById('modalDotT').style.background = t; document.getElementById('modalDotB').style.background = b;
   document.getElementById('modalInfo').innerHTML = `${t}&nbsp;/&nbsp;${b}`;
@@ -1435,7 +1548,9 @@ function closeAddRowModal() { document.getElementById('addRowModal').style.displ
 function confirmAddRow() {
   const t = document.getElementById('tHex').value, b = document.getElementById('bHex').value;
   const label = document.getElementById('addRowLabel').value.trim();
-  groups[addRowTargetGi].rows[addRowTargetRi].colors.push({ id: uid(), t, b, locked: false, label, copyTarget: 'b' });
+  const targetRow = groups[addRowTargetGi].rows[addRowTargetRi];
+  if (!targetRow || targetRow.divider) { showToast('行が見つかりません'); closeAddRowModal(); return; }
+  targetRow.colors.push({ id: uid(), t, b, locked: false, label, copyTarget: 'b' });
   saveGroups(); renderGroups(); closeAddRowModal();
 }
 
@@ -1443,10 +1558,24 @@ function confirmAddRow() {
 //  行編集モーダル
 // ============================================================
 let editGi, editRi;
-function openEditRowModal(gi, ri) { editGi = gi; editRi = ri; document.getElementById('editRowInput').value = groups[gi].rows[ri].key; document.getElementById('editRowModal').style.display = 'flex'; setTimeout(() => document.getElementById('editRowInput').focus(), 50); }
-function saveEditRow() { const val = document.getElementById('editRowInput').value.trim(); if (val) groups[editGi].rows[editRi].key = val; saveGroups(); renderGroups(); closeEditRowModal(); }
-function deleteEditRow() { if (confirm('この行を削除しますか？\n含まれるカラーもすべて消去されます。')) { groups[editGi].rows.splice(editRi, 1); saveGroups(); renderGroups(); closeEditRowModal(); } }
+function openEditRowModal(gi, ri) {
+  editGi = gi; editRi = ri;
+  document.getElementById('editRowInput').value = groups[gi].rows[ri].key;
+  document.getElementById('editRowModal').style.display = 'flex';
+  setTimeout(() => document.getElementById('editRowInput').focus(), 50);
+}
+function saveEditRow() {
+  const val = document.getElementById('editRowInput').value.trim();
+  if (val) groups[editGi].rows[editRi].key = val;
+  saveGroups(); renderGroups(); closeEditRowModal();
+}
+function deleteEditRow() {
+  if (confirm('この行を削除しますか？\n含まれるカラーもすべて消去されます。')) {
+    groups[editGi].rows.splice(editRi, 1); saveGroups(); renderGroups(); closeEditRowModal();
+  }
+}
 function closeEditRowModal() { document.getElementById('editRowModal').style.display = 'none'; }
+document.getElementById('editRowInput').addEventListener('keydown', e => { if (e.key === 'Enter') saveEditRow(); if (e.key === 'Escape') closeEditRowModal(); });
 
 // ============================================================
 //  長押し編集モーダル
@@ -1462,16 +1591,25 @@ function lpUpdateCanvas() {
   const displayB = validHex(bVal) ? bVal : lpOldB, displayT = validHex(tVal) ? tVal : lpOldT;
   const canvas = document.getElementById('lpCanvas'), chip = document.getElementById('lpChipBig');
   canvas.style.background = displayB; chip.style.background = displayB; chip.style.color = displayT;
-  if (validHex(displayB)) { const r = parseInt(displayB.slice(1,3),16), g = parseInt(displayB.slice(3,5),16), b2 = parseInt(displayB.slice(5,7),16); const lum = (0.299*r + 0.587*g + 0.114*b2) / 255; canvas.style.setProperty('--lp-btn-fg', lum > 0.45 ? 'rgba(0,0,0,.72)' : '#fff'); canvas.style.setProperty('--lp-btn-shadow', lum > 0.45 ? '0 1px 2px rgba(255,255,255,.6)' : '0 1px 4px rgba(0,0,0,.6),0 0 8px rgba(0,0,0,.3)'); }
+  if (validHex(displayB)) {
+    const r = parseInt(displayB.slice(1,3),16), g = parseInt(displayB.slice(3,5),16), b2 = parseInt(displayB.slice(5,7),16);
+    const lum = (0.299*r + 0.587*g + 0.114*b2) / 255;
+    canvas.style.setProperty('--lp-btn-fg', lum > 0.45 ? 'rgba(0,0,0,.72)' : '#fff');
+    canvas.style.setProperty('--lp-btn-shadow', lum > 0.45 ? '0 1px 2px rgba(255,255,255,.6)' : '0 1px 4px rgba(0,0,0,.6),0 0 8px rgba(0,0,0,.3)');
+  }
   const rawText = document.getElementById('lpLabelInput').value.trim();
   const displayText = rawText || (lpTarget ? getChipLabel(lpTarget.c) : 'Aa'); chip.textContent = displayText;
   const vlen = [...displayText].reduce((n,ch)=>{const cp=ch.codePointAt(0);return n+(cp>0x7F?2:1);},0);
-  if (vlen <= 2) { chip.style.fontSize = '15px'; chip.style.whiteSpace = 'nowrap'; } else if (vlen <= 4) { chip.style.fontSize = '11px'; chip.style.lineHeight = '1.1'; chip.style.wordBreak = 'break-all'; chip.style.whiteSpace = 'normal'; } else { chip.style.fontSize = '8px'; chip.style.lineHeight = '1.1'; chip.style.wordBreak = 'break-all'; chip.style.whiteSpace = 'normal'; }
+  if (vlen <= 2) { chip.style.fontSize = '15px'; chip.style.whiteSpace = 'nowrap'; }
+  else if (vlen <= 4) { chip.style.fontSize = '11px'; chip.style.lineHeight = '1.1'; chip.style.wordBreak = 'break-all'; chip.style.whiteSpace = 'normal'; }
+  else { chip.style.fontSize = '8px'; chip.style.lineHeight = '1.1'; chip.style.wordBreak = 'break-all'; chip.style.whiteSpace = 'normal'; }
 }
 function updateLpOverwriteBtn() {
   const bVal = document.getElementById('lpBHex').value, tVal = document.getElementById('lpTHex').value;
   const btn = document.getElementById('lpOverwriteBtn'), label = document.getElementById('lpOverwriteLabel');
-  if (lpTarget && lpTarget.c.locked && !lpTarget.tempUnlocked) { btn.disabled = true; btn.style.background = 'var(--surface2)'; btn.style.color = 'var(--muted)'; btn.style.borderColor = 'var(--border)'; label.textContent = '🔒 ロック解除が必要です'; return; }
+  if (lpTarget && lpTarget.c.locked && !lpTarget.tempUnlocked) {
+    btn.disabled = true; btn.style.background = 'var(--surface2)'; btn.style.color = 'var(--muted)'; btn.style.borderColor = 'var(--border)'; label.textContent = '🔒 ロック解除が必要です'; return;
+  }
   const ok = validHex(bVal) && validHex(tVal); btn.disabled = !ok;
   if (ok) { btn.style.background = bVal; btn.style.color = tVal; btn.style.borderColor = 'rgba(0,0,0,.08)'; label.textContent = 'この色で上書き保存'; }
   else { btn.style.background = 'var(--surface2)'; btn.style.color = 'var(--muted)'; btn.style.borderColor = 'var(--border)'; label.textContent = '有効なHEXを入力してください'; }
@@ -1488,18 +1626,35 @@ function lpSetInputs(bVal, tVal) {
   if (validHex(bVal)) { document.getElementById('lpBHex').value = bVal; document.getElementById('lpBPicker').value = bVal; document.getElementById('lpBSwatch').style.background = bVal; document.getElementById('lpBHex').classList.remove('invalid'); }
   if (validHex(tVal)) { document.getElementById('lpTHex').value = tVal; document.getElementById('lpTPicker').value = tVal; document.getElementById('lpTSwatch').style.background = tVal; document.getElementById('lpTHex').classList.remove('invalid'); }
 }
-function lpCompareTo(mode) { lpSetInputs(mode === 'new' ? lpSnapB : lpOldB, mode === 'new' ? lpSnapT : lpOldT); document.getElementById('lpBtnNew').classList.toggle('active-compare', mode === 'new'); document.getElementById('lpBtnOld').classList.toggle('active-compare', mode === 'old'); lpUpdateCanvas(); updateLpOverwriteBtn(); }
-function lpSwapColors() { const bVal = document.getElementById('lpBHex').value, tVal = document.getElementById('lpTHex').value; if (!validHex(bVal) || !validHex(tVal)) { showToast('有効なHEXを入力してください'); return; } lpSetInputs(tVal, bVal); lpUpdateCanvas(); updateLpOverwriteBtn(); showToast('入力欄の色を入れ替えました'); }
-function lpMatchToPreview() { const bVal = document.getElementById('lpBHex').value, tVal = document.getElementById('lpTHex').value; const bOk = validHex(bVal), tOk = validHex(tVal); if (!bOk && !tOk) { showToast('有効なHEXを入力してください'); return; } const base = bOk ? bVal : tVal; lpSetInputs(base, base); lpUpdateCanvas(); updateLpOverwriteBtn(); showToast('同じ色 ' + base.toUpperCase() + ' に揃えました'); }
+function lpCompareTo(mode) {
+  lpSetInputs(mode === 'new' ? lpSnapB : lpOldB, mode === 'new' ? lpSnapT : lpOldT);
+  document.getElementById('lpBtnNew').classList.toggle('active-compare', mode === 'new');
+  document.getElementById('lpBtnOld').classList.toggle('active-compare', mode === 'old');
+  lpUpdateCanvas(); updateLpOverwriteBtn();
+}
+function lpSwapColors() {
+  const bVal = document.getElementById('lpBHex').value, tVal = document.getElementById('lpTHex').value;
+  if (!validHex(bVal) || !validHex(tVal)) { showToast('有効なHEXを入力してください'); return; }
+  lpSetInputs(tVal, bVal); lpUpdateCanvas(); updateLpOverwriteBtn(); showToast('入力欄の色を入れ替えました');
+}
+function lpMatchToPreview() {
+  const bVal = document.getElementById('lpBHex').value, tVal = document.getElementById('lpTHex').value;
+  const bOk = validHex(bVal), tOk = validHex(tVal);
+  if (!bOk && !tOk) { showToast('有効なHEXを入力してください'); return; }
+  const base = bOk ? bVal : tVal; lpSetInputs(base, base); lpUpdateCanvas(); updateLpOverwriteBtn(); showToast('同じ色 ' + base.toUpperCase() + ' に揃えました');
+}
 
 function openLpModal(c, gi, ri, ci, chipType) {
   longPressConsumed = true; longPressActive = false;
   if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
   lpTarget = { c, gi, ri, ci, chipType: chipType || 'group', tempUnlocked: false };
   lpOldB = c.b; lpOldT = c.t; lpSnapB = document.getElementById('bHex').value; lpSnapT = document.getElementById('tHex').value;
-  const rawLabel = (c.label && c.label.trim() && c.label.trim() !== 'Aa') ? c.label.trim() : ''; document.getElementById('lpLabelInput').value = rawLabel;
-  lpSetInputs(lpOldB, lpOldT); document.getElementById('lpBtnNew').classList.remove('active-compare'); document.getElementById('lpBtnOld').classList.add('active-compare');
-  lpUpdateCanvas(); lpUpdateLockIcon(); updateLpOverwriteBtn(); document.getElementById('longPressEditModal').style.display = 'flex';
+  const rawLabel = (c.label && c.label.trim() && c.label.trim() !== 'Aa') ? c.label.trim() : '';
+  document.getElementById('lpLabelInput').value = rawLabel;
+  lpSetInputs(lpOldB, lpOldT);
+  document.getElementById('lpBtnNew').classList.remove('active-compare'); document.getElementById('lpBtnOld').classList.add('active-compare');
+  lpUpdateCanvas(); lpUpdateLockIcon(); updateLpOverwriteBtn();
+  document.getElementById('longPressEditModal').style.display = 'flex';
 }
 
 function closeLpModal() {
@@ -1507,10 +1662,26 @@ function closeLpModal() {
   document.getElementById('longPressEditModal').style.display = 'none';
 }
 
-document.getElementById('lpBPicker').addEventListener('input', e => { document.getElementById('lpBHex').value = e.target.value; document.getElementById('lpBSwatch').style.background = e.target.value; document.getElementById('lpBHex').classList.remove('invalid'); lpUpdateCanvas(); updateLpOverwriteBtn(); });
-document.getElementById('lpTPicker').addEventListener('input', e => { document.getElementById('lpTHex').value = e.target.value; document.getElementById('lpTSwatch').style.background = e.target.value; document.getElementById('lpTHex').classList.remove('invalid'); lpUpdateCanvas(); updateLpOverwriteBtn(); });
-document.getElementById('lpBHex').addEventListener('input', e => { let v = normalizeHexInput(e.target.value); if (v !== e.target.value) e.target.value = v; if (validHex(v)) { document.getElementById('lpBPicker').value = v; document.getElementById('lpBSwatch').style.background = v; e.target.classList.remove('invalid'); } else e.target.classList.add('invalid'); lpUpdateCanvas(); updateLpOverwriteBtn(); });
-document.getElementById('lpTHex').addEventListener('input', e => { let v = normalizeHexInput(e.target.value); if (v !== e.target.value) e.target.value = v; if (validHex(v)) { document.getElementById('lpTPicker').value = v; document.getElementById('lpTSwatch').style.background = v; e.target.classList.remove('invalid'); } else e.target.classList.add('invalid'); lpUpdateCanvas(); updateLpOverwriteBtn(); });
+document.getElementById('lpBPicker').addEventListener('input', e => {
+  document.getElementById('lpBHex').value = e.target.value; document.getElementById('lpBSwatch').style.background = e.target.value;
+  document.getElementById('lpBHex').classList.remove('invalid'); lpUpdateCanvas(); updateLpOverwriteBtn();
+});
+document.getElementById('lpTPicker').addEventListener('input', e => {
+  document.getElementById('lpTHex').value = e.target.value; document.getElementById('lpTSwatch').style.background = e.target.value;
+  document.getElementById('lpTHex').classList.remove('invalid'); lpUpdateCanvas(); updateLpOverwriteBtn();
+});
+document.getElementById('lpBHex').addEventListener('input', e => {
+  let v = normalizeHexInput(e.target.value); if (v !== e.target.value) e.target.value = v;
+  if (validHex(v)) { document.getElementById('lpBPicker').value = v; document.getElementById('lpBSwatch').style.background = v; e.target.classList.remove('invalid'); }
+  else e.target.classList.add('invalid');
+  lpUpdateCanvas(); updateLpOverwriteBtn();
+});
+document.getElementById('lpTHex').addEventListener('input', e => {
+  let v = normalizeHexInput(e.target.value); if (v !== e.target.value) e.target.value = v;
+  if (validHex(v)) { document.getElementById('lpTPicker').value = v; document.getElementById('lpTSwatch').style.background = v; e.target.classList.remove('invalid'); }
+  else e.target.classList.add('invalid');
+  lpUpdateCanvas(); updateLpOverwriteBtn();
+});
 document.getElementById('lpLabelInput').addEventListener('input', lpUpdateCanvas);
 
 function lpOverwrite() {
@@ -1551,8 +1722,8 @@ function lpDelete() {
     if (ci >= 0 && ci < pinColors.length) pinColors.splice(ci, 1);
     savePinColors(); renderPinRow();
   } else {
-    const row = groups[gi]?.rows[ri];
-    if (row && ci >= 0 && ci < row.colors.length) row.colors.splice(ci, 1);
+    const row = groups[gi] && groups[gi].rows[ri];
+    if (row && !row.divider && ci >= 0 && ci < row.colors.length) row.colors.splice(ci, 1);
     saveGroups(); renderGroups();
   }
   showToast('削除しました');
@@ -1570,9 +1741,19 @@ function confirmOverwrite() {
 }
 
 let deleteGroupIndex = -1;
-function openDeleteGroupModal(gi) { deleteGroupIndex = gi; const g = groups[gi]; const colorCount = g.rows.reduce((n, r) => n + (r.divider ? 0 : r.colors.length), 0); const detail = colorCount > 0 ? `カラー ${colorCount} 件も削除されます。 ` : ''; document.getElementById('deleteGroupMsg').textContent = `「${g.name}」を削除します。${detail}この操作は取り消せません。`; document.getElementById('deleteGroupModal').style.display = 'flex'; }
+function openDeleteGroupModal(gi) {
+  deleteGroupIndex = gi; const g = groups[gi];
+  const colorCount = g.rows.reduce((n, r) => n + (r.divider ? 0 : r.colors.length), 0);
+  const detail = colorCount > 0 ? `カラー ${colorCount} 件も削除されます。 ` : '';
+  document.getElementById('deleteGroupMsg').textContent = `「${g.name}」を削除します。${detail}この操作は取り消せません。`;
+  document.getElementById('deleteGroupModal').style.display = 'flex';
+}
 function closeDeleteGroupModal() { deleteGroupIndex = -1; document.getElementById('deleteGroupModal').style.display = 'none'; }
-function confirmDeleteGroup() { if (deleteGroupIndex < 0 || deleteGroupIndex >= groups.length) { closeDeleteGroupModal(); return; } const name = groups[deleteGroupIndex].name; groups.splice(deleteGroupIndex, 1); saveGroups(); renderGroups(); showToast(`「${name}」を削除しました`); closeDeleteGroupModal(); }
+function confirmDeleteGroup() {
+  if (deleteGroupIndex < 0 || deleteGroupIndex >= groups.length) { closeDeleteGroupModal(); return; }
+  const name = groups[deleteGroupIndex].name; groups.splice(deleteGroupIndex, 1);
+  saveGroups(); renderGroups(); showToast(`「${name}」を削除しました`); closeDeleteGroupModal();
+}
 
 function openAddGroupModal() { document.getElementById('addGroupNameInput').value = ''; document.getElementById('addGroupModal').style.display = 'flex'; setTimeout(() => document.getElementById('addGroupNameInput').focus(), 50); }
 function closeAddGroupModal() { document.getElementById('addGroupModal').style.display = 'none'; }
@@ -1616,7 +1797,11 @@ async function gistPut(gs, pin, dc) {
     'pin.json': { content: JSON.stringify(pin !== undefined ? pin : pinColors) },
     'divider_colors.json': { content: JSON.stringify(dc !== undefined ? dc : dividerColors) }
   };
-  const r = await fetch('https://api.github.com/gists/' + syncConfig.gistId, { method: 'PATCH', headers: { 'Authorization': 'token ' + syncConfig.token }, body: JSON.stringify({ files }) });
+  const r = await fetch('https://api.github.com/gists/' + syncConfig.gistId, {
+    method: 'PATCH',
+    headers: { 'Authorization': 'token ' + syncConfig.token, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ files })
+  });
   return r.ok;
 }
 
@@ -1625,10 +1810,28 @@ function mergeGroups(localGs, remoteGs) {
   remoteGs.forEach(g => g.rows.forEach(r => { if (!r.divider) r.colors.forEach(c => { if (c.id) remoteChipIds.add(c.id); }); }));
   const localOnlyChips = [];
   localGs.forEach(lg => lg.rows.forEach(lr => { if (!lr.divider) lr.colors.forEach(c => { if (c.id && !remoteChipIds.has(c.id)) localOnlyChips.push({ chip: c, groupName: lg.name, rowKey: lr.key }); }); }));
+
+  const remoteDividerIds = new Set();
+  remoteGs.forEach(g => g.rows.forEach(r => { if (r.divider && r.id) remoteDividerIds.add(r.id); }));
+  const localOnlyDividers = [];
+  localGs.forEach(lg => lg.rows.forEach(lr => { if (lr.divider && lr.id && !remoteDividerIds.has(lr.id)) localOnlyDividers.push({ divider: lr, groupName: lg.name }); }));
+
   const merged = ensureIds(remoteGs);
-  localOnlyChips.forEach(({ chip, groupName, rowKey }) => { const tg = merged.find(g => g.name === groupName); if (!tg) return; const tr = tg.rows.find(r => !r.divider && r.key === rowKey); if (!tr) return; tr.colors.push(chip); });
+
+  localOnlyChips.forEach(({ chip, groupName, rowKey }) => {
+    const tg = merged.find(g => g.name === groupName); if (!tg) return;
+    const tr = tg.rows.find(r => !r.divider && r.key === rowKey); if (!tr) return;
+    tr.colors.push(chip);
+  });
+
+  localOnlyDividers.forEach(({ divider, groupName }) => {
+    const tg = merged.find(g => g.name === groupName); if (!tg) return;
+    tg.rows.push({ ...divider });
+  });
+
   return merged;
 }
+
 function mergePins(localPins, remotePins) {
   if (!remotePins) return localPins;
   const remoteIds = new Set(remotePins.map(c => c.id).filter(Boolean));
@@ -1655,9 +1858,18 @@ async function setupSync() {
     }
     localStorage.setItem('cp_sync', JSON.stringify(syncConfig)); startPolling(); updateSyncShareUrl(); document.getElementById('syncSetup').style.display = 'none';
   } else {
-    const r = await fetch('https://api.github.com/gists', { method: 'POST', headers: { 'Authorization': 'token ' + token }, body: JSON.stringify({ description: 'ColorPreview', public: false, files: { 'presets.json': { content: JSON.stringify(groups) }, 'pin.json': { content: JSON.stringify(pinColors) }, 'divider_colors.json': { content: JSON.stringify(dividerColors) } } }) });
+    const r = await fetch('https://api.github.com/gists', {
+      method: 'POST',
+      headers: { 'Authorization': 'token ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ description: 'ColorPreview', public: false, files: {
+        'presets.json': { content: JSON.stringify(groups) },
+        'pin.json': { content: JSON.stringify(pinColors) },
+        'divider_colors.json': { content: JSON.stringify(dividerColors) }
+      }})
+    });
     const d = await r.json();
-    if (d.id) { syncConfig.gistId = d.id; localStorage.setItem('cp_sync', JSON.stringify(syncConfig)); startPolling(); updateSyncShareUrl(); document.getElementById('syncSetup').style.display = 'none'; }
+    if (d.id) { syncConfig.gistId = d.id; localStorage.setItem('cp_sync', JSON.stringify(syncConfig)); startPolling(); updateSyncShareUrl(); document.getElementById('syncSetup').style.display = 'none'; setSyncBadge('synced', '同期中'); }
+    else { setSyncBadge('error', 'エラー'); }
   }
 }
 
@@ -1691,7 +1903,12 @@ function scheduleSyncPush() {
   }, 1500);
 }
 
-function updateSyncShareUrl() { if (!syncConfig.gistId) return; const url = location.href.split('?')[0] + '?gist=' + syncConfig.gistId; document.getElementById('syncShareUrlRow').style.display = 'flex'; document.getElementById('syncShareInput').value = url; }
+function updateSyncShareUrl() {
+  if (!syncConfig.gistId) return;
+  const url = location.href.split('?')[0] + '?gist=' + syncConfig.gistId;
+  document.getElementById('syncShareUrlRow').style.display = 'flex';
+  document.getElementById('syncShareInput').value = url;
+}
 function copySyncUrl() { navigator.clipboard.writeText(document.getElementById('syncShareInput').value); showToast('同期用URLをコピーしました'); }
 
 // ============================================================
@@ -1700,6 +1917,7 @@ function copySyncUrl() { navigator.clipboard.writeText(document.getElementById('
 let dividerTargetGi = 0;
 let editDividerGi = -1, editDividerRi = -1;
 let _dividerSelectedColor = '';
+let _dividerInsertAt = 0;
 
 function _updateAddDividerColorUI(color) {
   const swatch = document.getElementById('dividerColorSwatch');
@@ -1707,47 +1925,147 @@ function _updateAddDividerColorUI(color) {
   const hex = document.getElementById('dividerHexInput');
   const c = (color && validHex(color)) ? color : '';
   swatch.style.background = c || '#e0e0e8';
-  input.value = c || '#e0e0e8';
+  if (c) input.value = c;
   hex.value = c || '';
   _dividerSelectedColor = c;
 }
 
-function _buildAddDividerPresets() {
-  const container = document.getElementById('dividerColorPresets');
+function _updateEditDividerColorUI(color) {
+  const swatch = document.getElementById('editDividerColorSwatch');
+  const input = document.getElementById('editDividerColorInput');
+  const hex = document.getElementById('editDividerHexInput');
+  const c = (color && validHex(color)) ? color : '';
+  swatch.style.background = c || '#e0e0e8';
+  if (c) input.value = c;
+  hex.value = c || '';
+}
+
+function _buildDividerPresetsRow(containerId, onSelect, onDelete) {
+  const container = document.getElementById(containerId);
   container.innerHTML = '';
   const colors = _loadDividerUserColors();
+
   const defBtn = document.createElement('button');
-  defBtn.title = 'デフォルト'; defBtn.textContent = '×';
-  defBtn.style.cssText = 'width:24px;height:24px;border-radius:5px;border:1.5px solid var(--border);cursor:pointer;background:var(--surface2);color:var(--muted);font-size:11px;font-weight:700;font-family:Syne,sans-serif;flex-shrink:0;';
-  defBtn.addEventListener('click', () => _updateAddDividerColorUI(''));
+  defBtn.title = 'デフォルト（色なし）'; defBtn.textContent = '─';
+  defBtn.style.cssText = 'width:24px;height:24px;border-radius:5px;border:1.5px solid var(--border);cursor:pointer;background:var(--surface2);color:var(--muted);font-size:13px;font-weight:700;font-family:Syne,sans-serif;flex-shrink:0;display:flex;align-items:center;justify-content:center;';
+  defBtn.addEventListener('click', () => onSelect(''));
   container.append(defBtn);
+
   colors.forEach((c, idx) => {
     const wrap = document.createElement('div');
     wrap.style.cssText = 'position:relative;width:24px;height:24px;flex-shrink:0;';
     const btn = document.createElement('button');
     btn.title = c; btn.style.cssText = `width:24px;height:24px;border-radius:5px;border:1.5px solid rgba(0,0,0,.15);cursor:pointer;background:${c};padding:0;display:block;`;
-    btn.addEventListener('click', () => _updateAddDividerColorUI(c));
+    btn.addEventListener('click', () => onSelect(c));
     const del = document.createElement('button');
     del.textContent = '×'; del.title = '削除';
     del.style.cssText = 'position:absolute;top:-5px;right:-5px;width:13px;height:13px;border-radius:50%;background:#d9363e;color:#fff;border:none;cursor:pointer;font-size:8px;line-height:1;display:flex;align-items:center;justify-content:center;padding:0;z-index:1;';
-    del.addEventListener('click', e => { e.stopPropagation(); const arr = _loadDividerUserColors(); arr.splice(idx, 1); _saveDividerUserColors(arr); _buildAddDividerPresets(); _buildEditDividerPresets(); });
+    del.addEventListener('click', e => { e.stopPropagation(); onDelete(idx); });
     wrap.append(btn, del); container.append(wrap);
   });
 }
 
-function _addDividerUserColor() {
-  const hex = document.getElementById('dividerHexInput').value.trim();
-  let c = hex;
+function _buildAddDividerPresets() {
+  _buildDividerPresetsRow('dividerColorPresets',
+    (c) => _updateAddDividerColorUI(c),
+    (idx) => {
+      const arr = _loadDividerUserColors(); arr.splice(idx, 1); _saveDividerUserColors(arr);
+      _buildAddDividerPresets(); _buildEditDividerPresets();
+    }
+  );
+}
+
+function _buildEditDividerPresets() {
+  _buildDividerPresetsRow('editDividerColorPresets',
+    (c) => _updateEditDividerColorUI(c),
+    (idx) => {
+      const arr = _loadDividerUserColors(); arr.splice(idx, 1); _saveDividerUserColors(arr);
+      _buildEditDividerPresets(); _buildAddDividerPresets();
+    }
+  );
+}
+
+function _registerDividerColor(hexInputId, onSuccess) {
+  const hexEl = document.getElementById(hexInputId);
+  let c = hexEl.value.trim();
   if (/^[0-9a-fA-F]{6}$/.test(c)) c = '#' + c;
   if (!validHex(c)) { showToast('有効な HEX カラーコードを入力してください'); return; }
   const arr = _loadDividerUserColors();
   if (arr.length >= 6) { showToast('登録色は最大6色です。先に削除してください'); return; }
-  if (arr.includes(c)) { _updateAddDividerColorUI(c); return; }
-  arr.push(c);
-  _saveDividerUserColors(arr);
-  _updateAddDividerColorUI(c);
-  _buildAddDividerPresets();
-  _buildEditDividerPresets();
+  if (!arr.includes(c)) {
+    arr.push(c);
+    _saveDividerUserColors(arr);
+    _buildAddDividerPresets();
+    _buildEditDividerPresets();
+  }
+  onSuccess(c);
+}
+
+function _addDividerUserColor() {
+  _registerDividerColor('dividerHexInput', (c) => _updateAddDividerColorUI(c));
+}
+
+function _addEditDividerUserColor() {
+  _registerDividerColor('editDividerHexInput', (c) => _updateEditDividerColorUI(c));
+}
+
+function _buildDividerPositionPicker(gi, defaultInsertAt) {
+  _dividerInsertAt = defaultInsertAt;
+  const picker = document.getElementById('dividerPositionPicker');
+  picker.innerHTML = '';
+  const rows = groups[gi].rows;
+
+  function makeSlot(idx, label) {
+    const slot = document.createElement('div');
+    slot.className = 'divider-pos-slot' + (idx === _dividerInsertAt ? ' selected' : '');
+    slot.dataset.idx = idx;
+
+    const arrow = document.createElement('span'); arrow.className = 'divider-pos-slot-arrow'; arrow.textContent = '▼';
+    const text = document.createElement('span'); text.textContent = label || 'ここに追加';
+    slot.append(arrow, text);
+
+    slot.addEventListener('click', () => {
+      _dividerInsertAt = idx;
+      picker.querySelectorAll('.divider-pos-slot').forEach(s => s.classList.toggle('selected', +s.dataset.idx === idx));
+    });
+    return slot;
+  }
+
+  function makeRowItem(row, ri) {
+    const item = document.createElement('div');
+    if (row.divider) {
+      item.className = 'divider-pos-item is-divider-item';
+      item.style.cssText = 'display:flex;align-items:center;gap:6px;';
+      const lineL = document.createElement('div'); lineL.style.cssText = `flex:1;height:2px;border-radius:1px;background:${row.color || 'var(--border)'};opacity:.75;`;
+      if (row.label) {
+        const lbl = document.createElement('span'); lbl.style.cssText = `font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:${row.color || 'var(--muted)'};opacity:.8;white-space:nowrap;font-family:'Syne',sans-serif;`;
+        lbl.textContent = row.label;
+        const lineR = document.createElement('div'); lineR.style.cssText = lineL.style.cssText;
+        item.append(lineL, lbl, lineR);
+      } else {
+        item.append(lineL);
+      }
+    } else {
+      item.className = 'divider-pos-item';
+      item.textContent = row.key;
+    }
+    return item;
+  }
+
+  picker.append(makeSlot(0, rows.length === 0 ? '先頭（行なし）' : rows.length + ' 行の先頭'));
+
+  rows.forEach((row, ri) => {
+    picker.append(makeRowItem(row, ri));
+    const isLast = ri === rows.length - 1;
+    picker.append(makeSlot(ri + 1, isLast ? '末尾に追加' : null));
+  });
+
+  setTimeout(() => {
+    const sel = picker.querySelector('.divider-pos-slot.selected');
+    if (sel) sel.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }, 60);
+
+  if (window._scheduleTwemoji) window._scheduleTwemoji();
 }
 
 function openAddDividerModal(gi) {
@@ -1756,35 +2074,26 @@ function openAddDividerModal(gi) {
   document.getElementById('dividerLabelInput').value = '';
   _buildAddDividerPresets();
   _updateAddDividerColorUI('');
-  const sel = document.getElementById('dividerPositionSelect');
-  sel.innerHTML = '';
-  const rows = groups[gi].rows;
-  rows.forEach((row, ri) => {
-    const opt = document.createElement('option'); opt.value = ri;
-    const prev = ri === 0 ? '先頭' : '「' + (rows[ri-1].divider ? '─' : rows[ri-1].key) + '」の後';
-    opt.textContent = prev + ' → ここに挿入'; sel.append(opt);
-  });
-  const optEnd = document.createElement('option'); optEnd.value = rows.length;
-  optEnd.textContent = rows.length === 0 ? '先頭（行なし）' : '「' + (rows[rows.length-1].divider ? '─' : rows[rows.length-1].key) + '」の後（末尾）';
-  sel.append(optEnd); sel.value = rows.length;
+  _buildDividerPositionPicker(gi, groups[gi].rows.length);
   document.getElementById('addDividerModal').style.display = 'flex';
   setTimeout(() => document.getElementById('dividerLabelInput').focus(), 60);
 }
 function closeAddDividerModal() { document.getElementById('addDividerModal').style.display = 'none'; }
 function confirmAddDivider() {
   const label = document.getElementById('dividerLabelInput').value.trim();
-  const insertAt = +document.getElementById('dividerPositionSelect').value;
   const color = _dividerSelectedColor;
-  groups[dividerTargetGi].rows.splice(insertAt, 0, { key: '---', divider: true, label, color, colors: [] });
+  const insertAt = Math.max(0, Math.min(_dividerInsertAt, groups[dividerTargetGi].rows.length));
+  groups[dividerTargetGi].rows.splice(insertAt, 0, { id: 'div_' + uid(), key: '---', divider: true, label, color, colors: [] });
   saveGroups(); renderGroups(); closeAddDividerModal();
   showToast('区切りを追加しました');
 }
 document.getElementById('dividerLabelInput').addEventListener('keydown', e => { if (e.key === 'Enter') confirmAddDivider(); if (e.key === 'Escape') closeAddDividerModal(); });
+
 document.getElementById('dividerColorInput').addEventListener('input', e => {
   const c = e.target.value;
   document.getElementById('dividerHexInput').value = c;
   document.getElementById('dividerColorSwatch').style.background = c;
-  _dividerSelectedColor = c;
+  _dividerSelectedColor = validHex(c) ? c : '';
 });
 document.getElementById('dividerHexInput').addEventListener('input', e => {
   let v = e.target.value.trim();
@@ -1793,40 +2102,6 @@ document.getElementById('dividerHexInput').addEventListener('input', e => {
   if (validHex(v)) { _updateAddDividerColorUI(v); }
   else { _dividerSelectedColor = ''; }
 });
-
-// ---- 編集モーダル ----
-function _updateEditDividerColorUI(color) {
-  const swatch = document.getElementById('editDividerColorSwatch');
-  const input = document.getElementById('editDividerColorInput');
-  const hex = document.getElementById('editDividerHexInput');
-  const c = (color && validHex(color)) ? color : '';
-  swatch.style.background = c || '#e0e0e8';
-  input.value = c || '#e0e0e8';
-  hex.value = c || '';
-}
-
-function _buildEditDividerPresets() {
-  const container = document.getElementById('editDividerColorPresets');
-  container.innerHTML = '';
-  const colors = _loadDividerUserColors();
-  const defBtn = document.createElement('button');
-  defBtn.title = 'デフォルト'; defBtn.textContent = '×';
-  defBtn.style.cssText = 'width:24px;height:24px;border-radius:5px;border:1.5px solid var(--border);cursor:pointer;background:var(--surface2);color:var(--muted);font-size:11px;font-weight:700;font-family:Syne,sans-serif;flex-shrink:0;';
-  defBtn.addEventListener('click', () => _updateEditDividerColorUI(''));
-  container.append(defBtn);
-  colors.forEach((c, idx) => {
-    const wrap = document.createElement('div');
-    wrap.style.cssText = 'position:relative;width:24px;height:24px;flex-shrink:0;';
-    const btn = document.createElement('button');
-    btn.title = c; btn.style.cssText = `width:24px;height:24px;border-radius:5px;border:1.5px solid rgba(0,0,0,.15);cursor:pointer;background:${c};padding:0;display:block;`;
-    btn.addEventListener('click', () => _updateEditDividerColorUI(c));
-    const del = document.createElement('button');
-    del.textContent = '×'; del.title = '削除';
-    del.style.cssText = 'position:absolute;top:-5px;right:-5px;width:13px;height:13px;border-radius:50%;background:#d9363e;color:#fff;border:none;cursor:pointer;font-size:8px;line-height:1;display:flex;align-items:center;justify-content:center;padding:0;z-index:1;';
-    del.addEventListener('click', e => { e.stopPropagation(); const arr = _loadDividerUserColors(); arr.splice(idx, 1); _saveDividerUserColors(arr); _buildEditDividerPresets(); _buildAddDividerPresets(); });
-    wrap.append(btn, del); container.append(wrap);
-  });
-}
 
 function openEditDividerModal(gi, ri) {
   editDividerGi = gi; editDividerRi = ri;
@@ -1871,16 +2146,43 @@ document.getElementById('editDividerHexInput').addEventListener('input', e => {
 //  カラー操作
 // ============================================================
 const state = { t: { h: 229, s: 44, v: 18 }, b: { h: 200, s: 38, v: 97 } };
-function hexToHsv(hex) { let r = parseInt(hex.slice(1,3),16)/255, g = parseInt(hex.slice(3,5),16)/255, b = parseInt(hex.slice(5,7),16)/255; const max = Math.max(r,g,b), mn = Math.min(r,g,b), d = max-mn; let h = 0, s = max===0?0:d/max, v = max; if(d){if(max===r)h=((g-b)/d+6)%6;else if(max===g)h=(b-r)/d+2;else h=(r-g)/d+4;h=Math.round(h*60);} return [h,Math.round(s*100),Math.round(v*100)]; }
-function hsvToHex(h,s,v) { s/=100;v/=100; const f=n=>{const k=(n+h/60)%6;return v-v*s*Math.max(0,Math.min(k,4-k,1));}; const bx=x=>Math.round(x*255).toString(16).padStart(2,'0'); return '#'+bx(f(5))+bx(f(3))+bx(f(1)); }
-function validHex(h){return /^#[0-9a-fA-F]{6}$/.test(h);}
+function hexToHsv(hex) {
+  let r = parseInt(hex.slice(1,3),16)/255, g = parseInt(hex.slice(3,5),16)/255, b = parseInt(hex.slice(5,7),16)/255;
+  const max = Math.max(r,g,b), mn = Math.min(r,g,b), d = max-mn;
+  let h = 0, s = max===0?0:d/max, v = max;
+  if(d){if(max===r)h=((g-b)/d+6)%6;else if(max===g)h=(b-r)/d+2;else h=(r-g)/d+4;h=Math.round(h*60);}
+  return [h,Math.round(s*100),Math.round(v*100)];
+}
+function hsvToHex(h,s,v) {
+  s/=100;v/=100;
+  const f=n=>{const k=(n+h/60)%6;return v-v*s*Math.max(0,Math.min(k,4-k,1));};
+  const bx=x=>Math.round(x*255).toString(16).padStart(2,'0');
+  return '#'+bx(f(5))+bx(f(3))+bx(f(1));
+}
+function validHex(h){ return /^#[0-9a-fA-F]{6}$/.test(h); }
 function applyHex(k, hex) { if (!validHex(hex)) return; const [h,s,v] = hexToHsv(hex); state[k]={h,s,v}; document.getElementById(k+'Picker').value=hex; document.getElementById(k+'Hex').value=hex; syncUI(k); render(); }
-function syncUI(k) { const {h,s,v}=state[k]; document.getElementById(k+'H').value=h; document.getElementById(k+'S').value=s; document.getElementById(k+'V').value=v; document.getElementById(k+'Hval').textContent=h+'°'; document.getElementById(k+'Sval').textContent=s+'%'; document.getElementById(k+'Vval').textContent=v+'%'; const hex=hsvToHex(h,s,v); document.getElementById(k+'Swatch').style.background=hex; document.getElementById(k+'S').style.background=`linear-gradient(to right,${hsvToHex(h,0,v)},${hsvToHex(h,100,v)})`; document.getElementById(k+'V').style.background=`linear-gradient(to right,${hsvToHex(h,s,0)},${hsvToHex(h,s,100)})`; }
-function fromSlider(k) { state[k].h=+document.getElementById(k+'H').value; state[k].s=+document.getElementById(k+'S').value; state[k].v=+document.getElementById(k+'V').value; const hex=hsvToHex(state[k].h,state[k].s,state[k].v); document.getElementById(k+'Picker').value=hex; document.getElementById(k+'Hex').value=hex; syncUI(k); render(); }
+function syncUI(k) {
+  const {h,s,v}=state[k]; document.getElementById(k+'H').value=h; document.getElementById(k+'S').value=s; document.getElementById(k+'V').value=v;
+  document.getElementById(k+'Hval').textContent=h+'°'; document.getElementById(k+'Sval').textContent=s+'%'; document.getElementById(k+'Vval').textContent=v+'%';
+  const hex=hsvToHex(h,s,v); document.getElementById(k+'Swatch').style.background=hex;
+  document.getElementById(k+'S').style.background=`linear-gradient(to right,${hsvToHex(h,0,v)},${hsvToHex(h,100,v)})`;
+  document.getElementById(k+'V').style.background=`linear-gradient(to right,${hsvToHex(h,s,0)},${hsvToHex(h,s,100)})`;
+}
+function fromSlider(k) {
+  state[k].h=+document.getElementById(k+'H').value; state[k].s=+document.getElementById(k+'S').value; state[k].v=+document.getElementById(k+'V').value;
+  const hex=hsvToHex(state[k].h,state[k].s,state[k].v); document.getElementById(k+'Picker').value=hex; document.getElementById(k+'Hex').value=hex; syncUI(k); render();
+}
 function applyMatchBg() { const hex = document.getElementById('bHex').value; if (!validHex(hex)) return; applyHex('t', hex); showToast('文字色を背景色 ' + hex.toUpperCase() + ' に揃えました'); }
 function swapColors() { const th=document.getElementById('tHex').value, bh=document.getElementById('bHex').value; applyHex('t',bh); applyHex('b',th); }
-function render() { const tc=document.getElementById('tHex').value, bc=document.getElementById('bHex').value; document.getElementById('preview').style.background=bc; document.getElementById('preview').style.color=tc; document.getElementById('tcDot').style.background=tc; document.getElementById('bcDot').style.background=bc; document.getElementById('tcCode').textContent=tc.toUpperCase(); document.getElementById('bcCode').textContent=bc.toUpperCase(); document.getElementById('tcName').textContent=document.getElementById('tName').value?' ('+document.getElementById('tName').value+')':''; document.getElementById('bcName').textContent=document.getElementById('bName').value?' ('+document.getElementById('bName').value+')':''; }
-function copyText(t){ return navigator.clipboard.writeText(t); }
+function render() {
+  const tc=document.getElementById('tHex').value, bc=document.getElementById('bHex').value;
+  document.getElementById('preview').style.background=bc; document.getElementById('preview').style.color=tc;
+  document.getElementById('tcDot').style.background=tc; document.getElementById('bcDot').style.background=bc;
+  document.getElementById('tcCode').textContent=tc.toUpperCase(); document.getElementById('bcCode').textContent=bc.toUpperCase();
+  document.getElementById('tcName').textContent=document.getElementById('tName').value?' ('+document.getElementById('tName').value+')':'';
+  document.getElementById('bcName').textContent=document.getElementById('bName').value?' ('+document.getElementById('bName').value+')':'';
+}
+function copyText(t){ return navigator.clipboard.writeText(t).catch(()=>{}); }
 function pasteHex(k) {
   const inputEl = document.getElementById(k + 'Hex');
   if (!inputEl) return;
@@ -1902,13 +2204,42 @@ function pasteHex(k) {
   }
 }
 let toastTimer = null;
-function contrastColor(hex) { if (!validHex(hex)) return '#fff'; const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16); const lum = (0.299*r + 0.587*g + 0.114*b) / 255; if (lum > 0.55) { const f=0.28; return '#'+[r,g,b].map(x=>Math.round(x*f).toString(16).padStart(2,'0')).join(''); } const f=0.82; return '#'+[r,g,b].map(x=>Math.round(x+(255-x)*f).toString(16).padStart(2,'0')).join(''); }
-function showColorToast(hexText, bgColor, _ig, label) { const fg = contrastColor(bgColor); const toast = document.getElementById('copyToast'); toast.style.background = bgColor; toast.style.color = fg; toast.style.borderColor = fg.startsWith('#f')||fg.startsWith('#e')||fg.startsWith('#d') ? 'rgba(255,255,255,.22)' : 'rgba(0,0,0,.12)'; toast.textContent = label + ' ' + hexText + ' をコピー'; toast.classList.add('show'); if (toastTimer) clearTimeout(toastTimer); toastTimer = setTimeout(() => { toast.classList.remove('show'); toastTimer = null; }, 2400); }
-function showToast(m) { const toast = document.getElementById('copyToast'); toast.style.background = 'rgba(20,20,30,.84)'; toast.style.color = '#fff'; toast.style.borderColor = 'rgba(255,255,255,.12)'; toast.textContent = m; toast.classList.add('show'); if (toastTimer) clearTimeout(toastTimer); toastTimer = setTimeout(() => { toast.classList.remove('show'); toastTimer = null; }, 2200); }
-function copyHex(k) { const h = document.getElementById(k+'Hex').value; copyText(h); if (k === 'b') { showColorToast(h.toUpperCase(), h, document.getElementById('tHex').value, '背景色'); } else { showColorToast(h.toUpperCase(), h, document.getElementById('bHex').value, '文字色'); } }
-function copyAndShowHex(k) { const h = document.getElementById(k==='t'?'tcCode':'bcCode').textContent; copyText(h); if (k === 'b') showColorToast(h, h, document.getElementById('tHex').value, '背景色'); else showColorToast(h, h, document.getElementById('bHex').value, '文字色'); }
-function stepSlider(id, k, delta, btn) { const el = document.getElementById(id); el.value = Math.min(+el.max, Math.max(+el.min, +el.value + delta)); fromSlider(k); if(btn) btn.blur(); }
+function contrastColor(hex) {
+  if (!validHex(hex)) return '#fff';
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  const lum = (0.299*r + 0.587*g + 0.114*b) / 255;
+  if (lum > 0.55) { const f=0.28; return '#'+[r,g,b].map(x=>Math.round(x*f).toString(16).padStart(2,'0')).join(''); }
+  const f=0.82; return '#'+[r,g,b].map(x=>Math.round(x+(255-x)*f).toString(16).padStart(2,'0')).join('');
+}
+function showColorToast(hexText, bgColor, _ig, label) {
+  const fg = contrastColor(bgColor); const toast = document.getElementById('copyToast');
+  toast.style.background = bgColor; toast.style.color = fg;
+  toast.style.borderColor = fg.startsWith('#f')||fg.startsWith('#e')||fg.startsWith('#d') ? 'rgba(255,255,255,.22)' : 'rgba(0,0,0,.12)';
+  toast.textContent = label + ' ' + hexText + ' をコピー'; toast.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer); toastTimer = setTimeout(() => { toast.classList.remove('show'); toastTimer = null; }, 2400);
+}
+function showToast(m) {
+  const toast = document.getElementById('copyToast');
+  toast.style.background = 'rgba(20,20,30,.84)'; toast.style.color = '#fff'; toast.style.borderColor = 'rgba(255,255,255,.12)';
+  toast.textContent = m; toast.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer); toastTimer = setTimeout(() => { toast.classList.remove('show'); toastTimer = null; }, 2200);
+}
+function copyHex(k) {
+  const h = document.getElementById(k+'Hex').value; copyText(h);
+  if (k === 'b') { showColorToast(h.toUpperCase(), h, document.getElementById('tHex').value, '背景色'); }
+  else { showColorToast(h.toUpperCase(), h, document.getElementById('bHex').value, '文字色'); }
+}
+function copyAndShowHex(k) {
+  const h = document.getElementById(k==='t'?'tcCode':'bcCode').textContent; copyText(h);
+  if (k === 'b') showColorToast(h, h, document.getElementById('tHex').value, '背景色');
+  else showColorToast(h, h, document.getElementById('bHex').value, '文字色');
+}
+function stepSlider(id, k, delta, btn) {
+  const el = document.getElementById(id); el.value = Math.min(+el.max, Math.max(+el.min, +el.value + delta));
+  fromSlider(k); if(btn) btn.blur();
+}
 function normalizeHexInput(val) { val = val.trim(); if (!val) return val; if (!val.startsWith('#')) val = '#' + val; return val; }
+
 ['tH','tS','tV'].forEach(id=>document.getElementById(id).oninput=()=>fromSlider('t'));
 ['bH','bS','bV'].forEach(id=>document.getElementById(id).oninput=()=>fromSlider('b'));
 document.getElementById('tPicker').oninput=e=>applyHex('t',e.target.value);
@@ -1932,12 +2263,23 @@ document.getElementById('bHex').addEventListener('input', e => { let v = normali
   });
 });
 document.getElementById('tName').oninput=render; document.getElementById('bName').oninput=render;
-document.addEventListener('touchstart', e => { const active = document.activeElement; if (active && active !== e.target && !active.contains(e.target)) { if (active.tagName !== 'INPUT' && active.tagName !== 'TEXTAREA' && active.tagName !== 'SELECT') active.blur(); } }, { passive: true });
+
+document.addEventListener('touchstart', e => {
+  const active = document.activeElement;
+  if (active && active !== e.target && !active.contains(e.target)) {
+    if (active.tagName !== 'INPUT' && active.tagName !== 'TEXTAREA' && active.tagName !== 'SELECT') active.blur();
+  }
+}, { passive: true });
 
 (function init() {
   const params = new URLSearchParams(location.search); const urlGistId = params.get('gist');
   loadSyncConfig(); if (urlGistId) { syncConfig.gistId = urlGistId; document.getElementById('gistIdInput').value = urlGistId; }
-  if (syncConfig.token && syncConfig.gistId) { startPolling(); updateSyncShareUrl(); document.getElementById('gistTokenInput').value = syncConfig.token; document.getElementById('gistIdInput').value = syncConfig.gistId; document.getElementById('syncSetup').style.display = 'none'; }
+  if (syncConfig.token && syncConfig.gistId) {
+    startPolling(); updateSyncShareUrl();
+    document.getElementById('gistTokenInput').value = syncConfig.token;
+    document.getElementById('gistIdInput').value = syncConfig.gistId;
+    document.getElementById('syncSetup').style.display = 'none';
+  }
   syncUI('t'); syncUI('b'); render(); renderPinRow(); renderGroups();
   setupCopyHexPressEffect('copyHexBBtn'); setupCopyHexPressEffect('copyHexTBtn');
 })();
