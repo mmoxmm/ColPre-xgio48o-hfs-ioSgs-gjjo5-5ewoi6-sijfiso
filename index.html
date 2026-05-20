@@ -157,7 +157,36 @@ body.mode-edit .group-del-btn{display:block}
 .emoji-rows{padding:10px 12px;display:flex;flex-direction:column;gap:0}
 .emoji-row{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;border-radius:6px;transition:background .12s;padding:5px 0;}
 .emoji-row + .emoji-row{border-top:1px solid rgba(224,224,232,0.55);}
-body.mode-edit 
+/* ===== 区切り行 ===== */
+/* FIX: handle は右端のみ。左線は絵文字キー幅まで伸ばすため padding を利用しない */
+.divider-row{display:flex;align-items:center;gap:6px;padding:5px 0;cursor:default;}
+/* 隣接行の border-top を消す */
+.divider-row + .emoji-row,.emoji-row + .divider-row,.divider-row + .divider-row{border-top:none;}
+/* 線: flex:1 で左右に伸びる */
+.divider-line{flex:1;height:2.5px;border-radius:1.5px;background:var(--border);}
+/* ラベル */
+.divider-label{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;white-space:nowrap;flex-shrink:0;padding:0 3px;text-transform:uppercase;}
+/* 並び替えモード */
+body.mode-edit .divider-row{cursor:grab;}
+body.mode-edit .divider-row.is-grabbing{cursor:grabbing;}
+.divider-row.row-dragging{opacity:.4;}
+/* handle: 右端に固定、編集モードのみ表示 */
+.divider-drag-handle{font-size:13px;color:var(--muted);flex-shrink:0;opacity:0;transition:opacity .15s;pointer-events:none;order:99;}
+body.mode-edit .divider-drag-handle{opacity:1;pointer-events:auto;}
+/* 削除ボタン: 編集モードのみ表示 */
+.divider-del-btn{display:none;background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;line-height:1;padding:2px 3px;border-radius:3px;flex-shrink:0;transition:color .12s;align-items:center;order:98;}
+body.mode-edit .divider-del-btn{display:flex;}
+@media(hover:hover){body.mode-edit .divider-del-btn:hover{color:#d9363e;}}
+/* 色スウォッチ: 並び替えモードのみ表示（色変更用） */
+.divider-color-swatch{width:14px;height:14px;border-radius:3px;border:1.5px solid rgba(0,0,0,.15);cursor:pointer;flex-shrink:0;position:relative;overflow:hidden;display:none;order:97;}
+body.mode-edit .divider-color-swatch{display:block;}
+.divider-color-swatch input[type=color]{position:absolute;inset:-4px;width:calc(100%+8px);height:calc(100%+8px);opacity:0;cursor:pointer;}
+/* ドラッグ中ハイライト */
+.divider-row.row-drag-over-top{border-top:2.5px solid var(--accent);}
+.divider-row.row-drag-over-bottom{border-bottom:2.5px solid var(--accent);}
+/* グループ下の追加ボタン */
+.divider-add-btn{display:flex;align-items:center;gap:4px;font-size:11px;font-family:'Syne',sans-serif;font-weight:600;color:var(--muted);cursor:pointer;background:none;border:none;transition:color .15s;padding:0;flex-shrink:0;white-space:nowrap;}
+@media(hover:hover){.divider-add-btn:hover{color:var(--text);}}
 .emoji-key{font-size:15px;flex-shrink:0;width:auto;min-width:28px;text-align:center;padding:2px 4px;border-radius:4px;border:1px solid transparent;transition:all .15s;line-height:32px;cursor:default}
 body.mode-edit .emoji-key{border:1.5px dashed var(--muted);cursor:grab}
 body.mode-edit .emoji-key.is-grabbing{cursor:grabbing}
@@ -187,7 +216,7 @@ body.mode-lock .swatch-chip.locked{border-color:rgba(217,54,62,.4);box-shadow:0 
 #chipDragGhost{position:fixed;pointer-events:none;z-index:9998;opacity:.88;will-change:transform;transition:none;display:none}
 .emoji-add-btn{width:28px;height:28px;border-radius:50%;border:1.5px dashed var(--border);background:none;color:var(--muted);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;line-height:1;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;}
 @media(hover:hover){.emoji-add-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}}
-.group-add-row{padding:6px 12px;border-top:1px solid var(--border)}
+.group-add-row{padding:6px 12px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;}
 .group-add-preset{display:flex;align-items:center;gap:5px;font-size:11px;font-family:'Syne',sans-serif;font-weight:600;color:var(--muted);cursor:pointer;background:none;border:none;width:100%;transition:color .15s;padding:0}
 @media(hover:hover){.group-add-preset:hover{color:var(--text)}}
 .sync-setup{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-top:20px}
@@ -418,7 +447,8 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
   </div>
   <footer>
     【通常】シングルタップ→背景色コピー ／ ダブルタップ→文字色コピー ／ トリプルタップ→プレビューのみ ／ 長押し(0.3秒)→編集<br>
-    【並び替え】チップタップ→2色入れ替え ／ チップドラッグ→移動 ／ 行絵文字ドラッグ→行移動 ／ グループヘッダードラッグ→グループ移動
+    【並び替え】チップタップ→2色入れ替え ／ チップドラッグ→移動 ／ 行絵文字ドラッグ→行移動 ／ グループヘッダードラッグ→グループ移動<br>
+    【区切り線】グループ下「─ 区切り」ボタンで追加 ／ 並び替えモードでドラッグ移動・×で削除
   </footer>
 </div>
 <div id="groupDragGhost"></div>
@@ -488,6 +518,74 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
     <div class="modal-btns">
       <button class="modal-btn secondary" onclick="closeAddRowModal()">キャンセル</button>
       <button class="modal-btn primary" onclick="confirmAddRow()">登録</button>
+    </div>
+  </div>
+</div>
+
+<!-- 区切り行追加モーダル -->
+<div class="modal-overlay" id="addDividerModal" style="display:none" onclick="if(event.target===this)closeAddDividerModal()">
+  <div class="modal" style="width:320px;">
+    <h3>区切り線を追加</h3>
+    <div class="modal-field">
+      <div class="modal-label">ラベル（任意・空欄でシンプルな横線）</div>
+      <input type="text" class="modal-input" id="dividerLabelInput" maxlength="20" placeholder="例: メイン / サブ / unused">
+    </div>
+    <div class="modal-field">
+      <div class="modal-label">線の色</div>
+      <div style="display:flex;flex-direction:column;gap:8px;align-items:center;">
+        <!-- 登録色（最大6色） + デフォルト -->
+        <div id="dividerColorPresets" style="display:flex;gap:5px;flex-wrap:wrap;justify-content:center;min-height:28px;"></div>
+        <!-- HEX入力 + カラーピッカー -->
+        <div style="display:flex;align-items:center;gap:6px;justify-content:center;">
+          <div id="dividerColorSwatch" style="width:24px;height:24px;border-radius:5px;border:1.5px solid rgba(0,0,0,.12);cursor:pointer;position:relative;overflow:hidden;flex-shrink:0;">
+            <input type="color" id="dividerColorInput" style="position:absolute;inset:-4px;width:calc(100%+8px);height:calc(100%+8px);opacity:0;cursor:pointer;" value="#e0e0e8">
+          </div>
+          <input type="text" id="dividerHexInput" class="modal-input" style="width:90px;font-family:'DM Mono',monospace;font-size:12px;" maxlength="7" placeholder="#rrggbb">
+          <button onclick="_addDividerUserColor()" style="font-family:'Syne',sans-serif;font-size:10px;font-weight:700;background:var(--text);color:#fff;border:none;border-radius:var(--radius-sm);padding:5px 8px;cursor:pointer;white-space:nowrap;">＋ 登録</button>
+        </div>
+        <div id="dividerColorStatus" style="font-size:10px;color:var(--muted);font-family:'Syne',sans-serif;text-align:center;min-height:14px;"></div>
+      </div>
+    </div>
+    <div class="modal-field" style="margin-bottom:0;">
+      <div class="modal-label">挿入位置</div>
+      <select class="group-select" id="dividerPositionSelect" style="text-align:center;text-align-last:center;"></select>
+    </div>
+    <div class="modal-btns">
+      <button class="modal-btn secondary" onclick="closeAddDividerModal()">キャンセル</button>
+      <button class="modal-btn primary" onclick="confirmAddDivider()">追加</button>
+    </div>
+  </div>
+</div>
+
+<!-- 区切り行編集モーダル -->
+<div class="modal-overlay" id="editDividerModal" style="display:none" onclick="if(event.target===this)closeEditDividerModal()">
+  <div class="modal" style="width:320px;">
+    <h3>区切り線を編集</h3>
+    <div class="modal-field">
+      <div class="modal-label">ラベル（任意・空欄でシンプルな横線）</div>
+      <input type="text" class="modal-input" id="editDividerLabelInput" maxlength="20" placeholder="例: メイン / サブ / unused">
+    </div>
+    <div class="modal-field">
+      <div class="modal-label">線の色</div>
+      <div style="display:flex;flex-direction:column;gap:8px;align-items:center;">
+        <div style="display:flex;align-items:center;gap:8px;justify-content:center;flex-wrap:wrap;">
+          <div id="editDividerColorPresets" style="display:flex;gap:5px;flex-wrap:wrap;justify-content:center;"></div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div id="editDividerColorSwatch" style="width:24px;height:24px;border-radius:5px;border:1.5px solid rgba(0,0,0,.12);cursor:pointer;position:relative;overflow:hidden;flex-shrink:0;">
+              <input type="color" id="editDividerColorInput" style="position:absolute;inset:-4px;width:calc(100%+8px);height:calc(100%+8px);opacity:0;cursor:pointer;" value="#e0e0e8">
+            </div>
+            <input type="text" id="editDividerHexInput" class="modal-input" style="width:90px;font-family:'DM Mono',monospace;font-size:12px;" maxlength="7" placeholder="#rrggbb">
+            <span id="editDividerColorLabel" style="font-size:10px;color:var(--muted);font-family:'Syne',sans-serif;white-space:nowrap;">デフォルト</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-btns" style="justify-content:space-between;">
+      <button class="modal-btn" style="color:#d9363e;border-color:#d9363e;background:none;" onclick="deleteEditDivider()">区切り行削除</button>
+      <div style="display:flex;gap:8px;">
+        <button class="modal-btn secondary" onclick="closeEditDividerModal()">キャンセル</button>
+        <button class="modal-btn primary" onclick="saveEditDivider()">保存</button>
+      </div>
     </div>
   </div>
 </div>
@@ -651,7 +749,7 @@ const DEFAULT_GROUPS = [
 function ensureIds(gs) {
   return gs.map(g => {
     const gid = (g.id && g.id !== 'undefined') ? g.id : ('grp_' + (g.name || uid()).replace(/[^a-zA-Z0-9]/g, '_') + '_' + Math.random().toString(36).slice(2,6));
-    return { id: gid, name: g.name || '', rows: (g.rows || []).map(r => ({ key: r.key || '?', colors: (r.colors || []).map(c => { if (typeof c === 'string') return { id: uid(), t: '#1a1a2e', b: c, locked: false, label: '', copyTarget: 'b' }; return { id: c.id || uid(), t: c.t || '#1a1a2e', b: c.b, locked: c.locked || false, label: c.label || '', copyTarget: c.copyTarget || 'b' }; }) })) };
+    return { id: gid, name: g.name || '', rows: (g.rows || []).map(r => { if (r.divider) return { key: r.key || '---', divider: true, label: r.label || '', color: r.color || '', colors: [] }; return { key: r.key || '?', colors: (r.colors || []).map(c => { if (typeof c === 'string') return { id: uid(), t: '#1a1a2e', b: c, locked: false, label: '', copyTarget: 'b' }; return { id: c.id || uid(), t: c.t || '#1a1a2e', b: c.b, locked: c.locked || false, label: c.label || '', copyTarget: c.copyTarget || 'b' }; }) }; }) };
   });
 }
 
@@ -830,23 +928,30 @@ function setupGroupHeaderPointerDnD(hdr, block, gi) {
 // ============================================================
 function cancelRowDrag() {
   document.querySelectorAll('.emoji-row.row-dragging').forEach(r => r.classList.remove('row-dragging'));
-  document.querySelectorAll('.emoji-row.row-drag-over-top,.emoji-row.row-drag-over-bottom').forEach(r => r.classList.remove('row-drag-over-top','row-drag-over-bottom'));
+  document.querySelectorAll('.emoji-row.row-drag-over-top,.emoji-row.row-drag-over-bottom,.divider-row.row-drag-over-top,.divider-row.row-drag-over-bottom').forEach(r => r.classList.remove('row-drag-over-top','row-drag-over-bottom'));
   rowDragSrc = null; rowDragActive = false; rowPointerId = null;
 }
 
 function setupRowKeyPointerDnD(keySpan, rowEl, gi, ri) {
-  keySpan.addEventListener('pointerdown', e => { if (appMode !== 'edit') return; if (e.button !== 0 && e.pointerType !== 'touch') return; rowDragSrc = { gi, ri, rowEl, keySpan, startX: e.clientX, startY: e.clientY }; rowDragActive = false; rowPointerId = e.pointerId; keySpan.setPointerCapture(e.pointerId); });
+  keySpan.addEventListener('pointerdown', e => {
+    if (appMode !== 'edit') return;
+    if (e.button !== 0 && e.pointerType !== 'touch') return;
+    // 削除ボタン・色スウォッチ上のpointerdownはDnDを開始しない
+    if (e.target.closest('.divider-del-btn,.divider-color-swatch')) return;
+    rowDragSrc = { gi, ri, rowEl, keySpan, startX: e.clientX, startY: e.clientY };
+    rowDragActive = false; rowPointerId = e.pointerId; keySpan.setPointerCapture(e.pointerId);
+  });
   keySpan.addEventListener('pointermove', e => {
     if (rowPointerId === null || e.pointerId !== rowPointerId || !rowDragSrc) return;
     const dx = e.clientX - rowDragSrc.startX, dy = e.clientY - rowDragSrc.startY;
     if (!rowDragActive && Math.sqrt(dx*dx + dy*dy) > 6) { rowDragActive = true; rowEl.classList.add('row-dragging'); keySpan.classList.add('is-grabbing'); }
     if (!rowDragActive) return; e.preventDefault();
-    document.querySelectorAll('.emoji-row.row-drag-over-top,.emoji-row.row-drag-over-bottom').forEach(r => r.classList.remove('row-drag-over-top','row-drag-over-bottom'));
+    document.querySelectorAll('.emoji-row.row-drag-over-top,.emoji-row.row-drag-over-bottom,.divider-row.row-drag-over-top,.divider-row.row-drag-over-bottom').forEach(r => r.classList.remove('row-drag-over-top','row-drag-over-bottom'));
     try { keySpan.releasePointerCapture(e.pointerId); } catch(_){}
     const elemBelow = document.elementFromPoint(e.clientX, e.clientY);
     try { keySpan.setPointerCapture(e.pointerId); } catch(_){}
     if (!elemBelow) return;
-    const targetRow = elemBelow.closest('.emoji-row');
+    const targetRow = elemBelow.closest('.emoji-row,.divider-row');
     if (targetRow && targetRow !== rowEl && +targetRow.dataset.gi === gi) { const rect = targetRow.getBoundingClientRect(); if (e.clientY < rect.top + rect.height / 2) targetRow.classList.add('row-drag-over-top'); else targetRow.classList.add('row-drag-over-bottom'); }
   });
   keySpan.addEventListener('pointerup', e => {
@@ -854,9 +959,15 @@ function setupRowKeyPointerDnD(keySpan, rowEl, gi, ri) {
     const wasActive = rowDragActive, srcRi = rowDragSrc ? rowDragSrc.ri : -1, srcGi = rowDragSrc ? rowDragSrc.gi : -1;
     try { keySpan.releasePointerCapture(e.pointerId); } catch(_){}
     const elemBelow = document.elementFromPoint(e.clientX, e.clientY); cancelRowDrag();
-    if (!wasActive) { openEditRowModal(srcGi, srcRi); return; }
+    if (!wasActive) {
+      // divider行のタップはeditRowModalではなくdivider専用モーダルを開く
+      if (groups[srcGi] && groups[srcGi].rows[srcRi] && groups[srcGi].rows[srcRi].divider) {
+        openEditDividerModal(srcGi, srcRi); return;
+      }
+      openEditRowModal(srcGi, srcRi); return;
+    }
     if (srcRi < 0 || !elemBelow) return;
-    const targetRow = elemBelow.closest('.emoji-row');
+    const targetRow = elemBelow.closest('.emoji-row,.divider-row');
     if (!targetRow || targetRow === rowEl || +targetRow.dataset.gi !== srcGi) return;
     const dstRi = +targetRow.dataset.ri; const rect = targetRow.getBoundingClientRect(); const insertBefore = e.clientY < rect.top + rect.height / 2;
     const rows = groups[srcGi].rows; const [moved] = rows.splice(srcRi, 1);
@@ -1023,6 +1134,35 @@ function renderGroups() {
     if (appMode === 'edit') setupGroupHeaderPointerDnD(hdr, block, gi);
     const rowsEl = document.createElement('div'); rowsEl.className = 'emoji-rows';
     g.rows.forEach((row, ri) => {
+      // ===== 区切り行 =====
+      if (row.divider === true) {
+        const divEl = document.createElement('div'); divEl.className = 'divider-row'; divEl.dataset.gi = gi; divEl.dataset.ri = ri;
+        const lineColor = row.color || '';
+        // 左線
+        const lineL = document.createElement('div'); lineL.className = 'divider-line';
+        if (lineColor) lineL.style.background = lineColor;
+        // 削除ボタン（order:98 → CSS右端、編集モードのみ表示）
+        const delBtn = document.createElement('button'); delBtn.className = 'divider-del-btn'; delBtn.title = '区切りを削除'; delBtn.textContent = '×';
+        delBtn.addEventListener('pointerdown', e => e.stopPropagation()); // DnD発動を防ぐ
+        ;(function(cGi, cRi){ delBtn.addEventListener('click', e => { e.stopPropagation(); groups[cGi].rows.splice(cRi, 1); saveGroups(); renderGroups(); showToast('区切りを削除しました'); }); })(gi, ri);
+        // ハンドル（order:99 → CSS最右端、編集モードのみ表示）
+        const handle = document.createElement('span'); handle.className = 'divider-drag-handle'; handle.textContent = '⠿';
+        // ラベルあり: [lineL] [lbl] [lineR] [del] [handle]
+        if (row.label) {
+          const lineR = document.createElement('div'); lineR.className = 'divider-line';
+          if (lineColor) lineR.style.background = lineColor;
+          const lbl = document.createElement('span'); lbl.className = 'divider-label'; lbl.textContent = row.label;
+          if (lineColor) lbl.style.color = lineColor;
+          divEl.append(lineL, lbl, lineR, delBtn, handle);
+        } else {
+          // ラベルなし: [lineL] [del] [handle]
+          divEl.append(lineL, delBtn, handle);
+        }
+        if (appMode === 'edit') { setupRowKeyPointerDnD(divEl, divEl, gi, ri); }
+        rowsEl.append(divEl);
+        return;
+      }
+      // ===== 通常行 =====
       const rowEl = document.createElement('div'); rowEl.className = 'emoji-row'; rowEl.dataset.gi = gi; rowEl.dataset.ri = ri;
       const keySpan = document.createElement('span'); keySpan.className = 'emoji-key'; keySpan.textContent = row.key;
       if (appMode === 'edit') { setupRowKeyPointerDnD(keySpan, rowEl, gi, ri); }
@@ -1114,7 +1254,10 @@ function renderGroups() {
     const addRow = document.createElement('div'); addRow.className = 'group-add-row';
     const addBtn2 = document.createElement('button'); addBtn2.className = 'group-add-preset'; addBtn2.innerHTML = '＋ 新規登録…';
     ;(function(cGi) { addBtn2.onclick = () => openAddModal(cGi); })(gi);
-    addRow.append(addBtn2); block.append(addRow); el.append(block);
+    const divBtn = document.createElement('button'); divBtn.className = 'divider-add-btn';
+    divBtn.innerHTML = '─&thinsp;区切り';
+    ;(function(cGi){ divBtn.onclick = () => openAddDividerModal(cGi); })(gi);
+    addRow.append(addBtn2); addRow.append(divBtn); block.append(addRow); el.append(block);
   });
   if (window._scheduleTwemoji) window._scheduleTwemoji();
 }
@@ -1252,6 +1395,15 @@ function closeEditRowModal() { document.getElementById('editRowModal').style.dis
 // ============================================================
 //  長押し編集モーダル
 // ============================================================
+
+
+// インデックスから実チップを取得（render後も正確に参照）
+function getLpChipByIndex(chipType, gi, ri, ci) {
+  if (chipType === 'pin') return (ci >= 0 && ci < pinColors.length) ? pinColors[ci] : null;
+  const g = groups[gi]; if (!g) return null;
+  const r = g.rows[ri]; if (!r) return null;
+  return (ci >= 0 && ci < r.colors.length) ? r.colors[ci] : null;
+}
 function lpUpdateCanvas() {
   const bVal = document.getElementById('lpBHex').value, tVal = document.getElementById('lpTHex').value;
   const displayB = validHex(bVal) ? bVal : lpOldB, displayT = validHex(tVal) ? tVal : lpOldT;
@@ -1319,11 +1471,14 @@ function lpOverwrite() {
   const bVal = document.getElementById('lpBHex').value, tVal = document.getElementById('lpTHex').value;
   if (!validHex(bVal) || !validHex(tVal)) { showToast('有効な HEX 値を入力してください'); return; }
   if (lpTarget.c.locked && !lpTarget.tempUnlocked) { showToast('🔒 一時解除してから操作してください'); return; }
-  const rawLabel = document.getElementById('lpLabelInput').value.trim(); const pendingLabel = rawLabel === 'Aa' ? '' : rawLabel;
-  const savedC = lpTarget.c, oldChipLabel = getChipLabel(lpTarget.c), savedType = lpTarget.chipType;
+  const rawLabel = document.getElementById('lpLabelInput').value.trim();
+  const pendingLabel = rawLabel === 'Aa' ? '' : rawLabel;
+  const { gi, ri, ci, chipType } = lpTarget;
+  const oldChipLabel = getChipLabel(lpTarget.c);
+  const snapOldB = lpOldB, snapOldT = lpOldT;
   closeLpModal();
-  pendingOverwrite = { c: savedC, newT: tVal, newB: bVal, newLabel: pendingLabel, chipType: savedType };
-  const before = document.getElementById('owBefore'); before.style.background = lpOldB; before.style.color = lpOldT; before.textContent = oldChipLabel;
+  pendingOverwrite = { gi, ri, ci, chipType, newT: tVal, newB: bVal, newLabel: pendingLabel };
+  const before = document.getElementById('owBefore'); before.style.background = snapOldB; before.style.color = snapOldT; before.textContent = oldChipLabel;
   const after = document.getElementById('owAfter'); after.style.background = bVal; after.style.color = tVal; after.textContent = pendingLabel || oldChipLabel;
   document.getElementById('overwriteModal').style.display = 'flex';
 }
@@ -1343,19 +1498,27 @@ function lpSaveSettings() {
 
 function lpDelete() {
   if (!lpTarget) return;
-  const c = lpTarget.c, gi = lpTarget.gi, ri = lpTarget.ri, chipType = lpTarget.chipType;
-  if (c.locked) { alert('🔒 ロックされているため削除できません。先にロックを解除してください。'); return; }
-  // ★ closeLpModalを先に呼んでフラグをリセット
+  if (lpTarget.c.locked) { alert('🔒 ロックされているため削除できません。先にロックを解除してください。'); return; }
+  const { gi, ri, ci, chipType } = lpTarget;
   closeLpModal();
-  if (chipType === 'pin') { const idx = pinColors.indexOf(c); if (idx >= 0) pinColors.splice(idx, 1); savePinColors(); renderPinRow(); }
-  else { const targetRow = groups[gi].rows[ri]; if (targetRow) { const idx = targetRow.colors.indexOf(c); if (idx >= 0) targetRow.colors.splice(idx, 1); } saveGroups(); renderGroups(); }
+  if (chipType === 'pin') {
+    if (ci >= 0 && ci < pinColors.length) pinColors.splice(ci, 1);
+    savePinColors(); renderPinRow();
+  } else {
+    const row = groups[gi]?.rows[ri];
+    if (row && ci >= 0 && ci < row.colors.length) row.colors.splice(ci, 1);
+    saveGroups(); renderGroups();
+  }
   showToast('削除しました');
 }
 
 function closeOverwriteModal() { pendingOverwrite = null; document.getElementById('overwriteModal').style.display = 'none'; }
 function confirmOverwrite() {
   if (!pendingOverwrite) return;
-  const { c, newT, newB, newLabel, chipType } = pendingOverwrite; c.t = newT; c.b = newB; if (newLabel !== undefined) c.label = newLabel;
+  const { gi, ri, ci, chipType, newT, newB, newLabel } = pendingOverwrite;
+  const chip = getLpChipByIndex(chipType, gi, ri, ci);
+  if (!chip) { showToast('チップが見つかりません'); pendingOverwrite = null; document.getElementById('overwriteModal').style.display = 'none'; return; }
+  chip.t = newT; chip.b = newB; if (newLabel !== undefined) chip.label = newLabel;
   if (chipType === 'pin') { savePinColors(); renderPinRow(); } else { saveGroups(); renderGroups(); }
   showToast('色を上書きしました ✓'); pendingOverwrite = null; document.getElementById('overwriteModal').style.display = 'none';
 }
@@ -1376,14 +1539,12 @@ function confirmAddGroup() {
 document.getElementById('addGroupNameInput').addEventListener('keydown', e => { if (e.key === 'Enter') confirmAddGroup(); if (e.key === 'Escape') closeAddGroupModal(); });
 
 // ============================================================
-//  Sync
+//  Sync — GitHub Gist
 // ============================================================
 let syncConfig = { token: '', gistId: '' }, pollTimer = null, lastEtag = '', isSyncPushing = false;
-
 function setSyncBadge(state, label) { document.getElementById('syncBadge').className = 'sync-badge ' + (state || ''); document.getElementById('syncLabel').textContent = label; if (state === 'error') document.getElementById('syncSetup').style.display = 'block'; }
 function toggleSyncSetupPanel() { const setup = document.getElementById('syncSetup'); setup.style.display = setup.style.display === 'none' ? 'block' : 'none'; }
-function loadSyncConfig() { try { const c = JSON.parse(localStorage.getItem('cp_sync') || '{}'); syncConfig.token = c.token || ''; syncConfig.gistId = c.gistId || ''; } catch (e) {} }
-
+function loadSyncConfig() { try { const c = JSON.parse(localStorage.getItem('cp_sync') || '{}'); syncConfig.token = c.token || ''; syncConfig.gistId = c.gistId || ''; } catch(e) {} }
 async function gistGet() {
   if (!syncConfig.gistId || !syncConfig.token) return null;
   try {
@@ -1395,24 +1556,30 @@ async function gistGet() {
     const etag = r.headers.get('ETag'); if (etag) lastEtag = etag;
     const data = await r.json();
     return { groups: JSON.parse(data.files['presets.json'].content), pin: data.files['pin.json'] ? JSON.parse(data.files['pin.json'].content) : null };
-  } catch (e) { return null; }
+  } catch(e) { return null; }
 }
-
 async function gistPut(gs, pin) {
   if (!syncConfig.gistId || !syncConfig.token) return false;
-  const files = { 'presets.json': { content: JSON.stringify(gs) } }; if (pin !== undefined) files['pin.json'] = { content: JSON.stringify(pin) };
-  const r = await fetch('https://api.github.com/gists/' + syncConfig.gistId, { method: 'PATCH', headers: { 'Authorization': 'token ' + syncConfig.token }, body: JSON.stringify({ files }) }); return r.ok;
+  const files = { 'presets.json': { content: JSON.stringify(gs) } };
+  if (pin !== undefined) files['pin.json'] = { content: JSON.stringify(pin) };
+  const r = await fetch('https://api.github.com/gists/' + syncConfig.gistId, { method: 'PATCH', headers: { 'Authorization': 'token ' + syncConfig.token }, body: JSON.stringify({ files }) });
+  return r.ok;
 }
-
 function mergeGroups(localGs, remoteGs) {
-  const remoteChipIds = new Set(); remoteGs.forEach(g => g.rows.forEach(r => r.colors.forEach(c => { if (c.id) remoteChipIds.add(c.id); })));
-  const localOnlyChips = []; localGs.forEach(lg => lg.rows.forEach(lr => lr.colors.forEach(c => { if (c.id && !remoteChipIds.has(c.id)) localOnlyChips.push({ chip: c, groupName: lg.name, rowKey: lr.key }); })));
+  const remoteChipIds = new Set();
+  remoteGs.forEach(g => g.rows.forEach(r => { if (!r.divider) r.colors.forEach(c => { if (c.id) remoteChipIds.add(c.id); }); }));
+  const localOnlyChips = [];
+  localGs.forEach(lg => lg.rows.forEach(lr => { if (!lr.divider) lr.colors.forEach(c => { if (c.id && !remoteChipIds.has(c.id)) localOnlyChips.push({ chip: c, groupName: lg.name, rowKey: lr.key }); }); }));
   const merged = ensureIds(remoteGs);
-  localOnlyChips.forEach(({ chip, groupName, rowKey }) => { const tg = merged.find(g => g.name === groupName); if (!tg) return; const tr = tg.rows.find(r => r.key === rowKey); if (!tr) return; tr.colors.push(chip); });
+  localOnlyChips.forEach(({ chip, groupName, rowKey }) => { const tg = merged.find(g => g.name === groupName); if (!tg) return; const tr = tg.rows.find(r => !r.divider && r.key === rowKey); if (!tr) return; tr.colors.push(chip); });
   return merged;
 }
-function mergePins(localPins, remotePins) { if (!remotePins) return localPins; const remoteIds = new Set(remotePins.map(c => c.id).filter(Boolean)); const localOnly = localPins.filter(c => c.id && !remoteIds.has(c.id)); return [...remotePins, ...localOnly]; }
-
+function mergePins(localPins, remotePins) {
+  if (!remotePins) return localPins;
+  const remoteIds = new Set(remotePins.map(c => c.id).filter(Boolean));
+  const localOnly = localPins.filter(c => c.id && !remoteIds.has(c.id));
+  return [...remotePins, ...localOnly];
+}
 async function setupSync() {
   const token = document.getElementById('gistTokenInput').value.trim(), gistId = document.getElementById('gistIdInput').value.trim();
   if (!token) return alert('Tokenが必要です');
@@ -1426,19 +1593,15 @@ async function setupSync() {
     localStorage.setItem('cp_sync', JSON.stringify(syncConfig)); startPolling(); updateSyncShareUrl(); document.getElementById('syncSetup').style.display = 'none';
   } else {
     const r = await fetch('https://api.github.com/gists', { method: 'POST', headers: { 'Authorization': 'token ' + token }, body: JSON.stringify({ description: 'ColorPreview', public: false, files: { 'presets.json': { content: JSON.stringify(groups) }, 'pin.json': { content: JSON.stringify(pinColors) } } }) });
-    const d = await r.json(); if (d.id) { syncConfig.gistId = d.id; localStorage.setItem('cp_sync', JSON.stringify(syncConfig)); startPolling(); updateSyncShareUrl(); document.getElementById('syncSetup').style.display = 'none'; }
+    const d = await r.json();
+    if (d.id) { syncConfig.gistId = d.id; localStorage.setItem('cp_sync', JSON.stringify(syncConfig)); startPolling(); updateSyncShareUrl(); document.getElementById('syncSetup').style.display = 'none'; }
   }
 }
-
 function clearSync() { stopPolling(); syncConfig = { token: '', gistId: '' }; localStorage.removeItem('cp_sync'); setSyncBadge('', '未接続'); document.getElementById('syncShareUrlRow').style.display = 'none'; document.getElementById('syncSetup').style.display = 'block'; }
-
 function startPolling() {
   stopPolling(); setSyncBadge('synced', '同期中');
-  // ★ ポーリング間隔を8秒に延長。ユーザー操作中の干渉を最小化
   pollTimer = setInterval(async () => {
-    if (isSyncPushing) return;
-    // ★ ローカルで操作直後（デバウンス中）はポーリングをスキップ
-    if (syncPushDebounceTimer) return;
+    if (isSyncPushing || syncPushDebounceTimer) return;
     const data = await gistGet(); if (data === null) { setSyncBadge('error', 'エラー'); return; }
     if (data && data !== 'unchanged') {
       if (data.groups) { groups = mergeGroups(groups, data.groups); localStorage.setItem('cp_groups5', JSON.stringify(groups)); renderGroups(); }
@@ -1447,9 +1610,7 @@ function startPolling() {
     }
   }, 8000);
 }
-
-function stopPolling() { if (pollTimer) clearInterval(pollTimer); }
-
+function stopPolling() { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } }
 let syncPushDebounceTimer = null;
 function scheduleSyncPush() {
   if (!syncConfig.gistId || !syncConfig.token) return;
@@ -1459,16 +1620,208 @@ function scheduleSyncPush() {
     if (isSyncPushing) return;
     isSyncPushing = true;
     try { await gistPut(groups, pinColors); lastEtag = ''; }
-    catch(e) {}
-    finally { isSyncPushing = false; }
+    catch(e) {} finally { isSyncPushing = false; }
   }, 1500);
 }
-
 function syncPush() { scheduleSyncPush(); }
-
 function updateSyncShareUrl() { if (!syncConfig.gistId) return; const url = location.href.split('?')[0] + '?gist=' + syncConfig.gistId; document.getElementById('syncShareUrlRow').style.display = 'flex'; document.getElementById('syncShareInput').value = url; }
 function copySyncUrl() { navigator.clipboard.writeText(document.getElementById('syncShareInput').value); showToast('同期用URLをコピーしました'); }
+// ============================================================
+//  区切り行 — 登録色管理・追加・編集モーダル
+// ============================================================
+let dividerTargetGi = 0;
+let editDividerGi = -1, editDividerRi = -1;
+let _dividerSelectedColor = ''; // ''=デフォルト
 
+// 登録色: localStorageで永続化（最大6色）
+function _loadDividerUserColors() {
+  try { return JSON.parse(localStorage.getItem('cp_divider_colors') || '[]'); } catch(_){ return []; }
+}
+function _saveDividerUserColors(arr) {
+  localStorage.setItem('cp_divider_colors', JSON.stringify(arr.slice(0, 6)));
+}
+
+// ---- 追加モーダル ----
+
+function _updateAddDividerColorUI(color) {
+  const swatch = document.getElementById('dividerColorSwatch');
+  const input = document.getElementById('dividerColorInput');
+  const hex = document.getElementById('dividerHexInput');
+  const status = document.getElementById('dividerColorStatus');
+  const c = (color && validHex(color)) ? color : '';
+  swatch.style.background = c || '#e0e0e8';
+  input.value = c || '#e0e0e8';
+  hex.value = c || '';
+  status.textContent = c ? c.toUpperCase() + ' を選択中' : 'デフォルト色を使用';
+  _dividerSelectedColor = c;
+}
+
+function _buildAddDividerPresets() {
+  const container = document.getElementById('dividerColorPresets');
+  container.innerHTML = '';
+  const colors = _loadDividerUserColors();
+  // デフォルトボタン
+  const defBtn = document.createElement('button');
+  defBtn.title = 'デフォルト'; defBtn.textContent = '×';
+  defBtn.style.cssText = 'width:24px;height:24px;border-radius:5px;border:1.5px solid var(--border);cursor:pointer;background:var(--surface2);color:var(--muted);font-size:11px;font-weight:700;font-family:Syne,sans-serif;flex-shrink:0;';
+  defBtn.addEventListener('click', () => _updateAddDividerColorUI(''));
+  container.append(defBtn);
+  // 登録色
+  colors.forEach((c, idx) => {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'position:relative;width:24px;height:24px;flex-shrink:0;';
+    const btn = document.createElement('button');
+    btn.title = c; btn.style.cssText = `width:24px;height:24px;border-radius:5px;border:1.5px solid rgba(0,0,0,.15);cursor:pointer;background:${c};padding:0;display:block;`;
+    btn.addEventListener('click', () => _updateAddDividerColorUI(c));
+    // 右上に削除バッジ
+    const del = document.createElement('button');
+    del.textContent = '×'; del.title = '削除';
+    del.style.cssText = 'position:absolute;top:-5px;right:-5px;width:13px;height:13px;border-radius:50%;background:#d9363e;color:#fff;border:none;cursor:pointer;font-size:8px;line-height:1;display:flex;align-items:center;justify-content:center;padding:0;z-index:1;';
+    del.addEventListener('click', e => { e.stopPropagation(); const arr = _loadDividerUserColors(); arr.splice(idx, 1); _saveDividerUserColors(arr); _buildAddDividerPresets(); });
+    wrap.append(btn, del); container.append(wrap);
+  });
+}
+
+function _addDividerUserColor() {
+  const hex = document.getElementById('dividerHexInput').value.trim();
+  let c = hex;
+  if (/^[0-9a-fA-F]{6}$/.test(c)) c = '#' + c;
+  if (!validHex(c)) { showToast('有効な HEX カラーコードを入力してください'); return; }
+  const arr = _loadDividerUserColors();
+  if (arr.length >= 6) { showToast('登録色は最大6色です。先に削除してください'); return; }
+  if (arr.includes(c)) { _updateAddDividerColorUI(c); return; }
+  arr.push(c);
+  _saveDividerUserColors(arr);
+  _updateAddDividerColorUI(c);
+  _buildAddDividerPresets();
+}
+
+function openAddDividerModal(gi) {
+  dividerTargetGi = gi;
+  _dividerSelectedColor = '';
+  document.getElementById('dividerLabelInput').value = '';
+  _buildAddDividerPresets();
+  _updateAddDividerColorUI('');
+  // 挿入位置
+  const sel = document.getElementById('dividerPositionSelect');
+  sel.innerHTML = '';
+  const rows = groups[gi].rows;
+  rows.forEach((row, ri) => {
+    const opt = document.createElement('option'); opt.value = ri;
+    const prev = ri === 0 ? '先頭' : '「' + (rows[ri-1].divider ? '─' : rows[ri-1].key) + '」の後';
+    opt.textContent = prev + ' → ここに挿入'; sel.append(opt);
+  });
+  const optEnd = document.createElement('option'); optEnd.value = rows.length;
+  optEnd.textContent = rows.length === 0 ? '先頭（行なし）' : '「' + (rows[rows.length-1].divider ? '─' : rows[rows.length-1].key) + '」の後（末尾）';
+  sel.append(optEnd); sel.value = rows.length;
+  document.getElementById('addDividerModal').style.display = 'flex';
+  setTimeout(() => document.getElementById('dividerLabelInput').focus(), 60);
+}
+function closeAddDividerModal() { document.getElementById('addDividerModal').style.display = 'none'; }
+function confirmAddDivider() {
+  const label = document.getElementById('dividerLabelInput').value.trim();
+  const insertAt = +document.getElementById('dividerPositionSelect').value;
+  const color = _dividerSelectedColor;
+  groups[dividerTargetGi].rows.splice(insertAt, 0, { key: '---', divider: true, label, color, colors: [] });
+  saveGroups(); renderGroups(); closeAddDividerModal();
+  showToast('区切りを追加しました');
+}
+document.getElementById('dividerLabelInput').addEventListener('keydown', e => { if (e.key === 'Enter') confirmAddDivider(); if (e.key === 'Escape') closeAddDividerModal(); });
+document.getElementById('dividerColorInput').addEventListener('input', e => {
+  const c = e.target.value;
+  document.getElementById('dividerHexInput').value = c;
+  document.getElementById('dividerColorSwatch').style.background = c;
+  document.getElementById('dividerColorStatus').textContent = c.toUpperCase() + ' を選択中';
+  _dividerSelectedColor = c;
+});
+document.getElementById('dividerHexInput').addEventListener('input', e => {
+  let v = e.target.value.trim();
+  if (/^[0-9a-fA-F]{6}$/.test(v)) v = '#' + v;
+  if (v && !v.startsWith('#')) v = '#' + v;
+  if (validHex(v)) {
+    _updateAddDividerColorUI(v);
+  } else {
+    _dividerSelectedColor = '';
+    document.getElementById('dividerColorStatus').textContent = '無効なHEX値';
+  }
+});
+
+// ---- 編集モーダル ----
+
+function _updateEditDividerColorUI(color) {
+  const swatch = document.getElementById('editDividerColorSwatch');
+  const input = document.getElementById('editDividerColorInput');
+  const hex = document.getElementById('editDividerHexInput');
+  const lbl = document.getElementById('editDividerColorLabel');
+  const c = (color && validHex(color)) ? color : '';
+  swatch.style.background = c || '#e0e0e8';
+  input.value = c || '#e0e0e8';
+  hex.value = c || '';
+  lbl.textContent = c ? c.toUpperCase() : 'デフォルト';
+}
+
+function _buildEditDividerPresets() {
+  const container = document.getElementById('editDividerColorPresets');
+  container.innerHTML = '';
+  const colors = _loadDividerUserColors();
+  // デフォルトボタン
+  const defBtn = document.createElement('button');
+  defBtn.title = 'デフォルト'; defBtn.textContent = '×';
+  defBtn.style.cssText = 'width:24px;height:24px;border-radius:5px;border:1.5px solid var(--border);cursor:pointer;background:var(--surface2);color:var(--muted);font-size:11px;font-weight:700;font-family:Syne,sans-serif;flex-shrink:0;';
+  defBtn.addEventListener('click', () => _updateEditDividerColorUI(''));
+  container.append(defBtn);
+  colors.forEach((c, idx) => {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'position:relative;width:24px;height:24px;flex-shrink:0;';
+    const btn = document.createElement('button');
+    btn.title = c; btn.style.cssText = `width:24px;height:24px;border-radius:5px;border:1.5px solid rgba(0,0,0,.15);cursor:pointer;background:${c};padding:0;display:block;`;
+    btn.addEventListener('click', () => _updateEditDividerColorUI(c));
+    const del = document.createElement('button');
+    del.textContent = '×'; del.title = '削除';
+    del.style.cssText = 'position:absolute;top:-5px;right:-5px;width:13px;height:13px;border-radius:50%;background:#d9363e;color:#fff;border:none;cursor:pointer;font-size:8px;line-height:1;display:flex;align-items:center;justify-content:center;padding:0;z-index:1;';
+    del.addEventListener('click', e => { e.stopPropagation(); const arr = _loadDividerUserColors(); arr.splice(idx, 1); _saveDividerUserColors(arr); _buildEditDividerPresets(); });
+    wrap.append(btn, del); container.append(wrap);
+  });
+}
+
+function openEditDividerModal(gi, ri) {
+  editDividerGi = gi; editDividerRi = ri;
+  const row = groups[gi].rows[ri];
+  document.getElementById('editDividerLabelInput').value = row.label || '';
+  _buildEditDividerPresets();
+  _updateEditDividerColorUI(row.color || '');
+  document.getElementById('editDividerModal').style.display = 'flex';
+  setTimeout(() => document.getElementById('editDividerLabelInput').focus(), 60);
+}
+function closeEditDividerModal() { document.getElementById('editDividerModal').style.display = 'none'; editDividerGi = -1; editDividerRi = -1; }
+function saveEditDivider() {
+  if (editDividerGi < 0 || editDividerRi < 0) return;
+  const row = groups[editDividerGi].rows[editDividerRi];
+  if (!row || !row.divider) return;
+  row.label = document.getElementById('editDividerLabelInput').value.trim();
+  const hexVal = document.getElementById('editDividerHexInput').value.trim();
+  let c = hexVal;
+  if (/^[0-9a-fA-F]{6}$/.test(c)) c = '#' + c;
+  row.color = validHex(c) ? c : '';
+  saveGroups(); renderGroups(); closeEditDividerModal(); showToast('区切りを更新しました');
+}
+function deleteEditDivider() {
+  if (editDividerGi < 0 || editDividerRi < 0) return;
+  groups[editDividerGi].rows.splice(editDividerRi, 1);
+  saveGroups(); renderGroups(); closeEditDividerModal(); showToast('区切りを削除しました');
+}
+document.getElementById('editDividerLabelInput').addEventListener('keydown', e => { if (e.key === 'Enter') saveEditDivider(); if (e.key === 'Escape') closeEditDividerModal(); });
+document.getElementById('editDividerColorInput').addEventListener('input', e => {
+  const c = e.target.value;
+  _updateEditDividerColorUI(c);
+  document.getElementById('editDividerHexInput').value = c;
+});
+document.getElementById('editDividerHexInput').addEventListener('input', e => {
+  let v = e.target.value.trim();
+  if (/^[0-9a-fA-F]{6}$/.test(v)) v = '#' + v;
+  if (v && !v.startsWith('#')) v = '#' + v;
+  if (validHex(v)) _updateEditDividerColorUI(v);
+});
 // ============================================================
 //  カラー操作
 // ============================================================
@@ -1483,21 +1836,26 @@ function applyMatchBg() { const hex = document.getElementById('bHex').value; if 
 function swapColors() { const th=document.getElementById('tHex').value, bh=document.getElementById('bHex').value; applyHex('t',bh); applyHex('b',th); }
 function render() { const tc=document.getElementById('tHex').value, bc=document.getElementById('bHex').value; document.getElementById('preview').style.background=bc; document.getElementById('preview').style.color=tc; document.getElementById('tcDot').style.background=tc; document.getElementById('bcDot').style.background=bc; document.getElementById('tcCode').textContent=tc.toUpperCase(); document.getElementById('bcCode').textContent=bc.toUpperCase(); document.getElementById('tcName').textContent=document.getElementById('tName').value?' ('+document.getElementById('tName').value+')':''; document.getElementById('bcName').textContent=document.getElementById('bName').value?' ('+document.getElementById('bName').value+')':''; }
 function copyText(t){ return navigator.clipboard.writeText(t); }
-
-async function pasteHex(k) {
-  try {
-    const text = await navigator.clipboard.readText();
-    let val = text.trim();
-    if (/^[0-9a-fA-F]{6}$/.test(val)) val = '#' + val;
-    if (validHex(val)) { applyHex(k, val); showColorToast(val.toUpperCase(), val, k === 'b' ? document.getElementById('tHex').value : document.getElementById('bHex').value, k === 'b' ? '背景色' : '文字色'); }
-    else { showToast('有効な HEX カラーコードが見つかりません'); }
-  } catch(e) {
-    const inputEl = document.getElementById(k + 'Hex');
-    if (inputEl) { inputEl.focus(); inputEl.select(); }
-    showToast('HEX入力欄にペーストしてください');
+function pasteHex(k) {
+  const inputEl = document.getElementById(k + 'Hex');
+  if (!inputEl) return;
+  if (navigator.clipboard && navigator.clipboard.readText) {
+    navigator.clipboard.readText().then(text => {
+      let val = text.trim();
+      if (/^[0-9a-fA-F]{6}$/.test(val)) val = '#' + val;
+      if (validHex(val)) {
+        applyHex(k, val);
+        const other = k === 'b' ? document.getElementById('tHex').value : document.getElementById('bHex').value;
+        showColorToast(val.toUpperCase(), val, other, k === 'b' ? '背景色' : '文字色');
+      } else {
+        inputEl.focus(); inputEl.select();
+        showToast('HEX入力欄にペーストしてください');
+      }
+    }).catch(() => { inputEl.focus(); inputEl.select(); });
+  } else {
+    inputEl.focus(); inputEl.select();
   }
 }
-
 let toastTimer = null;
 function contrastColor(hex) { if (!validHex(hex)) return '#fff'; const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16); const lum = (0.299*r + 0.587*g + 0.114*b) / 255; if (lum > 0.55) { const f=0.28; return '#'+[r,g,b].map(x=>Math.round(x*f).toString(16).padStart(2,'0')).join(''); } const f=0.82; return '#'+[r,g,b].map(x=>Math.round(x+(255-x)*f).toString(16).padStart(2,'0')).join(''); }
 function showColorToast(hexText, bgColor, _ig, label) { const fg = contrastColor(bgColor); const toast = document.getElementById('copyToast'); toast.style.background = bgColor; toast.style.color = fg; toast.style.borderColor = fg.startsWith('#f')||fg.startsWith('#e')||fg.startsWith('#d') ? 'rgba(255,255,255,.22)' : 'rgba(0,0,0,.12)'; toast.textContent = label + ' ' + hexText + ' をコピー'; toast.classList.add('show'); if (toastTimer) clearTimeout(toastTimer); toastTimer = setTimeout(() => { toast.classList.remove('show'); toastTimer = null; }, 2400); }
@@ -1512,6 +1870,22 @@ document.getElementById('tPicker').oninput=e=>applyHex('t',e.target.value);
 document.getElementById('bPicker').oninput=e=>applyHex('b',e.target.value);
 document.getElementById('tHex').addEventListener('input', e => { let v = normalizeHexInput(e.target.value); if (v !== e.target.value) e.target.value = v; applyHex('t', v); });
 document.getElementById('bHex').addEventListener('input', e => { let v = normalizeHexInput(e.target.value); if (v !== e.target.value) e.target.value = v; applyHex('b', v); });
+['tHex','bHex'].forEach(id => {
+  document.getElementById(id).addEventListener('paste', e => {
+    e.preventDefault();
+    const raw = (e.clipboardData || window.clipboardData).getData('text');
+    let val = raw.trim();
+    if (/^[0-9a-fA-F]{6}$/.test(val)) val = '#' + val;
+    const k = id === 'tHex' ? 't' : 'b';
+    if (validHex(val)) {
+      applyHex(k, val);
+      const other = k === 'b' ? document.getElementById('tHex').value : document.getElementById('bHex').value;
+      showColorToast(val.toUpperCase(), val, other, k === 'b' ? '背景色' : '文字色');
+    } else {
+      document.getElementById(id).value = raw;
+    }
+  });
+});
 document.getElementById('tName').oninput=render; document.getElementById('bName').oninput=render;
 document.addEventListener('touchstart', e => { const active = document.activeElement; if (active && active !== e.target && !active.contains(e.target)) { if (active.tagName !== 'INPUT' && active.tagName !== 'TEXTAREA' && active.tagName !== 'SELECT') active.blur(); } }, { passive: true });
 
