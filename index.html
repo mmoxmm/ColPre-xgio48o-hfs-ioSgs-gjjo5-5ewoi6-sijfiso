@@ -2063,8 +2063,13 @@ document.addEventListener('touchstart', e => {
   syncUI('t'); syncUI('b'); render(); renderPinRow(); renderGroups();
   setupCopyHexPressEffect('copyHexBBtn'); setupCopyHexPressEffect('copyHexTBtn');
 })();
+  
+</script>
 
-  <!-- 💡 インポート機能付きの復元パネル -->
+ ...
+</script>
+
+<!-- 💡 インポート機能のコード -->
 <div id="shared-data-panel" style="position: fixed; bottom: 20px; right: 20px; z-index: 99999; padding: 15px; background: #f8f9fa; border: 2px solid #4CAF50; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
     <h4 style="margin: 0 0 10px 0; font-size: 14px;">🔄 共有データ管理</h4>
     <button onclick="importData()" style="width: 100%; padding: 8px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">共有データを読み込む</button>
@@ -2075,7 +2080,6 @@ function importData() {
     const data = prompt("共有されたJSONデータを貼り付けてください：");
     if (data) {
         try {
-            // JSONが正しいかチェック
             JSON.parse(data);
             localStorage.setItem('cp_groups5', data);
             alert("成功しました！ページを再読み込みします。");
@@ -2085,9 +2089,6 @@ function importData() {
         }
     }
 }
-</script>
-
-  
 </script>
 </body>
 </html>
