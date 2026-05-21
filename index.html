@@ -137,6 +137,7 @@ body.mode-lock .pin-chip.locked{border-color:rgba(217,54,62,.4);box-shadow:0 0 0
 .pin-add-btn{height:34px;min-width:34px;border-radius:17px;border:1.5px dashed var(--border);background:none;color:var(--muted);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;line-height:1;padding:0 10px;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;}
 @media(hover:hover){.pin-add-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}}
 .pin-row-inner.drop-append-here{outline:2px dashed #b0b0bc;outline-offset:3px;border-radius:var(--radius)}
+
 .groups-list{display:flex;flex-direction:row;gap:12px;align-items:flex-start;flex-wrap:wrap;will-change:contents}
 .group-block{flex:1 1 calc(33.333% - 8px);min-width:200px;min-height:80px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);transform:translateZ(0);contain:layout style;}
 @media(max-width:540px){.groups-list{flex-direction:column}.group-block{flex:1 1 100%;min-width:0}}
@@ -157,21 +158,75 @@ body.mode-edit .group-del-btn{display:block}
 .emoji-rows{padding:10px 12px;display:flex;flex-direction:column;gap:0}
 .emoji-row{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;border-radius:6px;transition:background .12s;padding:5px 0;}
 .emoji-row + .emoji-row{border-top:1px solid rgba(224,224,232,0.55);}
-.divider-row{display:flex;align-items:center;gap:0;padding:7px 0;cursor:default;width:100%;position:relative;min-height:28px;}
-.divider-row + .emoji-row,.emoji-row + .divider-row,.divider-row + .divider-row{border-top:none;}
-.divider-line{flex:1;height:2px;border-radius:1px;background:var(--border);opacity:0.75;}
-.divider-label-wrap{flex-shrink:0;display:flex;align-items:center;gap:8px;padding:0 10px;}
-.divider-label{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;white-space:nowrap;flex-shrink:0;text-transform:uppercase;opacity:0.7;}
-.divider-actions{position:absolute;right:0;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:3px;opacity:0;pointer-events:none;transition:opacity .15s;background:var(--surface);padding-left:4px;}
+
+/* ===== 区切り行 ===== */
+.divider-row{
+  display:flex;
+  align-items:center;
+  gap:0;
+  padding:7px 0;
+  cursor:default;
+  width:100%;
+  position:relative;
+  min-height:28px;
+}
+.divider-row + .emoji-row,
+.emoji-row + .divider-row,
+.divider-row + .divider-row{border-top:none;}
+
+.divider-line{
+  flex:1;
+  height:2px;
+  border-radius:1px;
+  background:var(--border);
+  opacity:0.75;
+}
+
+.divider-label-wrap{
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:0 10px;
+}
+
+.divider-label{
+  font-family:'Syne',sans-serif;
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.12em;
+  white-space:nowrap;
+  flex-shrink:0;
+  text-transform:uppercase;
+  opacity:0.7;
+}
+
+.divider-actions{
+  position:absolute;
+  right:0;
+  top:50%;
+  transform:translateY(-50%);
+  display:flex;
+  align-items:center;
+  gap:3px;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .15s;
+  background:var(--surface);
+  padding-left:4px;
+}
 body.mode-edit .divider-actions{opacity:1;pointer-events:auto;}
+
 body.mode-edit .divider-row{cursor:grab;}
 body.mode-edit .divider-row.is-grabbing{cursor:grabbing;}
 .divider-row.row-dragging{opacity:.4;}
 .divider-row.row-drag-over-top{border-top:2px solid var(--accent);}
 .divider-row.row-drag-over-bottom{border-bottom:2px solid var(--accent);}
+
 .divider-drag-handle{font-size:11px;color:var(--muted);cursor:grab;padding:2px;}
 .divider-del-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;line-height:1;padding:2px 3px;border-radius:3px;display:flex;align-items:center;transition:color .12s;}
 @media(hover:hover){body.mode-edit .divider-del-btn:hover{color:#d9363e;}}
+
 .emoji-key{font-size:15px;flex-shrink:0;width:auto;min-width:28px;text-align:center;padding:2px 4px;border-radius:4px;border:1px solid transparent;transition:all .15s;line-height:32px;cursor:default}
 body.mode-edit .emoji-key{border:1.5px dashed var(--muted);cursor:grab}
 body.mode-edit .emoji-key.is-grabbing{cursor:grabbing}
@@ -201,9 +256,9 @@ body.mode-lock .swatch-chip.locked{border-color:rgba(217,54,62,.4);box-shadow:0 
 #chipDragGhost{position:fixed;pointer-events:none;z-index:9998;opacity:.88;will-change:transform;transition:none;display:none}
 .emoji-add-btn{width:28px;height:28px;border-radius:50%;border:1.5px dashed var(--border);background:none;color:var(--muted);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;line-height:1;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;}
 @media(hover:hover){.emoji-add-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}}
-/* FIX: group-add-row justify-content:space-between で左右に分離 */
-.group-add-row{padding:6px 12px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;}
-.group-add-preset{display:flex;align-items:center;gap:5px;font-size:11px;font-family:'Syne',sans-serif;font-weight:600;color:var(--muted);cursor:pointer;background:none;border:none;transition:color .15s;padding:0;flex-shrink:0;}
+/* ===== ここが変更点1: flex:1 を追加 ===== */
+.group-add-row{padding:6px 12px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.group-add-preset{display:flex;align-items:center;gap:5px;font-size:11px;font-family:'Syne',sans-serif;font-weight:600;color:var(--muted);cursor:pointer;background:none;border:none;width:100%;transition:color .15s;padding:0;flex:1}
 @media(hover:hover){.group-add-preset:hover{color:var(--text)}}
 .sync-setup{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-top:20px}
 .sync-setup-title{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
@@ -308,16 +363,62 @@ body.mode-lock .swatch-chip.locked{border-color:rgba(217,54,62,.4);box-shadow:0 
 .overwrite-arrow{font-size:18px;color:rgba(255,255,255,.7);flex-shrink:0;line-height:1;margin-top:18px}
 #deleteGroupModal .modal{width:300px;text-align:center}
 footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line-height:1.8}
+
+/* ===== 区切り線カラー系 ===== */
 .divider-color-picker-row{display:flex;align-items:center;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:6px;}
 .divider-color-presets-row{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;min-height:28px;margin-bottom:8px;}
-.divider-pos-list{border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;max-height:230px;overflow-y:auto;background:var(--bg);}
-.divider-pos-slot{display:flex;align-items:center;gap:7px;padding:7px 14px;cursor:pointer;font-family:'Syne',sans-serif;font-size:11px;font-weight:600;color:var(--muted);background:var(--surface);border-left:3px solid transparent;transition:background .12s,border-left-color .12s,color .12s;user-select:none;-webkit-tap-highlight-color:transparent;}
-.divider-pos-slot:hover{background:var(--accent-light);color:var(--accent);border-left-color:var(--accent-border);}
-.divider-pos-slot.selected{background:var(--accent-light);color:var(--accent);border-left-color:var(--accent);}
+
+/* ===== 挿入位置ピッカー ===== */
+.divider-pos-list{
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  overflow:hidden;
+  max-height:230px;
+  overflow-y:auto;
+  background:var(--bg);
+}
+.divider-pos-slot{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  padding:7px 14px;
+  cursor:pointer;
+  font-family:'Syne',sans-serif;
+  font-size:11px;
+  font-weight:600;
+  color:var(--muted);
+  background:var(--surface);
+  border-left:3px solid transparent;
+  transition:background .12s,border-left-color .12s,color .12s;
+  user-select:none;
+  -webkit-tap-highlight-color:transparent;
+}
+.divider-pos-slot:hover{
+  background:var(--accent-light);
+  color:var(--accent);
+  border-left-color:var(--accent-border);
+}
+.divider-pos-slot.selected{
+  background:var(--accent-light);
+  color:var(--accent);
+  border-left-color:var(--accent);
+}
 .divider-pos-slot-arrow{font-size:10px;flex-shrink:0;}
-/* FIX: 挿入位置の行アイテムを中央揃え */
-.divider-pos-item{display:flex;align-items:center;justify-content:center;padding:5px 14px;font-size:13px;color:var(--text);background:var(--bg);border-left:3px solid transparent;user-select:none;min-height:28px;text-align:center;}
-.divider-pos-item.is-divider-item{padding:7px 14px;}
+.divider-pos-item{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:5px 14px;
+  font-size:13px;
+  color:var(--text);
+  background:var(--bg);
+  border-left:3px solid transparent;
+  user-select:none;
+  min-height:28px;
+}
+.divider-pos-item.is-divider-item{
+  padding:7px 14px;
+}
 </style>
 </head>
 <body>
@@ -692,6 +793,7 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
     </div>
   </div>
 </div>
+
 <script>
 const uid = () => Math.random().toString(36).slice(2, 9);
 
@@ -743,7 +845,6 @@ let groups = (() => {
     const d = localStorage.getItem('cp_groups5') || localStorage.getItem('cp_groups_v7') || localStorage.getItem('cp_groups');
     if (d) g = ensureIds(JSON.parse(d)); else g = ensureIds(DEFAULT_GROUPS);
   } catch (e) { g = ensureIds(DEFAULT_GROUPS); }
-  // 毎回inject実行（重複チェックあり — 区切り線増殖バグの真の原因はDOMの2重生成であり、こちらは安全）
   const injects = [{ key: '🐹', b: '#f9c89b' }, { key: '🥽', b: '#efea5a' }, { key: '🐸', b: '#eef1d0' }, { key: '🩰', b: '#ffe4e1' }, { key: '🐱', b: '#ffdab9' }, { key: '🐰', b: '#fff799' }, { key: '🎀', b: '#fff0f5' }];
   g.forEach(group => { group.rows.forEach(row => { if (row.divider) return; const target = injects.find(i => i.key === row.key); if (target && !row.colors.some(c => c.b.toLowerCase() === target.b.toLowerCase())) { row.colors.push({ id: uid(), t: '#1a1a2e', b: target.b, locked: false, label: '', copyTarget: 'b' }); } }); });
   return g;
@@ -779,10 +880,6 @@ function applyMigrations() {
   if (!localStorage.getItem(KEY_V1)) { const nightGroup = groups.find(g => g.name === '🌃'); if (nightGroup) { const desired = ['👓', '🐹', '🥽', '🕶️', '🐸', '🩰']; const rowMap = new Map(nightGroup.rows.filter(r => !r.divider).map(r => [r.key, r])); const newRows = desired.map(key => rowMap.get(key) || { key, colors: [] }); nightGroup.rows.forEach(r => { if (!r.divider && !desired.includes(r.key)) newRows.push(r); }); nightGroup.rows = newRows; } localStorage.setItem(KEY_V1, '1'); }
   const KEY_V2 = 'cp_migrated_remove_city_key_v2';
   if (!localStorage.getItem(KEY_V2)) { const cityGroup = groups.find(g => g.name === '🌆'); if (cityGroup) cityGroup.rows = cityGroup.rows.filter(r => r.key !== '🌆'); localStorage.setItem(KEY_V2, '1'); }
-  // 旧バグ(cp_inject_done_v1フラグ)で初期色が消えたユーザーへの救済。既存チップには影響なし（重複チェックあり）
-  localStorage.removeItem('cp_inject_done_v1');
-  const _inj = [{ key: '🐹', b: '#f9c89b' }, { key: '🥽', b: '#efea5a' }, { key: '🐸', b: '#eef1d0' }, { key: '🩰', b: '#ffe4e1' }, { key: '🐱', b: '#ffdab9' }, { key: '🐰', b: '#fff799' }, { key: '🎀', b: '#fff0f5' }];
-  groups.forEach(group => { group.rows.forEach(row => { if (row.divider) return; const tgt = _inj.find(i => i.key === row.key); if (tgt && !row.colors.some(c => c.b.toLowerCase() === tgt.b.toLowerCase())) { row.colors.push({ id: uid(), t: '#1a1a2e', b: tgt.b, locked: false, label: '', copyTarget: 'b' }); } }); });
   localStorage.setItem('cp_groups5', JSON.stringify(groups));
 }
 applyMigrations();
@@ -793,7 +890,11 @@ function saveGroups() {
 }
 
 let appMode = 'normal', swapSelected = null, pendingOverwrite = null;
-let longPressTimer = null, longPressActive = false, longPressConsumed = false;
+
+let longPressTimer = null;
+let longPressActive = false;
+let longPressConsumed = false;
+
 let lpTarget = null, lpOldB = '', lpOldT = '', lpSnapB = '', lpSnapT = '';
 let chipDragSrc = null, chipDropInfo = null, chipDragActive = false, chipPointerId = null, chipGhost = null;
 let rowDragSrc = null, rowDragActive = false, rowPointerId = null;
@@ -809,13 +910,17 @@ function toggleLockMode() {
   } else {
     appMode = 'normal';
     document.getElementById('lockModeBtn').classList.remove('active-lock'); document.getElementById('lockModeIcon').textContent = '🔓'; document.getElementById('lockModeText').textContent = 'ロック選択'; document.body.classList.remove('mode-lock');
-    saveGroups(); savePinColors(); renderGroups(); renderPinRow(); showToast('ロック状態を保存しました');
+    saveGroups(); savePinColors();
+    renderGroups(); renderPinRow();
+    showToast('ロック状態を保存しました');
   }
 }
+
 function exitEditMode() {
   appMode = 'normal'; swapSelected = null; cancelChipDrag(); cancelRowDrag(); cancelGrpDrag();
   document.getElementById('editModeBtn').classList.remove('active'); document.body.classList.remove('mode-edit');
 }
+
 function toggleEditMode() {
   if (appMode !== 'edit') { if (appMode === 'lock') toggleLockMode(); appMode = 'edit'; document.getElementById('editModeBtn').classList.add('active'); document.body.classList.add('mode-edit'); renderGroups(); renderPinRow(); }
   else { exitEditMode(); renderGroups(); renderPinRow(); }
@@ -830,6 +935,7 @@ function applyPinChipLabelStyle(inner, label) {
   else if (vlen <= 7) { inner.style.fontSize = '9px'; inner.style.wordBreak = 'break-word'; inner.style.whiteSpace = 'normal'; inner.style.lineHeight = '1.1'; }
   else { inner.style.fontSize = '7.5px'; inner.style.wordBreak = 'break-all'; inner.style.whiteSpace = 'normal'; inner.style.lineHeight = '1.1'; }
 }
+
 function applyChipLabelStyle(inner, label) {
   if (!label) return;
   const vlen = [...label].reduce((n, ch) => { const cp = ch.codePointAt(0); return n + (cp > 0x7F ? 2 : 1); }, 0);
@@ -851,7 +957,9 @@ function doMoveChip(src, dst) {
   saveGroups(); savePinColors(); renderGroups(); renderPinRow();
 }
 
-// Group DnD
+// ============================================================
+//  グループDnD
+// ============================================================
 function cancelGrpDrag() {
   const ghost = document.getElementById('groupDragGhost'); ghost.style.display = 'none';
   if (grpDragSrc && grpDragSrc.block) grpDragSrc.block.classList.remove('group-dragging');
@@ -859,6 +967,7 @@ function cancelGrpDrag() {
   document.querySelectorAll('.group-block.group-drag-over-left,.group-block.group-drag-over-right').forEach(b => b.classList.remove('group-drag-over-left','group-drag-over-right'));
   grpDragSrc = null; grpDragActive = false; grpPointerId = null; grpDragOverGi = null; grpDropInsertBefore = true;
 }
+
 function setupGroupHeaderPointerDnD(hdr, block, gi) {
   const srcGroupId = groups[gi].id;
   hdr.addEventListener('pointerdown', e => {
@@ -878,10 +987,11 @@ function setupGroupHeaderPointerDnD(hdr, block, gi) {
       const ghost = document.getElementById('groupDragGhost');
       ghost.style.width = '160px'; ghost.style.height = '44px'; ghost.style.display = 'block';
       const nameEl = grpDragSrc.block.querySelector('.group-name-display');
-      ghost.innerHTML = '<div style="padding:8px 12px;font-family:'Syne',sans-serif;font-size:13px;font-weight:600;text-align:center;">' + (nameEl ? nameEl.textContent : '') + '</div>';
+      ghost.innerHTML = '<div style="padding:8px 12px;font-family:\'Syne\',sans-serif;font-size:13px;font-weight:600;text-align:center;">' + (nameEl ? nameEl.textContent : '') + '</div>';
       ghost.style.transform = `translate(${e.clientX - 80}px,${e.clientY - 22}px)`; grpGhost = ghost;
     }
-    if (!grpDragActive) return; e.preventDefault();
+    if (!grpDragActive) return;
+    e.preventDefault();
     grpGhost.style.transform = `translate(${e.clientX - 80}px,${e.clientY - 22}px)`;
     document.querySelectorAll('.group-block.group-drag-over-left,.group-block.group-drag-over-right').forEach(b => b.classList.remove('group-drag-over-left','group-drag-over-right'));
     grpDragOverGi = null; grpDropInsertBefore = true;
@@ -918,13 +1028,16 @@ function setupGroupHeaderPointerDnD(hdr, block, gi) {
   hdr.addEventListener('pointercancel', () => cancelGrpDrag());
 }
 
-// Row DnD
+// ============================================================
+//  行DnD
+// ============================================================
 function cancelRowDrag() {
   document.querySelectorAll('.emoji-row.row-dragging,.divider-row.row-dragging').forEach(r => r.classList.remove('row-dragging'));
   document.querySelectorAll('.emoji-row.row-drag-over-top,.emoji-row.row-drag-over-bottom,.divider-row.row-drag-over-top,.divider-row.row-drag-over-bottom').forEach(r => r.classList.remove('row-drag-over-top','row-drag-over-bottom'));
   if (rowDragSrc && rowDragSrc.keySpan) rowDragSrc.keySpan.classList.remove('is-grabbing');
   rowDragSrc = null; rowDragActive = false; rowPointerId = null;
 }
+
 function setupRowKeyPointerDnD(keySpan, rowEl, gi, ri) {
   keySpan.addEventListener('pointerdown', e => {
     if (appMode !== 'edit') return;
@@ -938,7 +1051,9 @@ function setupRowKeyPointerDnD(keySpan, rowEl, gi, ri) {
     if (rowPointerId === null || e.pointerId !== rowPointerId || !rowDragSrc) return;
     const dx = e.clientX - rowDragSrc.startX, dy = e.clientY - rowDragSrc.startY;
     if (!rowDragActive && Math.sqrt(dx*dx + dy*dy) > 6) {
-      rowDragActive = true; rowEl.classList.add('row-dragging'); keySpan.classList.add('is-grabbing');
+      rowDragActive = true;
+      rowEl.classList.add('row-dragging');
+      keySpan.classList.add('is-grabbing');
     }
     if (!rowDragActive) return; e.preventDefault();
     document.querySelectorAll('.emoji-row.row-drag-over-top,.emoji-row.row-drag-over-bottom,.divider-row.row-drag-over-top,.divider-row.row-drag-over-bottom').forEach(r => r.classList.remove('row-drag-over-top','row-drag-over-bottom'));
@@ -959,7 +1074,9 @@ function setupRowKeyPointerDnD(keySpan, rowEl, gi, ri) {
     const elemBelow = document.elementFromPoint(e.clientX, e.clientY);
     cancelRowDrag();
     if (!wasActive) {
-      if (groups[srcGi] && groups[srcGi].rows[srcRi] && groups[srcGi].rows[srcRi].divider) { openEditDividerModal(srcGi, srcRi); return; }
+      if (groups[srcGi] && groups[srcGi].rows[srcRi] && groups[srcGi].rows[srcRi].divider) {
+        openEditDividerModal(srcGi, srcRi); return;
+      }
       openEditRowModal(srcGi, srcRi); return;
     }
     if (srcRi < 0 || !elemBelow) return;
@@ -975,7 +1092,9 @@ function setupRowKeyPointerDnD(keySpan, rowEl, gi, ri) {
   keySpan.addEventListener('pointercancel', () => cancelRowDrag());
 }
 
-// Chip DnD
+// ============================================================
+//  チップDnD
+// ============================================================
 function clearChipDropHighlights() {
   document.querySelectorAll('.swatch-chip.chip-drop-before,.swatch-chip.chip-drop-after').forEach(c => c.classList.remove('chip-drop-before','chip-drop-after'));
   document.querySelectorAll('.pin-chip.chip-drop-before,.pin-chip.chip-drop-after').forEach(c => c.classList.remove('chip-drop-before','chip-drop-after'));
@@ -1080,11 +1199,14 @@ function setupChipPointerDnD(chip, c, srcInfo) {
   chip.addEventListener('pointercancel', () => cancelChipDrag());
 }
 
-// Pin row render
+// ============================================================
+//  ピン行レンダリング
+// ============================================================
 function renderPinRow() {
   const container = document.getElementById('pinRowInner');
   const frag = document.createDocumentFragment();
   container.dataset.type = 'pin';
+
   pinColors.forEach((c, ci) => {
     const chip = document.createElement('div'); chip.className = 'pin-chip'; chip.dataset.type = 'pin'; chip.dataset.ci = ci;
     if (c.locked) chip.classList.add('locked');
@@ -1128,6 +1250,7 @@ function renderPinRow() {
     chip.addEventListener('contextmenu', e => e.preventDefault());
     frag.append(chip);
   });
+
   const addBtn = document.createElement('button'); addBtn.className = 'pin-add-btn'; addBtn.textContent = '+'; addBtn.title = '短押し: 即追加 / 長押し: ラベル付き登録';
   addBtn.addEventListener('contextmenu', e => e.preventDefault());
   let pinAddPressTimer = null, pinAddLongPress = false;
@@ -1141,14 +1264,18 @@ function renderPinRow() {
     savePinColors(); renderPinRow();
   });
   frag.append(addBtn);
+
   container.replaceChildren(frag);
   if (window._scheduleTwemoji) window._scheduleTwemoji();
 }
 
-// Groups render
+// ============================================================
+//  グループ一覧レンダリング
+// ============================================================
 function renderGroups() {
   const el = document.getElementById('groupsList');
   const frag = document.createDocumentFragment();
+
   groups.forEach((g, gi) => {
     if (!g.id || g.id === 'undefined') g.id = uid();
     const block = document.createElement('div'); block.className = 'group-block'; block.dataset.groupId = g.id;
@@ -1168,11 +1295,13 @@ function renderGroups() {
     if (appMode === 'edit') setupGroupHeaderPointerDnD(hdr, block, gi);
 
     const rowsEl = document.createElement('div'); rowsEl.className = 'emoji-rows';
+
     g.rows.forEach((row, ri) => {
-      // 区切り行
+      // ===== 区切り行 =====
       if (row.divider === true) {
         const divEl = document.createElement('div'); divEl.className = 'divider-row'; divEl.dataset.gi = gi; divEl.dataset.ri = ri;
         const lineColor = row.color || '';
+
         if (row.label) {
           const lineL = document.createElement('div'); lineL.className = 'divider-line';
           if (lineColor) { lineL.style.background = lineColor; lineL.style.opacity = '0.8'; }
@@ -1182,25 +1311,31 @@ function renderGroups() {
           labelWrap.append(lbl);
           const lineR = document.createElement('div'); lineR.className = 'divider-line';
           if (lineColor) { lineR.style.background = lineColor; lineR.style.opacity = '0.8'; }
-          divEl.append(lineL, labelWrap, lineR);
+          const actions = document.createElement('div'); actions.className = 'divider-actions';
+          const delBtn2 = document.createElement('button'); delBtn2.className = 'divider-del-btn'; delBtn2.title = '区切りを削除'; delBtn2.textContent = '×';
+          delBtn2.addEventListener('pointerdown', e => { e.stopPropagation(); });
+          ;(function(cGi, cRi){ delBtn2.addEventListener('click', e => { e.stopPropagation(); groups[cGi].rows.splice(cRi, 1); saveGroups(); renderGroups(); showToast('区切りを削除しました'); }); })(gi, ri);
+          const handle = document.createElement('span'); handle.className = 'divider-drag-handle'; handle.textContent = '⠿';
+          actions.append(delBtn2, handle);
+          divEl.append(lineL, labelWrap, lineR, actions);
         } else {
           const lineOnly = document.createElement('div'); lineOnly.className = 'divider-line';
           if (lineColor) { lineOnly.style.background = lineColor; lineOnly.style.opacity = '0.8'; }
-          divEl.append(lineOnly);
+          const actions = document.createElement('div'); actions.className = 'divider-actions';
+          const delBtn2 = document.createElement('button'); delBtn2.className = 'divider-del-btn'; delBtn2.title = '区切りを削除'; delBtn2.textContent = '×';
+          delBtn2.addEventListener('pointerdown', e => { e.stopPropagation(); });
+          ;(function(cGi, cRi){ delBtn2.addEventListener('click', e => { e.stopPropagation(); groups[cGi].rows.splice(cRi, 1); saveGroups(); renderGroups(); showToast('区切りを削除しました'); }); })(gi, ri);
+          const handle = document.createElement('span'); handle.className = 'divider-drag-handle'; handle.textContent = '⠿';
+          actions.append(delBtn2, handle);
+          divEl.append(lineOnly, actions);
         }
-        /* FIX: actionsを1つだけ生成して右端に固定（増殖バグ修正） */
-        const actions = document.createElement('div'); actions.className = 'divider-actions';
-        const delBtn2 = document.createElement('button'); delBtn2.className = 'divider-del-btn'; delBtn2.title = '区切りを削除'; delBtn2.textContent = '×';
-        delBtn2.addEventListener('pointerdown', e => { e.stopPropagation(); });
-        ;(function(cGi, cRi){ delBtn2.addEventListener('click', e => { e.stopPropagation(); groups[cGi].rows.splice(cRi, 1); saveGroups(); renderGroups(); showToast('区切りを削除しました'); }); })(gi, ri);
-        const handle = document.createElement('span'); handle.className = 'divider-drag-handle'; handle.textContent = '⠿';
-        actions.append(delBtn2, handle);
-        divEl.append(actions);
-        if (appMode === 'edit') setupRowKeyPointerDnD(divEl, divEl, gi, ri);
+
+        if (appMode === 'edit') { setupRowKeyPointerDnD(divEl, divEl, gi, ri); }
         rowsEl.append(divEl);
         return;
       }
-      // 通常行
+
+      // ===== 通常行 =====
       const rowEl = document.createElement('div'); rowEl.className = 'emoji-row'; rowEl.dataset.gi = gi; rowEl.dataset.ri = ri;
       const keySpan = document.createElement('span'); keySpan.className = 'emoji-key'; keySpan.textContent = row.key;
       if (appMode === 'edit') { setupRowKeyPointerDnD(keySpan, rowEl, gi, ri); }
@@ -1215,6 +1350,7 @@ function renderGroups() {
         })(gi, ri);
       }
       rowEl.append(keySpan);
+
       const swatchesEl = document.createElement('div'); swatchesEl.className = 'emoji-swatches'; swatchesEl.dataset.gi = gi; swatchesEl.dataset.ri = ri;
       row.colors.forEach((c, ci) => {
         const chip = document.createElement('div'); chip.className = 'swatch-chip'; chip.dataset.gi = gi; chip.dataset.ri = ri; chip.dataset.ci = ci;
@@ -1257,6 +1393,7 @@ function renderGroups() {
         }
         chip.addEventListener('contextmenu', e => e.preventDefault()); swatchesEl.append(chip);
       });
+
       const addRowBtn = document.createElement('button'); addRowBtn.className = 'emoji-add-btn'; addRowBtn.textContent = '+'; addRowBtn.title = '短押し: 即追加 / 長押し: ラベル付き登録';
       addRowBtn.addEventListener('contextmenu', e => e.preventDefault());
       ;(function(capturedRow, capturedGi, capturedRi) {
@@ -1271,19 +1408,22 @@ function renderGroups() {
           saveGroups(); renderGroups();
         });
       })(row, gi, ri);
+
       swatchesEl.append(addRowBtn); rowEl.append(swatchesEl); rowsEl.append(rowEl);
     });
 
     block.append(rowsEl);
-    /* FIX: 新規登録ボタン（左）と区切りボタン（右）を space-between で左右に配置 */
     const addRow = document.createElement('div'); addRow.className = 'group-add-row';
     const addBtn2 = document.createElement('button'); addBtn2.className = 'group-add-preset'; addBtn2.innerHTML = '＋ 新規登録…';
     ;(function(cGi) { addBtn2.onclick = () => openAddModal(cGi); })(gi);
-    const divBtn = document.createElement('button'); divBtn.className = 'group-add-preset'; divBtn.innerHTML = '─&thinsp;区切り';
+    // ===== ここが変更点2: divider-add-btn → group-add-preset =====
+    const divBtn = document.createElement('button'); divBtn.className = 'group-add-preset';
+    divBtn.innerHTML = '─&thinsp;区切り';
     ;(function(cGi){ divBtn.onclick = () => openAddDividerModal(cGi); })(gi);
     addRow.append(addBtn2); addRow.append(divBtn); block.append(addRow);
     frag.append(block);
   });
+
   el.replaceChildren(frag);
   if (window._scheduleTwemoji) window._scheduleTwemoji();
 }
@@ -1294,8 +1434,11 @@ document.addEventListener('click', e => {
   }
 });
 
-// モーダル関連
+// ============================================================
+//  新規登録モーダル（グループ下）
+// ============================================================
 let modalTargetGi = 0, modalTargetPin = false;
+
 function openAddModal(gi) {
   modalTargetPin = false; modalTargetGi = gi != null ? gi : 0;
   const t = document.getElementById('tHex').value, b = document.getElementById('bHex').value;
@@ -1308,6 +1451,7 @@ function openAddModal(gi) {
   document.getElementById('addModal').style.display = 'flex';
   setTimeout(() => document.getElementById('modalKeyInput').focus(), 60);
 }
+
 function openAddModalForPin() {
   modalTargetPin = true;
   const t = document.getElementById('tHex').value, b = document.getElementById('bHex').value;
@@ -1319,14 +1463,18 @@ function openAddModalForPin() {
   document.getElementById('addModal').style.display = 'flex';
   setTimeout(() => document.getElementById('addLabel').focus(), 60);
 }
+
 function onModalGroupChange() { modalTargetGi = +document.getElementById('modalGroup').value; }
+
 document.getElementById('addLabel').addEventListener('input', () => {
   const val = document.getElementById('addLabel').value.trim(), label = val || 'Aa';
   const chip = document.getElementById('modalChipPreview'); chip.textContent = label;
   const vlen = [...label].reduce((n,ch)=>{const cp=ch.codePointAt(0);return n+(cp>0x7F?2:1);},0);
   chip.style.fontSize = vlen<=2?'13px':vlen<=4?'9px':'7px';
 });
+
 function closeModal() { document.getElementById('addModal').style.display = 'none'; }
+
 function confirmAdd() {
   const t = document.getElementById('tHex').value, b = document.getElementById('bHex').value;
   const label = document.getElementById('addLabel').value.trim();
@@ -1339,7 +1487,11 @@ function confirmAdd() {
   saveGroups(); renderGroups(); closeModal();
 }
 
+// ============================================================
+//  行内+長押し「チップの新規登録」モーダル
+// ============================================================
 let addRowTargetGi = 0, addRowTargetRi = 0, addRowAllKeyShown = false;
+
 function openAddRowModal(gi, ri) {
   addRowTargetGi = gi; addRowTargetRi = ri; addRowAllKeyShown = false;
   const t = document.getElementById('tHex').value, b = document.getElementById('bHex').value;
@@ -1356,6 +1508,7 @@ function openAddRowModal(gi, ri) {
   document.getElementById('addRowModal').style.display = 'flex';
   setTimeout(() => document.getElementById('addRowLabel').focus(), 60);
 }
+
 function buildRowKeyGrid(gi, activeRi) {
   const grid = document.getElementById('rowKeyGrid'); grid.innerHTML = '';
   groups[gi].rows.forEach((row, ri) => {
@@ -1376,18 +1529,22 @@ function buildRowKeyGrid(gi, activeRi) {
   });
   if (window._scheduleTwemoji) window._scheduleTwemoji();
 }
+
 function toggleRowKeyPanel() {
   addRowAllKeyShown = !addRowAllKeyShown;
   document.getElementById('rowKeyAllPanel').classList.toggle('open', addRowAllKeyShown);
   document.getElementById('rowKeyDisplayHint').textContent = addRowAllKeyShown ? '▲ 閉じる' : '▼ タップで切り替え';
 }
+
 document.getElementById('addRowLabel').addEventListener('input', () => {
   const val = document.getElementById('addRowLabel').value.trim(), label = val || 'Aa';
   const chip = document.getElementById('addRowChipPreview'); chip.textContent = label;
   const vlen = [...label].reduce((n,ch)=>{const cp=ch.codePointAt(0);return n+(cp>0x7F?2:1);},0);
   chip.style.fontSize = vlen<=2?'13px':vlen<=4?'9px':'7px';
 });
+
 function closeAddRowModal() { document.getElementById('addRowModal').style.display = 'none'; addRowAllKeyShown = false; }
+
 function confirmAddRow() {
   const t = document.getElementById('tHex').value, b = document.getElementById('bHex').value;
   const label = document.getElementById('addRowLabel').value.trim();
@@ -1397,6 +1554,9 @@ function confirmAddRow() {
   saveGroups(); renderGroups(); closeAddRowModal();
 }
 
+// ============================================================
+//  行編集モーダル
+// ============================================================
 let editGi, editRi;
 function openEditRowModal(gi, ri) {
   editGi = gi; editRi = ri;
@@ -1410,15 +1570,16 @@ function saveEditRow() {
   saveGroups(); renderGroups(); closeEditRowModal();
 }
 function deleteEditRow() {
-  if (confirm('この行を削除しますか？
-含まれるカラーもすべて消去されます。')) {
+  if (confirm('この行を削除しますか？\n含まれるカラーもすべて消去されます。')) {
     groups[editGi].rows.splice(editRi, 1); saveGroups(); renderGroups(); closeEditRowModal();
   }
 }
 function closeEditRowModal() { document.getElementById('editRowModal').style.display = 'none'; }
 document.getElementById('editRowInput').addEventListener('keydown', e => { if (e.key === 'Enter') saveEditRow(); if (e.key === 'Escape') closeEditRowModal(); });
 
-// 長押し編集モーダル
+// ============================================================
+//  長押し編集モーダル
+// ============================================================
 function getLpChipByIndex(chipType, gi, ri, ci) {
   if (chipType === 'pin') return (ci >= 0 && ci < pinColors.length) ? pinColors[ci] : null;
   const g = groups[gi]; if (!g) return null;
@@ -1482,6 +1643,7 @@ function lpMatchToPreview() {
   if (!bOk && !tOk) { showToast('有効なHEXを入力してください'); return; }
   const base = bOk ? bVal : tVal; lpSetInputs(base, base); lpUpdateCanvas(); updateLpOverwriteBtn(); showToast('同じ色 ' + base.toUpperCase() + ' に揃えました');
 }
+
 function openLpModal(c, gi, ri, ci, chipType) {
   longPressConsumed = true; longPressActive = false;
   if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
@@ -1494,10 +1656,12 @@ function openLpModal(c, gi, ri, ci, chipType) {
   lpUpdateCanvas(); lpUpdateLockIcon(); updateLpOverwriteBtn();
   document.getElementById('longPressEditModal').style.display = 'flex';
 }
+
 function closeLpModal() {
   lpTarget = null; longPressActive = false; longPressConsumed = false;
   document.getElementById('longPressEditModal').style.display = 'none';
 }
+
 document.getElementById('lpBPicker').addEventListener('input', e => {
   document.getElementById('lpBHex').value = e.target.value; document.getElementById('lpBSwatch').style.background = e.target.value;
   document.getElementById('lpBHex').classList.remove('invalid'); lpUpdateCanvas(); updateLpOverwriteBtn();
@@ -1519,6 +1683,7 @@ document.getElementById('lpTHex').addEventListener('input', e => {
   lpUpdateCanvas(); updateLpOverwriteBtn();
 });
 document.getElementById('lpLabelInput').addEventListener('input', lpUpdateCanvas);
+
 function lpOverwrite() {
   if (!lpTarget) return;
   const bVal = document.getElementById('lpBHex').value, tVal = document.getElementById('lpTHex').value;
@@ -1535,6 +1700,7 @@ function lpOverwrite() {
   const after = document.getElementById('owAfter'); after.style.background = bVal; after.style.color = tVal; after.textContent = pendingLabel || oldChipLabel;
   document.getElementById('overwriteModal').style.display = 'flex';
 }
+
 function lpSaveSettings() {
   if (!lpTarget) return;
   const rawLabel = document.getElementById('lpLabelInput').value.trim(); const newLabel = rawLabel === 'Aa' ? '' : rawLabel;
@@ -1546,6 +1712,7 @@ function lpSaveSettings() {
   if (chipType === 'pin') { savePinColors(); renderPinRow(); } else { saveGroups(); renderGroups(); }
   showToast('設定を保存しました ✓');
 }
+
 function lpDelete() {
   if (!lpTarget) return;
   if (lpTarget.c.locked) { alert('🔒 ロックされているため削除できません。先にロックを解除してください。'); return; }
@@ -1561,6 +1728,7 @@ function lpDelete() {
   }
   showToast('削除しました');
 }
+
 function closeOverwriteModal() { pendingOverwrite = null; document.getElementById('overwriteModal').style.display = 'none'; }
 function confirmOverwrite() {
   if (!pendingOverwrite) return;
@@ -1586,6 +1754,7 @@ function confirmDeleteGroup() {
   const name = groups[deleteGroupIndex].name; groups.splice(deleteGroupIndex, 1);
   saveGroups(); renderGroups(); showToast(`「${name}」を削除しました`); closeDeleteGroupModal();
 }
+
 function openAddGroupModal() { document.getElementById('addGroupNameInput').value = ''; document.getElementById('addGroupModal').style.display = 'flex'; setTimeout(() => document.getElementById('addGroupNameInput').focus(), 50); }
 function closeAddGroupModal() { document.getElementById('addGroupModal').style.display = 'none'; }
 function confirmAddGroup() {
@@ -1595,11 +1764,14 @@ function confirmAddGroup() {
 }
 document.getElementById('addGroupNameInput').addEventListener('keydown', e => { if (e.key === 'Enter') confirmAddGroup(); if (e.key === 'Escape') closeAddGroupModal(); });
 
-// Sync
+// ============================================================
+//  Sync — GitHub Gist
+// ============================================================
 let syncConfig = { token: '', gistId: '' }, pollTimer = null, lastEtag = '', isSyncPushing = false;
 function setSyncBadge(state, label) { document.getElementById('syncBadge').className = 'sync-badge ' + (state || ''); document.getElementById('syncLabel').textContent = label; if (state === 'error') document.getElementById('syncSetup').style.display = 'block'; }
 function toggleSyncSetupPanel() { const setup = document.getElementById('syncSetup'); setup.style.display = setup.style.display === 'none' ? 'block' : 'none'; }
 function loadSyncConfig() { try { const c = JSON.parse(localStorage.getItem('cp_sync') || '{}'); syncConfig.token = c.token || ''; syncConfig.gistId = c.gistId || ''; } catch(e) {} }
+
 async function gistGet() {
   if (!syncConfig.gistId || !syncConfig.token) return null;
   try {
@@ -1617,6 +1789,7 @@ async function gistGet() {
     };
   } catch(e) { return null; }
 }
+
 async function gistPut(gs, pin, dc) {
   if (!syncConfig.gistId || !syncConfig.token) return false;
   const files = {
@@ -1631,27 +1804,34 @@ async function gistPut(gs, pin, dc) {
   });
   return r.ok;
 }
+
 function mergeGroups(localGs, remoteGs) {
   const remoteChipIds = new Set();
   remoteGs.forEach(g => g.rows.forEach(r => { if (!r.divider) r.colors.forEach(c => { if (c.id) remoteChipIds.add(c.id); }); }));
   const localOnlyChips = [];
   localGs.forEach(lg => lg.rows.forEach(lr => { if (!lr.divider) lr.colors.forEach(c => { if (c.id && !remoteChipIds.has(c.id)) localOnlyChips.push({ chip: c, groupName: lg.name, rowKey: lr.key }); }); }));
+
   const remoteDividerIds = new Set();
   remoteGs.forEach(g => g.rows.forEach(r => { if (r.divider && r.id) remoteDividerIds.add(r.id); }));
   const localOnlyDividers = [];
   localGs.forEach(lg => lg.rows.forEach(lr => { if (lr.divider && lr.id && !remoteDividerIds.has(lr.id)) localOnlyDividers.push({ divider: lr, groupName: lg.name }); }));
+
   const merged = ensureIds(remoteGs);
+
   localOnlyChips.forEach(({ chip, groupName, rowKey }) => {
     const tg = merged.find(g => g.name === groupName); if (!tg) return;
     const tr = tg.rows.find(r => !r.divider && r.key === rowKey); if (!tr) return;
     tr.colors.push(chip);
   });
+
   localOnlyDividers.forEach(({ divider, groupName }) => {
     const tg = merged.find(g => g.name === groupName); if (!tg) return;
     tg.rows.push({ ...divider });
   });
+
   return merged;
 }
+
 function mergePins(localPins, remotePins) {
   if (!remotePins) return localPins;
   const remoteIds = new Set(remotePins.map(c => c.id).filter(Boolean));
@@ -1664,6 +1844,7 @@ function mergeDividerColors(localDc, remoteDc) {
   localDc.forEach(c => { if (!merged.includes(c) && merged.length < 6) merged.push(c); });
   return merged.slice(0, 6);
 }
+
 async function setupSync() {
   const token = document.getElementById('gistTokenInput').value.trim(), gistId = document.getElementById('gistIdInput').value.trim();
   if (!token) return alert('Tokenが必要です');
@@ -1691,7 +1872,9 @@ async function setupSync() {
     else { setSyncBadge('error', 'エラー'); }
   }
 }
+
 function clearSync() { stopPolling(); syncConfig = { token: '', gistId: '' }; localStorage.removeItem('cp_sync'); setSyncBadge('', '未接続'); document.getElementById('syncShareUrlRow').style.display = 'none'; document.getElementById('syncSetup').style.display = 'block'; }
+
 function startPolling() {
   stopPolling(); setSyncBadge('synced', '同期中');
   pollTimer = setInterval(async () => {
@@ -1706,6 +1889,7 @@ function startPolling() {
   }, 8000);
 }
 function stopPolling() { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } }
+
 let syncPushDebounceTimer = null;
 function scheduleSyncPush() {
   if (!syncConfig.gistId || !syncConfig.token) return;
@@ -1718,6 +1902,7 @@ function scheduleSyncPush() {
     catch(e) {} finally { isSyncPushing = false; }
   }, 1500);
 }
+
 function updateSyncShareUrl() {
   if (!syncConfig.gistId) return;
   const url = location.href.split('?')[0] + '?gist=' + syncConfig.gistId;
@@ -1726,7 +1911,9 @@ function updateSyncShareUrl() {
 }
 function copySyncUrl() { navigator.clipboard.writeText(document.getElementById('syncShareInput').value); showToast('同期用URLをコピーしました'); }
 
-// 区切り行 モーダル
+// ============================================================
+//  区切り行 — 登録色管理・追加・編集モーダル
+// ============================================================
 let dividerTargetGi = 0;
 let editDividerGi = -1, editDividerRi = -1;
 let _dividerSelectedColor = '';
@@ -1742,6 +1929,7 @@ function _updateAddDividerColorUI(color) {
   hex.value = c || '';
   _dividerSelectedColor = c;
 }
+
 function _updateEditDividerColorUI(color) {
   const swatch = document.getElementById('editDividerColorSwatch');
   const input = document.getElementById('editDividerColorInput');
@@ -1751,15 +1939,18 @@ function _updateEditDividerColorUI(color) {
   if (c) input.value = c;
   hex.value = c || '';
 }
+
 function _buildDividerPresetsRow(containerId, onSelect, onDelete) {
   const container = document.getElementById(containerId);
   container.innerHTML = '';
   const colors = _loadDividerUserColors();
+
   const defBtn = document.createElement('button');
   defBtn.title = 'デフォルト（色なし）'; defBtn.textContent = '─';
   defBtn.style.cssText = 'width:24px;height:24px;border-radius:5px;border:1.5px solid var(--border);cursor:pointer;background:var(--surface2);color:var(--muted);font-size:13px;font-weight:700;font-family:Syne,sans-serif;flex-shrink:0;display:flex;align-items:center;justify-content:center;';
   defBtn.addEventListener('click', () => onSelect(''));
   container.append(defBtn);
+
   colors.forEach((c, idx) => {
     const wrap = document.createElement('div');
     wrap.style.cssText = 'position:relative;width:24px;height:24px;flex-shrink:0;';
@@ -1773,18 +1964,27 @@ function _buildDividerPresetsRow(containerId, onSelect, onDelete) {
     wrap.append(btn, del); container.append(wrap);
   });
 }
+
 function _buildAddDividerPresets() {
   _buildDividerPresetsRow('dividerColorPresets',
     (c) => _updateAddDividerColorUI(c),
-    (idx) => { const arr = _loadDividerUserColors(); arr.splice(idx, 1); _saveDividerUserColors(arr); _buildAddDividerPresets(); _buildEditDividerPresets(); }
+    (idx) => {
+      const arr = _loadDividerUserColors(); arr.splice(idx, 1); _saveDividerUserColors(arr);
+      _buildAddDividerPresets(); _buildEditDividerPresets();
+    }
   );
 }
+
 function _buildEditDividerPresets() {
   _buildDividerPresetsRow('editDividerColorPresets',
     (c) => _updateEditDividerColorUI(c),
-    (idx) => { const arr = _loadDividerUserColors(); arr.splice(idx, 1); _saveDividerUserColors(arr); _buildEditDividerPresets(); _buildAddDividerPresets(); }
+    (idx) => {
+      const arr = _loadDividerUserColors(); arr.splice(idx, 1); _saveDividerUserColors(arr);
+      _buildEditDividerPresets(); _buildAddDividerPresets();
+    }
   );
 }
+
 function _registerDividerColor(hexInputId, onSuccess) {
   const hexEl = document.getElementById(hexInputId);
   let c = hexEl.value.trim();
@@ -1792,62 +1992,79 @@ function _registerDividerColor(hexInputId, onSuccess) {
   if (!validHex(c)) { showToast('有効な HEX カラーコードを入力してください'); return; }
   const arr = _loadDividerUserColors();
   if (arr.length >= 6) { showToast('登録色は最大6色です。先に削除してください'); return; }
-  if (!arr.includes(c)) { arr.push(c); _saveDividerUserColors(arr); _buildAddDividerPresets(); _buildEditDividerPresets(); }
+  if (!arr.includes(c)) {
+    arr.push(c);
+    _saveDividerUserColors(arr);
+    _buildAddDividerPresets();
+    _buildEditDividerPresets();
+  }
   onSuccess(c);
 }
-function _addDividerUserColor() { _registerDividerColor('dividerHexInput', (c) => _updateAddDividerColorUI(c)); }
-function _addEditDividerUserColor() { _registerDividerColor('editDividerHexInput', (c) => _updateEditDividerColorUI(c)); }
 
-/* FIX: 挿入位置の名称「一番上」「一番下」に変更、行アイテムを中央揃え */
+function _addDividerUserColor() {
+  _registerDividerColor('dividerHexInput', (c) => _updateAddDividerColorUI(c));
+}
+
+function _addEditDividerUserColor() {
+  _registerDividerColor('editDividerHexInput', (c) => _updateEditDividerColorUI(c));
+}
+
 function _buildDividerPositionPicker(gi, defaultInsertAt) {
   _dividerInsertAt = defaultInsertAt;
   const picker = document.getElementById('dividerPositionPicker');
   picker.innerHTML = '';
   const rows = groups[gi].rows;
+
   function makeSlot(idx, label) {
     const slot = document.createElement('div');
     slot.className = 'divider-pos-slot' + (idx === _dividerInsertAt ? ' selected' : '');
     slot.dataset.idx = idx;
+
     const arrow = document.createElement('span'); arrow.className = 'divider-pos-slot-arrow'; arrow.textContent = '▼';
     const text = document.createElement('span'); text.textContent = label || 'ここに追加';
     slot.append(arrow, text);
+
     slot.addEventListener('click', () => {
       _dividerInsertAt = idx;
       picker.querySelectorAll('.divider-pos-slot').forEach(s => s.classList.toggle('selected', +s.dataset.idx === idx));
     });
     return slot;
   }
-  function makeRowItem(row) {
+
+  function makeRowItem(row, ri) {
     const item = document.createElement('div');
     if (row.divider) {
       item.className = 'divider-pos-item is-divider-item';
-      item.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:6px;';
-      const lineL = document.createElement('div'); lineL.style.cssText = `flex:1;height:2px;border-radius:1px;background:${row.color || 'var(--border)'};opacity:.75;max-width:40px;`;
+      item.style.cssText = 'display:flex;align-items:center;gap:6px;';
+      const lineL = document.createElement('div'); lineL.style.cssText = `flex:1;height:2px;border-radius:1px;background:${row.color || 'var(--border)'};opacity:.75;`;
       if (row.label) {
         const lbl = document.createElement('span'); lbl.style.cssText = `font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:${row.color || 'var(--muted)'};opacity:.8;white-space:nowrap;font-family:'Syne',sans-serif;`;
         lbl.textContent = row.label;
         const lineR = document.createElement('div'); lineR.style.cssText = lineL.style.cssText;
         item.append(lineL, lbl, lineR);
       } else {
-        const lineC = document.createElement('div'); lineC.style.cssText = `width:60px;height:2px;border-radius:1px;background:${row.color || 'var(--border)'};opacity:.75;`;
-        item.append(lineC);
+        item.append(lineL);
       }
     } else {
       item.className = 'divider-pos-item';
-      item.style.justifyContent = 'center';
       item.textContent = row.key;
     }
     return item;
   }
-  picker.append(makeSlot(0, '一番上'));
+
+  picker.append(makeSlot(0, rows.length === 0 ? '先頭（行なし）' : rows.length + ' 行の先頭'));
+
   rows.forEach((row, ri) => {
-    picker.append(makeRowItem(row));
-    picker.append(makeSlot(ri + 1, ri === rows.length - 1 ? '一番下' : null));
+    picker.append(makeRowItem(row, ri));
+    const isLast = ri === rows.length - 1;
+    picker.append(makeSlot(ri + 1, isLast ? '末尾に追加' : null));
   });
+
   setTimeout(() => {
     const sel = picker.querySelector('.divider-pos-slot.selected');
     if (sel) sel.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }, 60);
+
   if (window._scheduleTwemoji) window._scheduleTwemoji();
 }
 
@@ -1871,6 +2088,7 @@ function confirmAddDivider() {
   showToast('区切りを追加しました');
 }
 document.getElementById('dividerLabelInput').addEventListener('keydown', e => { if (e.key === 'Enter') confirmAddDivider(); if (e.key === 'Escape') closeAddDividerModal(); });
+
 document.getElementById('dividerColorInput').addEventListener('input', e => {
   const c = e.target.value;
   document.getElementById('dividerHexInput').value = c;
@@ -1881,10 +2099,10 @@ document.getElementById('dividerHexInput').addEventListener('input', e => {
   let v = e.target.value.trim();
   if (/^[0-9a-fA-F]{6}$/.test(v)) v = '#' + v;
   if (v && !v.startsWith('#')) v = '#' + v;
-  if (validHex(v)) { _updateAddDividerColorUI(v); } else { _dividerSelectedColor = ''; }
+  if (validHex(v)) { _updateAddDividerColorUI(v); }
+  else { _dividerSelectedColor = ''; }
 });
 
-/* FIX: saveEditDivider — gi/riをローカルに保存してからcloseしても安全 */
 function openEditDividerModal(gi, ri) {
   editDividerGi = gi; editDividerRi = ri;
   const row = groups[gi].rows[ri];
@@ -1894,35 +2112,28 @@ function openEditDividerModal(gi, ri) {
   document.getElementById('editDividerModal').style.display = 'flex';
   setTimeout(() => document.getElementById('editDividerLabelInput').focus(), 60);
 }
-function closeEditDividerModal() {
-  document.getElementById('editDividerModal').style.display = 'none';
-  editDividerGi = -1; editDividerRi = -1;
-}
+function closeEditDividerModal() { document.getElementById('editDividerModal').style.display = 'none'; editDividerGi = -1; editDividerRi = -1; }
 function saveEditDivider() {
-  const gi = editDividerGi, ri = editDividerRi;
-  if (gi < 0 || ri < 0) return;
-  const row = groups[gi] && groups[gi].rows[ri];
+  if (editDividerGi < 0 || editDividerRi < 0) return;
+  const row = groups[editDividerGi].rows[editDividerRi];
   if (!row || !row.divider) return;
   row.label = document.getElementById('editDividerLabelInput').value.trim();
   const hexVal = document.getElementById('editDividerHexInput').value.trim();
   let c = hexVal;
   if (/^[0-9a-fA-F]{6}$/.test(c)) c = '#' + c;
   row.color = validHex(c) ? c : '';
-  saveGroups(); renderGroups();
-  closeEditDividerModal();
-  showToast('区切りを更新しました');
+  saveGroups(); renderGroups(); closeEditDividerModal(); showToast('区切りを更新しました');
 }
 function deleteEditDivider() {
-  const gi = editDividerGi, ri = editDividerRi;
-  if (gi < 0 || ri < 0) return;
-  groups[gi].rows.splice(ri, 1);
-  closeEditDividerModal();
-  saveGroups(); renderGroups();
-  showToast('区切りを削除しました');
+  if (editDividerGi < 0 || editDividerRi < 0) return;
+  groups[editDividerGi].rows.splice(editDividerRi, 1);
+  saveGroups(); renderGroups(); closeEditDividerModal(); showToast('区切りを削除しました');
 }
 document.getElementById('editDividerLabelInput').addEventListener('keydown', e => { if (e.key === 'Enter') saveEditDivider(); if (e.key === 'Escape') closeEditDividerModal(); });
 document.getElementById('editDividerColorInput').addEventListener('input', e => {
-  const c = e.target.value; _updateEditDividerColorUI(c); document.getElementById('editDividerHexInput').value = c;
+  const c = e.target.value;
+  _updateEditDividerColorUI(c);
+  document.getElementById('editDividerHexInput').value = c;
 });
 document.getElementById('editDividerHexInput').addEventListener('input', e => {
   let v = e.target.value.trim();
@@ -1931,7 +2142,9 @@ document.getElementById('editDividerHexInput').addEventListener('input', e => {
   if (validHex(v)) _updateEditDividerColorUI(v);
 });
 
-// カラー操作
+// ============================================================
+//  カラー操作
+// ============================================================
 const state = { t: { h: 229, s: 44, v: 18 }, b: { h: 200, s: 38, v: 97 } };
 function hexToHsv(hex) {
   let r = parseInt(hex.slice(1,3),16)/255, g = parseInt(hex.slice(3,5),16)/255, b = parseInt(hex.slice(5,7),16)/255;
@@ -1981,9 +2194,14 @@ function pasteHex(k) {
         applyHex(k, val);
         const other = k === 'b' ? document.getElementById('tHex').value : document.getElementById('bHex').value;
         showColorToast(val.toUpperCase(), val, other, k === 'b' ? '背景色' : '文字色');
-      } else { inputEl.focus(); inputEl.select(); showToast('HEX入力欄にペーストしてください'); }
+      } else {
+        inputEl.focus(); inputEl.select();
+        showToast('HEX入力欄にペーストしてください');
+      }
     }).catch(() => { inputEl.focus(); inputEl.select(); });
-  } else { inputEl.focus(); inputEl.select(); }
+  } else {
+    inputEl.focus(); inputEl.select();
+  }
 }
 let toastTimer = null;
 function contrastColor(hex) {
@@ -2039,7 +2257,9 @@ document.getElementById('bHex').addEventListener('input', e => { let v = normali
       applyHex(k, val);
       const other = k === 'b' ? document.getElementById('tHex').value : document.getElementById('bHex').value;
       showColorToast(val.toUpperCase(), val, other, k === 'b' ? '背景色' : '文字色');
-    } else { document.getElementById(id).value = raw; }
+    } else {
+      document.getElementById(id).value = raw;
+    }
   });
 });
 document.getElementById('tName').oninput=render; document.getElementById('bName').oninput=render;
@@ -2063,32 +2283,6 @@ document.addEventListener('touchstart', e => {
   syncUI('t'); syncUI('b'); render(); renderPinRow(); renderGroups();
   setupCopyHexPressEffect('copyHexBBtn'); setupCopyHexPressEffect('copyHexTBtn');
 })();
-  
-</script>
-
- ...
-</script>
-
-<!-- 💡 インポート機能のコード -->
-<div id="shared-data-panel" style="position: fixed; bottom: 20px; right: 20px; z-index: 99999; padding: 15px; background: #f8f9fa; border: 2px solid #4CAF50; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-    <h4 style="margin: 0 0 10px 0; font-size: 14px;">🔄 共有データ管理</h4>
-    <button onclick="importData()" style="width: 100%; padding: 8px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">共有データを読み込む</button>
-</div>
-
-<script>
-function importData() {
-    const data = prompt("共有されたJSONデータを貼り付けてください：");
-    if (data) {
-        try {
-            JSON.parse(data);
-            localStorage.setItem('cp_groups5', data);
-            alert("成功しました！ページを再読み込みします。");
-            location.reload();
-        } catch (e) {
-            alert("エラー：データが正しくありません。コピーし直してください。");
-        }
-    }
-}
 </script>
 </body>
 </html>
