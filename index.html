@@ -138,13 +138,13 @@ body.mode-lock .pin-chip.locked{border-color:rgba(217,54,62,.4);box-shadow:0 0 0
 @media(hover:hover){.pin-add-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}}
 .pin-row-inner.drop-append-here{outline:2px dashed #b0b0bc;outline-offset:3px;border-radius:var(--radius)}
 .groups-list{display:flex;flex-direction:row;gap:12px;align-items:flex-start;flex-wrap:wrap;will-change:contents}
-.group-block{flex:1 1 calc(33.333% - 8px);min-width:200px;min-height:80px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);transform:translateZ(0);contain:layout style;}
+.group-block{flex:1 1 calc(33.333% - 8px);min-width:200px;min-height:80px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);transform:translateZ(0);}
 @media(max-width:540px){.groups-list{flex-direction:column}.group-block{flex:1 1 100%;min-width:0}}
 .group-header{display:flex;align-items:center;padding:7px 12px;background:var(--surface2);border-bottom:1px solid var(--border);justify-content:center;position:relative;min-height:36px;user-select:none;-webkit-user-select:none;}
 .group-block.group-dragging{opacity:.45;pointer-events:none}
 .group-block.group-drag-over-left{box-shadow:-3px 0 0 0 var(--accent)}
 .group-block.group-drag-over-right{box-shadow:3px 0 0 0 var(--accent)}
-body.mode-edit .group-header{cursor:grab}
+body.mode-edit .group-header{cursor:grab;touch-action:none}
 body.mode-edit .group-header.is-grabbing{cursor:grabbing}
 #groupDragGhost{position:fixed;pointer-events:none;z-index:9999;opacity:.82;border-radius:var(--radius);border:2px solid var(--accent);box-shadow:0 8px 32px rgba(0,0,0,.22);background:var(--surface);overflow:hidden;will-change:transform;display:none;}
 .group-name-display{font-family:'Syne',sans-serif;font-size:13px;font-weight:600;color:var(--text);text-align:center;cursor:text;padding:2px 6px;border-radius:4px;border:1px solid transparent;transition:border-color .15s,background .15s;min-width:40px;max-width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;outline:none}
@@ -163,8 +163,8 @@ body.mode-edit .group-del-btn{display:block}
 .divider-line{flex:1;height:2px;border-radius:1px;background:var(--border);opacity:0.75;}
 .divider-label-wrap{flex-shrink:0;display:flex;align-items:center;gap:8px;padding:0 10px;}
 .divider-label{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;white-space:nowrap;flex-shrink:0;text-transform:uppercase;opacity:0.7;}
-/* 区切りアクション: 右端固定 */
-.divider-actions{flex-shrink:0;display:flex;align-items:center;gap:3px;opacity:0;pointer-events:none;transition:opacity .15s;padding-left:4px;}
+/* 区切りアクション: absolute で右端に重ね置き → 線の左右対称を崩さない */
+.divider-actions{position:absolute;right:0;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:3px;opacity:0;pointer-events:none;transition:opacity .15s;background:var(--surface);padding-left:6px;}
 body.mode-edit .divider-actions{opacity:1;pointer-events:auto;}
 body.mode-edit .divider-row{cursor:grab;}
 body.mode-edit .divider-row.is-grabbing{cursor:grabbing;}
@@ -584,9 +584,16 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
   <div class="modal">
     <h3>行（キー）を編集</h3>
     <div class="modal-field"><label class="modal-label">文字・絵文字</label><input type="text" class="modal-input" id="editRowInput" maxlength="10"></div>
-    <div class="modal-btns" style="justify-content:space-between;">
+    <div class="modal-btns" id="editRowModalBtns" style="justify-content:space-between;">
       <button class="modal-btn" style="color:#d9363e;border-color:#d9363e;background:none;" onclick="deleteEditRow()">行ごと削除</button>
       <div style="display:flex;gap:8px;"><button class="modal-btn secondary" onclick="closeEditRowModal()">キャンセル</button><button class="modal-btn primary" onclick="saveEditRow()">保存</button></div>
+    </div>
+    <div id="editRowDeleteConfirm" style="display:none;flex-direction:column;gap:8px;margin-top:16px;">
+      <p style="font-size:12px;color:var(--muted);text-align:center;line-height:1.6;">この行を削除しますか？<br>含まれるカラーもすべて消去されます。</p>
+      <div style="display:flex;gap:8px;justify-content:center;">
+        <button class="modal-btn secondary" onclick="cancelDeleteRow()">キャンセル</button>
+        <button class="modal-btn" style="background:#d9363e;color:#fff;border-color:#d9363e;" onclick="confirmDeleteRow()">削除する</button>
+      </div>
     </div>
   </div>
 </div>
@@ -906,12 +913,21 @@ function cancelGrpDrag() {
 function setupGroupHeaderPointerDnD(hdr, block, gi) {
   const srcGroupId = groups[gi].id;
   hdr.addEventListener('pointerdown', e => {
-    if (appMode!=='edit') return; if (e.button!==0 && e.pointerType!=='touch') return; if (e.target.closest('.group-del-btn')) return;
-    e.preventDefault(); grpDragSrc={groupId:srcGroupId,block,hdr,startX:e.clientX,startY:e.clientY}; grpDragActive=false; grpDragOverGi=null; grpDropInsertBefore=true; grpPointerId=e.pointerId;
+    if (appMode!=='edit') return;
+    if (e.button!==0 && e.pointerType!=='touch') return;
+    if (e.target.closest('.group-del-btn')) return;
+    e.preventDefault();
+    // フォーカス中の編集要素があればblurしてキャプチャを確保
+    if (document.activeElement && document.activeElement !== document.body) {
+      document.activeElement.blur();
+    }
+    grpDragSrc={groupId:srcGroupId,block,hdr,startX:e.clientX,startY:e.clientY};
+    grpDragActive=false; grpDragOverGi=null; grpDropInsertBefore=true; grpPointerId=e.pointerId;
     try{hdr.setPointerCapture(e.pointerId);}catch(_){}
   });
   hdr.addEventListener('pointermove', e => {
     if (grpPointerId===null||e.pointerId!==grpPointerId||!grpDragSrc) return;
+    e.preventDefault(); // スクロールによるpointercancelを防ぐ
     const dx=e.clientX-grpDragSrc.startX,dy=e.clientY-grpDragSrc.startY;
     if (!grpDragActive&&Math.sqrt(dx*dx+dy*dy)>6) {
       grpDragActive=true; grpDragSrc.block.classList.add('group-dragging'); grpDragSrc.hdr.classList.add('is-grabbing');
@@ -920,7 +936,7 @@ function setupGroupHeaderPointerDnD(hdr, block, gi) {
       ghost.innerHTML='<div style="padding:8px 12px;font-family:\'Syne\',sans-serif;font-size:13px;font-weight:600;text-align:center;">'+(nameEl?nameEl.textContent:'')+'</div>';
       ghost.style.transform=`translate(${e.clientX-80}px,${e.clientY-22}px)`; grpGhost=ghost;
     }
-    if (!grpDragActive) return; e.preventDefault();
+    if (!grpDragActive) return;
     grpGhost.style.transform=`translate(${e.clientX-80}px,${e.clientY-22}px)`;
     document.querySelectorAll('.group-block.group-drag-over-left,.group-block.group-drag-over-right').forEach(b=>b.classList.remove('group-drag-over-left','group-drag-over-right'));
     grpDragOverGi=null; grpDropInsertBefore=true;
@@ -1334,8 +1350,16 @@ function confirmAddRow(){
 let editGi,editRi;
 function openEditRowModal(gi,ri){editGi=gi;editRi=ri;document.getElementById('editRowInput').value=groups[gi].rows[ri].key;document.getElementById('editRowModal').style.display='flex';setTimeout(()=>document.getElementById('editRowInput').focus(),50);}
 function saveEditRow(){const val=document.getElementById('editRowInput').value.trim();if(val) groups[editGi].rows[editRi].key=val;saveGroups();renderGroups();closeEditRowModal();}
-function deleteEditRow(){if(confirm('この行を削除しますか？\n含まれるカラーもすべて消去されます。')){groups[editGi].rows.splice(editRi,1);saveGroups();renderGroups();closeEditRowModal();}}
-function closeEditRowModal(){document.getElementById('editRowModal').style.display='none';}
+function deleteEditRow(){
+  // confirm()はiPad/WKWebViewで動作しないため、モーダル内で確認UIを表示
+  const btns=document.getElementById('editRowModalBtns');
+  const confirmArea=document.getElementById('editRowDeleteConfirm');
+  btns.style.display='none';
+  confirmArea.style.display='flex';
+}
+function confirmDeleteRow(){groups[editGi].rows.splice(editRi,1);saveGroups();renderGroups();closeEditRowModal();}
+function cancelDeleteRow(){document.getElementById('editRowModalBtns').style.display='';document.getElementById('editRowDeleteConfirm').style.display='none';}
+function closeEditRowModal(){document.getElementById('editRowModal').style.display='none';cancelDeleteRow();}
 document.getElementById('editRowInput').addEventListener('keydown',e=>{if(e.key==='Enter') saveEditRow();if(e.key==='Escape') closeEditRowModal();});
 
 // ============================================================
@@ -1434,7 +1458,7 @@ function lpSaveSettings(){
 }
 function lpDelete(){
   if(!lpTarget) return;
-  if(lpTarget.c.locked){alert('🔒 ロックされているため削除できません。先にロックを解除してください。');return;}
+  if(lpTarget.c.locked){showToast('🔒 ロックされているため削除できません。先にロックを解除してください。');return;}
   const {gi,ri,ci,chipType}=lpTarget;closeLpModal();
   if(chipType==='pin'){if(ci>=0&&ci<pinColors.length)pinColors.splice(ci,1);savePinColors();renderPinRow();}
   else{const row=groups[gi]&&groups[gi].rows[ri];if(row&&!row.divider&&ci>=0&&ci<row.colors.length)row.colors.splice(ci,1);saveGroups();renderGroups();}
@@ -1516,7 +1540,7 @@ function mergePins(localPins,remotePins){if(!remotePins)return localPins;const r
 function mergeDividerColors(localDc,remoteDc){if(!remoteDc)return localDc;const merged=[...remoteDc];localDc.forEach(c=>{if(!merged.includes(c)&&merged.length<6)merged.push(c);});return merged.slice(0,6);}
 async function setupSync(){
   const token=document.getElementById('gistTokenInput').value.trim(),gistId=document.getElementById('gistIdInput').value.trim();
-  if(!token)return alert('Tokenが必要です');syncConfig.token=token;setSyncBadge('syncing','接続中…');
+  if(!token){showToast('Tokenが必要です');return;}syncConfig.token=token;setSyncBadge('syncing','接続中…');
   if(gistId){
     syncConfig.gistId=gistId;const data=await gistGet();
     if(data&&data!=='unchanged'){if(data.groups){groups=mergeGroups(groups,data.groups);localStorage.setItem('cp_groups5',JSON.stringify(groups));renderGroups();}if(data.pin){pinColors=mergePins(pinColors,data.pin);localStorage.setItem('cp_pin_row',JSON.stringify(pinColors));renderPinRow();}if(data.dividerColors){dividerColors=mergeDividerColors(dividerColors,data.dividerColors);localStorage.setItem('cp_divider_colors',JSON.stringify(dividerColors));}}
@@ -1639,7 +1663,10 @@ function applyHex(k,hex){if(!validHex(hex))return;const[h,s,v]=hexToHsv(hex);sta
 function syncUI(k){
   const{h,s,v}=state[k];document.getElementById(k+'H').value=h;document.getElementById(k+'S').value=s;document.getElementById(k+'V').value=v;
   document.getElementById(k+'Hval').textContent=h+'°';document.getElementById(k+'Sval').textContent=s+'%';document.getElementById(k+'Vval').textContent=v+'%';
-  const hex=hsvToHex(h,s,v);document.getElementById(k+'Swatch').style.background=hex;
+  // swatchはpickerの実値を使うことでHSV変換誤差による色ズレを防ぐ
+  const pickerHex=document.getElementById(k+'Picker').value;
+  const hex=validHex(pickerHex)?pickerHex:hsvToHex(h,s,v);
+  document.getElementById(k+'Swatch').style.background=hex;
   document.getElementById(k+'S').style.background=`linear-gradient(to right,${hsvToHex(h,0,v)},${hsvToHex(h,100,v)})`;
   document.getElementById(k+'V').style.background=`linear-gradient(to right,${hsvToHex(h,s,0)},${hsvToHex(h,s,100)})`;
 }
@@ -1656,10 +1683,28 @@ function render(){
 }
 function copyText(t){return navigator.clipboard.writeText(t).catch(()=>{});}
 function pasteHex(k){
-  // readText()はiPad/Safariでパーミッションポップアップが出るため使わない
-  // 入力欄にフォーカスして選択状態にすることでOSのペースト操作を促す
   const inputEl=document.getElementById(k+'Hex');if(!inputEl)return;
-  inputEl.focus();inputEl.select();
+  const apply=text=>{
+    let val=text.trim();
+    if(/^[0-9a-fA-F]{6}$/.test(val))val='#'+val;
+    if(validHex(val)){
+      applyHex(k,val);
+      const other=k==='b'?document.getElementById('tHex').value:document.getElementById('bHex').value;
+      showColorToast(val.toUpperCase(),val,other,k==='b'?'背景色':'文字色');
+    }else{
+      showToast('クリップボードに有効なHEXカラーがありません');
+      inputEl.focus();inputEl.select();
+    }
+  };
+  // Clipboard API（ユーザージェスチャー内で呼ぶことでiPadでもポップアップなし）
+  if(navigator.clipboard&&navigator.clipboard.readText){
+    navigator.clipboard.readText().then(apply).catch(()=>{
+      // 権限拒否やAPI非対応のときはフォーカス+選択でOSのペーストUIを促す
+      inputEl.focus();inputEl.select();
+    });
+  }else{
+    inputEl.focus();inputEl.select();
+  }
 }
 let toastTimer=null;
 function contrastColor(hex){if(!validHex(hex))return'#fff';const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);const lum=(0.299*r+0.587*g+0.114*b)/255;if(lum>0.55){const f=0.28;return'#'+[r,g,b].map(x=>Math.round(x*f).toString(16).padStart(2,'0')).join('');}const f=0.82;return'#'+[r,g,b].map(x=>Math.round(x+(255-x)*f).toString(16).padStart(2,'0')).join('');}
