@@ -1527,16 +1527,48 @@ async function gistPut(gs,pin,dc){
   return r.ok;
 }
 function mergeGroups(localGs,remoteGs){
-  const remoteChipIds=new Set();remoteGs.forEach(g=>g.rows.forEach(r=>{if(!r.divider)r.colors.forEach(c=>{if(c.id)remoteChipIds.add(c.id);});}));
-  const localOnlyChips=[];localGs.forEach(lg=>lg.rows.forEach(lr=>{if(!lr.divider)lr.colors.forEach(c=>{if(c.id&&!remoteChipIds.has(c.id))localOnlyChips.push({chip:c,groupName:lg.name,rowKey:lr.key});});}));
-  const remoteDividerIds=new Set();remoteGs.forEach(g=>g.rows.forEach(r=>{if(r.divider&&r.id)remoteDividerIds.add(r.id);}));
-  const localOnlyDividers=[];localGs.forEach(lg=>lg.rows.forEach(lr=>{if(lr.divider&&lr.id&&!remoteDividerIds.has(lr.id))localOnlyDividers.push({divider:lr,groupName:lg.name});}));
+  // リモートを正とし、ローカルにしか存在しない「新規追加」チップのみ追記する。
+  // 削除はリモートに反映済みなのでリモートを採用することで正しく消える。
+  const remoteChipIds=new Set();
+  remoteGs.forEach(g=>g.rows.forEach(r=>{if(!r.divider)r.colors.forEach(c=>{if(c.id)remoteChipIds.add(c.id);});}));
+  // ローカル独自チップ = ローカルにあってリモートにない かつ 最後のpush以降に追加されたもの
+  // push済みIDセットを使って「まだpushしていない新規のみ」を追記する
+  const pendingIds=_getPendingChipIds();
+  const localOnlyChips=[];
+  localGs.forEach(lg=>lg.rows.forEach(lr=>{
+    if(!lr.divider)lr.colors.forEach(c=>{
+      if(c.id&&!remoteChipIds.has(c.id)&&pendingIds.has(c.id))
+        localOnlyChips.push({chip:c,groupName:lg.name,rowKey:lr.key});
+    });
+  }));
+  const remoteDividerIds=new Set();
+  remoteGs.forEach(g=>g.rows.forEach(r=>{if(r.divider&&r.id)remoteDividerIds.add(r.id);}));
+  const pendingDividerIds=_getPendingDividerIds();
+  const localOnlyDividers=[];
+  localGs.forEach(lg=>lg.rows.forEach(lr=>{
+    if(lr.divider&&lr.id&&!remoteDividerIds.has(lr.id)&&pendingDividerIds.has(lr.id))
+      localOnlyDividers.push({divider:lr,groupName:lg.name});
+  }));
   const merged=ensureIds(remoteGs);
   localOnlyChips.forEach(({chip,groupName,rowKey})=>{const tg=merged.find(g=>g.name===groupName);if(!tg)return;const tr=tg.rows.find(r=>!r.divider&&r.key===rowKey);if(!tr)return;tr.colors.push(chip);});
   localOnlyDividers.forEach(({divider,groupName})=>{const tg=merged.find(g=>g.name===groupName);if(!tg)return;tg.rows.push({...divider});});
   return merged;
 }
-function mergePins(localPins,remotePins){if(!remotePins)return localPins;const remoteIds=new Set(remotePins.map(c=>c.id).filter(Boolean));const localOnly=localPins.filter(c=>c.id&&!remoteIds.has(c.id));return[...remotePins,...localOnly];}
+// pushしていない（ローカルのみの）チップIDを追跡する
+let _localPendingChipIds=new Set();
+let _localPendingDividerIds=new Set();
+function _getPendingChipIds(){return _localPendingChipIds;}
+function _getPendingDividerIds(){return _localPendingDividerIds;}
+function _registerPendingChip(id){if(id)_localPendingChipIds.add(id);}
+function _registerPendingDivider(id){if(id)_localPendingDividerIds.add(id);}
+function _clearPendingAfterPush(){_localPendingChipIds=new Set();_localPendingDividerIds=new Set();}
+
+function mergePins(localPins,remotePins){
+  if(!remotePins)return localPins;
+  const remoteIds=new Set(remotePins.map(c=>c.id).filter(Boolean));
+  const localOnly=localPins.filter(c=>c.id&&!remoteIds.has(c.id)&&_localPendingChipIds.has(c.id));
+  return[...remotePins,...localOnly];
+}
 function mergeDividerColors(localDc,remoteDc){if(!remoteDc)return localDc;const merged=[...remoteDc];localDc.forEach(c=>{if(!merged.includes(c)&&merged.length<6)merged.push(c);});return merged.slice(0,6);}
 async function setupSync(){
   const token=document.getElementById('gistTokenInput').value.trim(),gistId=document.getElementById('gistIdInput').value.trim();
