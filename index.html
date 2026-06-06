@@ -207,8 +207,7 @@ body.mode-lock .swatch-chip.locked{border-color:rgba(217,54,62,.4);box-shadow:0 
 .group-add-row{padding:6px 12px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:6px;}
 .group-add-preset{display:flex;align-items:center;gap:5px;font-size:11px;font-family:'Syne',sans-serif;font-weight:600;color:var(--muted);cursor:pointer;background:none;border:none;transition:color .15s;padding:0;}
 @media(hover:hover){.group-add-preset:hover{color:var(--text)}}
-.sync-setup{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-top:20px}
-.sync-setup-title{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.sync-setup{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-top:0;margin-bottom:16px}
 .sync-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .sync-input{flex:1;min-width:160px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Mono',monospace;font-size:12px;padding:6px 10px;outline:none;transition:border-color .15s}
 .sync-input:focus{border-color:var(--accent)}
@@ -330,6 +329,7 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
       <span class="sync-dot"></span><span id="syncLabel">未接続</span><span class="sync-gear">⚙</span>
     </div>
   </header>
+  <div class="sync-setup" id="syncSetup">
   <div class="panels-with-actions">
     <button class="swap-btn" onclick="swapColors();this.blur()">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16V4m0 0L3 8m4-4l4 4"/><path d="M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
@@ -423,7 +423,6 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
     <div class="pin-row-wrap"><div class="pin-row-inner" id="pinRowInner"></div></div>
     <div class="groups-list" id="groupsList"></div>
   </div>
-  <div class="sync-setup" id="syncSetup">
     <div class="sync-setup-title">🔗 プリセット同期設定（GitHub Gist使用）</div>
     <div class="sync-row">
       <input type="text" class="sync-input" id="gistTokenInput" placeholder="GitHub Personal Access Token (gist権限)" autocomplete="off">
@@ -1448,23 +1447,21 @@ function lpOverwrite(){
 }
 function lpSaveSettings(){
   if(!lpTarget) return;
-  const rawLabel=document.getElementById('lpLabelInput').value.trim();const newLabel=rawLabel==='Aa'?'':rawLabel;
-  const bVal=document.getElementById('lpBHex').value,tVal=document.getElementById('lpTHex').value;
-  const {c:targetC, ci, chipType, gi, ri, tempUnlocked}=lpTarget;
-  const isLocked=targetC.locked&&!tempUnlocked;
+  const rawLabel=document.getElementById('lpLabelInput').value.trim();
+  const newLabel=rawLabel==='Aa'?'':rawLabel;
+  const bVal=document.getElementById('lpBHex').value;
+  const tVal=document.getElementById('lpTHex').value;
+  const {ci, chipType, gi, ri, tempUnlocked}=lpTarget;
+  const isLocked=lpTarget.c.locked&&!tempUnlocked;
 
-  targetC.label=newLabel;
-  if(!isLocked&&validHex(bVal)&&validHex(tVal)){
-    targetC.b=bVal;
-    targetC.t=tVal;
-  }
-
-  // pin行の参照も念押し更新（chipType問わず実行）
-  if(chipType==='pin'&&ci>=0&&ci<pinColors.length){
-    pinColors[ci].label=newLabel;
-    if(!isLocked&&validHex(bVal)&&validHex(tVal)){
-      pinColors[ci].b=bVal;
-      pinColors[ci].t=tVal;
+  // --- データを先に確定させてからモーダルを閉じる ---
+  if(chipType==='pin'){
+    if(ci>=0&&ci<pinColors.length){
+      pinColors[ci].label=newLabel;
+      if(!isLocked&&validHex(bVal)&&validHex(tVal)){
+        pinColors[ci].b=bVal;
+        pinColors[ci].t=tVal;
+      }
     }
   } else if(chipType==='group'){
     const row=groups[gi]&&groups[gi].rows[ri];
@@ -1477,7 +1474,12 @@ function lpSaveSettings(){
     }
   }
 
-  closeLpModal();
+  // --- データ確定後にモーダルを閉じて保存・再描画 ---
+  lpTarget=null;
+  longPressActive=false;
+  longPressConsumed=false;
+  document.getElementById('longPressEditModal').style.display='none';
+
   if(chipType==='pin'){savePinColors();renderPinRow();}
   else{saveGroups();renderGroups();}
   showToast('設定を保存しました ✓');
