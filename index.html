@@ -1384,10 +1384,18 @@ function lpUpdateCanvas(){
 function updateLpOverwriteBtn(){
   const bVal=document.getElementById('lpBHex').value,tVal=document.getElementById('lpTHex').value;
   const btn=document.getElementById('lpOverwriteBtn'),label=document.getElementById('lpOverwriteLabel');
-  if(lpTarget&&lpTarget.c.locked&&!lpTarget.tempUnlocked){btn.disabled=true;btn.style.background='var(--surface2)';btn.style.color='var(--muted)';btn.style.borderColor='var(--border)';label.textContent='🔒 ロック解除が必要です';return;}
+  if(lpTarget&&lpTarget.c.locked&&!lpTarget.tempUnlocked){
+    btn.disabled=true;btn.style.background='var(--surface2)';btn.style.color='var(--muted)';btn.style.borderColor='var(--border)';
+    label.textContent='🔒 ロック解除が必要です';return;
+  }
   const ok=validHex(bVal)&&validHex(tVal);btn.disabled=!ok;
-  if(ok){btn.style.background=bVal;btn.style.color=tVal;btn.style.borderColor='rgba(0,0,0,.08)';label.textContent='この色で上書き保存';}
-  else{btn.style.background='var(--surface2)';btn.style.color='var(--muted)';btn.style.borderColor='var(--border)';label.textContent='有効なHEXを入力してください';}
+  if(ok){
+    btn.style.background=bVal;btn.style.color=tVal;btn.style.borderColor='rgba(0,0,0,.08)';
+    label.textContent='変更前後を確認して上書き保存';  // ← ラベル変更
+  }else{
+    btn.style.background='var(--surface2)';btn.style.color='var(--muted)';btn.style.borderColor='var(--border)';
+    label.textContent='有効なHEXを入力してください';
+  }
 }
 function lpUpdateLockIcon(){
   if(!lpTarget) return;
@@ -1444,19 +1452,37 @@ function lpSaveSettings(){
   const bVal=document.getElementById('lpBHex').value,tVal=document.getElementById('lpTHex').value;
   const {c:targetC, ci, chipType, gi, ri, tempUnlocked}=lpTarget;
   const isLocked=targetC.locked&&!tempUnlocked;
-  // データ更新を先に確実に行ってからモーダルを閉じる
+
   targetC.label=newLabel;
-  if(!isLocked&&validHex(bVal)&&validHex(tVal)){targetC.b=bVal;targetC.t=tVal;}
-  // pinの場合はpinColors配列の該当要素も直接更新（参照念押し）
+  if(!isLocked&&validHex(bVal)&&validHex(tVal)){
+    targetC.b=bVal;
+    targetC.t=tVal;
+  }
+
+  // pin行の参照も念押し更新（chipType問わず実行）
   if(chipType==='pin'&&ci>=0&&ci<pinColors.length){
     pinColors[ci].label=newLabel;
-    if(!isLocked&&validHex(bVal)&&validHex(tVal)){pinColors[ci].b=bVal;pinColors[ci].t=tVal;}
+    if(!isLocked&&validHex(bVal)&&validHex(tVal)){
+      pinColors[ci].b=bVal;
+      pinColors[ci].t=tVal;
+    }
+  } else if(chipType==='group'){
+    const row=groups[gi]&&groups[gi].rows[ri];
+    if(row&&!row.divider&&ci>=0&&ci<row.colors.length){
+      row.colors[ci].label=newLabel;
+      if(!isLocked&&validHex(bVal)&&validHex(tVal)){
+        row.colors[ci].b=bVal;
+        row.colors[ci].t=tVal;
+      }
+    }
   }
+
   closeLpModal();
-  if(chipType==='pin'){savePinColors();renderPinRow();}else{saveGroups();renderGroups();}
+  if(chipType==='pin'){savePinColors();renderPinRow();}
+  else{saveGroups();renderGroups();}
   showToast('設定を保存しました ✓');
 }
-function lpDelete(){
+  function lpDelete(){
   if(!lpTarget) return;
   if(lpTarget.c.locked){showToast('🔒 ロックされているため削除できません。先にロックを解除してください。');return;}
   const {gi,ri,ci,chipType}=lpTarget;closeLpModal();
@@ -1590,15 +1616,20 @@ function startPolling(){
   pollTimer=setInterval(async()=>{
     if(isSyncPushing||syncPushDebounceTimer) return;
     const data=await gistGet();if(data===null){setSyncBadge('error','エラー');return;}
-    if(data&&data!=='unchanged'){if(data.groups){groups=mergeGroups(groups,data.groups);localStorage.setItem('cp_groups5',JSON.stringify(groups));renderGroups();}if(data.pin){pinColors=mergePins(pinColors,data.pin);localStorage.setItem('cp_pin_row',JSON.stringify(pinColors));renderPinRow();}if(data.dividerColors){dividerColors=mergeDividerColors(dividerColors,data.dividerColors);localStorage.setItem('cp_divider_colors',JSON.stringify(dividerColors));}lastEtag='';}
-  },8000);
+    if(data&&data!=='unchanged'){
+      if(data.groups){groups=mergeGroups(groups,data.groups);localStorage.setItem('cp_groups5',JSON.stringify(groups));renderGroups();}
+      if(data.pin){pinColors=mergePins(pinColors,data.pin);localStorage.setItem('cp_pin_row',JSON.stringify(pinColors));renderPinRow();}
+      if(data.dividerColors){dividerColors=mergeDividerColors(dividerColors,data.dividerColors);localStorage.setItem('cp_divider_colors',JSON.stringify(dividerColors));}
+      lastEtag='';
+    }
+  },3000);  // ← 8000 から変更
 }
 function stopPolling(){if(pollTimer){clearInterval(pollTimer);pollTimer=null;}}
 let syncPushDebounceTimer=null;
 function scheduleSyncPush(){
   if(!syncConfig.gistId||!syncConfig.token) return;
   if(syncPushDebounceTimer) clearTimeout(syncPushDebounceTimer);
-  syncPushDebounceTimer=setTimeout(async()=>{syncPushDebounceTimer=null;if(isSyncPushing)return;isSyncPushing=true;try{await gistPut(groups,pinColors,dividerColors);lastEtag='';}catch(e){}finally{isSyncPushing=false;}},1500);
+  syncPushDebounceTimer=setTimeout(async()=>{syncPushDebounceTimer=null;if(isSyncPushing)return;isSyncPushing=true;try{await gistPut(groups,pinColors,dividerColors);lastEtag='';}catch(e){}finally{isSyncPushing=false;}},800);
 }
 function updateSyncShareUrl(){if(!syncConfig.gistId)return;const url=location.href.split('?')[0]+'?gist='+syncConfig.gistId;document.getElementById('syncShareUrlRow').style.display='flex';document.getElementById('syncShareInput').value=url;}
 function copySyncUrl(){navigator.clipboard.writeText(document.getElementById('syncShareInput').value);showToast('同期用URLをコピーしました');}
