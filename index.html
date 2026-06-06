@@ -329,9 +329,28 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
       <span class="sync-dot"></span><span id="syncLabel">未接続</span><span class="sync-gear">⚙</span>
     </div>
   </header>
-  <div class="sync-setup" id="syncSetup">
+<div class="sync-setup" id="syncSetup">
+    <div class="sync-setup-title">🔗 プリセット同期設定（GitHub Gist使用）</div>
+    <div class="sync-row">
+      <input type="text" class="sync-input" id="gistTokenInput" placeholder="GitHub Personal Access Token (gist権限)" autocomplete="off">
+      <input type="text" class="sync-input" id="gistIdInput" placeholder="Gist ID（2人目は相手から受け取る）" style="max-width:220px">
+    </div>
+    <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+      <button class="sync-action-btn primary" onclick="setupSync()">接続 / 作成</button>
+      <button class="sync-action-btn secondary" onclick="clearSync()">切断</button>
+    </div>
+    <div class="sync-note" id="syncNote">
+      <a href="https://github.com/settings/tokens/new?scopes=gist&description=ColorPreview" target="_blank">① GitHubでgistスコープのトークンを作成</a> →
+      ② 1人目が「接続/作成」→ 共有URLをコピーして相手に送る<br>
+      ⚠️ 同時編集対応: IDベースでマージします。同じチップを同時に編集した場合のみコンフリクトが発生します。
+    </div>
+    <div class="sync-share-url" id="syncShareUrlRow" style="display:none">
+      <input type="text" class="sync-share-input" id="syncShareInput" readonly>
+      <button class="sync-copy-btn" onclick="copySyncUrl()">URLコピー</button>
+    </div>
+  </div>
   <div class="panels-with-actions">
-    <button class="swap-btn" onclick="swapColors();this.blur()">
+  <button class="swap-btn" onclick="swapColors();this.blur()">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16V4m0 0L3 8m4-4l4 4"/><path d="M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
       文字色と背景色を入れ替え
     </button>
@@ -422,25 +441,6 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
     </div>
     <div class="pin-row-wrap"><div class="pin-row-inner" id="pinRowInner"></div></div>
     <div class="groups-list" id="groupsList"></div>
-  </div>
-    <div class="sync-setup-title">🔗 プリセット同期設定（GitHub Gist使用）</div>
-    <div class="sync-row">
-      <input type="text" class="sync-input" id="gistTokenInput" placeholder="GitHub Personal Access Token (gist権限)" autocomplete="off">
-      <input type="text" class="sync-input" id="gistIdInput" placeholder="Gist ID（2人目は相手から受け取る）" style="max-width:220px">
-    </div>
-    <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
-      <button class="sync-action-btn primary" onclick="setupSync()">接続 / 作成</button>
-      <button class="sync-action-btn secondary" onclick="clearSync()">切断</button>
-    </div>
-    <div class="sync-note" id="syncNote">
-      <a href="https://github.com/settings/tokens/new?scopes=gist&description=ColorPreview" target="_blank">① GitHubでgistスコープのトークンを作成</a> →
-      ② 1人目が「接続/作成」→ 共有URLをコピーして相手に送る<br>
-      ⚠️ 同時編集対応: IDベースでマージします。同じチップを同時に編集した場合のみコンフリクトが発生します。
-    </div>
-    <div class="sync-share-url" id="syncShareUrlRow" style="display:none">
-      <input type="text" class="sync-share-input" id="syncShareInput" readonly>
-      <button class="sync-copy-btn" onclick="copySyncUrl()">URLコピー</button>
-    </div>
   </div>
   <footer>
     【通常】シングルタップ→背景色コピー ／ ダブルタップ→文字色コピー ／ トリプルタップ→プレビューのみ ／ 長押し(0.3秒)→編集<br>
