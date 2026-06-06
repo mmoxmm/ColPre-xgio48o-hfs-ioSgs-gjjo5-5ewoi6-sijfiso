@@ -1628,11 +1628,35 @@ function startPolling(){
 }
 function stopPolling(){if(pollTimer){clearInterval(pollTimer);pollTimer=null;}}
 let syncPushDebounceTimer=null;
+let syncPushDebounceTimer=null;
+let syncPushMaxTimer=null;  // ← 追加
+
 function scheduleSyncPush(){
   if(!syncConfig.gistId||!syncConfig.token) return;
+
+  // 最大待機タイマー：最初の変更から3秒後には必ずpush
+  if(!syncPushMaxTimer){
+    syncPushMaxTimer=setTimeout(async()=>{
+      syncPushMaxTimer=null;
+      if(syncPushDebounceTimer){clearTimeout(syncPushDebounceTimer);syncPushDebounceTimer=null;}
+      if(isSyncPushing) return;
+      isSyncPushing=true;
+      try{await gistPut(groups,pinColors,dividerColors);lastEtag='';}catch(e){}
+      finally{isSyncPushing=false;}
+    },3000);
+  }
+
+  // デバウンス：操作が止まってから800ms後にpush
   if(syncPushDebounceTimer) clearTimeout(syncPushDebounceTimer);
-  syncPushDebounceTimer=setTimeout(async()=>{syncPushDebounceTimer=null;if(isSyncPushing)return;isSyncPushing=true;try{await gistPut(groups,pinColors,dividerColors);lastEtag='';}catch(e){}finally{isSyncPushing=false;}},800);
-}
+  syncPushDebounceTimer=setTimeout(async()=>{
+    syncPushDebounceTimer=null;
+    if(syncPushMaxTimer){clearTimeout(syncPushMaxTimer);syncPushMaxTimer=null;}
+    if(isSyncPushing) return;
+    isSyncPushing=true;
+    try{await gistPut(groups,pinColors,dividerColors);lastEtag='';}catch(e){}
+    finally{isSyncPushing=false;}
+  },800);
+}  
 function updateSyncShareUrl(){if(!syncConfig.gistId)return;const url=location.href.split('?')[0]+'?gist='+syncConfig.gistId;document.getElementById('syncShareUrlRow').style.display='flex';document.getElementById('syncShareInput').value=url;}
 function copySyncUrl(){navigator.clipboard.writeText(document.getElementById('syncShareInput').value);showToast('同期用URLをコピーしました');}
 
