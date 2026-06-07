@@ -736,7 +736,7 @@ function normalizeRow(r) {
   return {
     key: r.key || '?',
     colors: (r.colors || []).map(normalizeChip),
-    updatedAt: r.updatedAt || 0, deleted: !!r.deleted
+    updatedAt: r.updatedAt || now(), deleted: !!r.deleted
   };
 }
 
