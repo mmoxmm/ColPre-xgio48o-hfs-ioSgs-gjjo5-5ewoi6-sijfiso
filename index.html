@@ -1909,25 +1909,27 @@ let syncPushMaxTimer=null;
 async function _doPush(){
   if(isSyncPushing) return;
   isSyncPushing=true;
+  setSyncBadge('syncing','同期中…'); // ← 追加
   try{
-    const remote=await gistGet();
-    if(remote&&remote!=='unchanged'){
-      if(remote.groups){groups=mergeGroups(groups,remote.groups);localStorage.setItem('cp_groups5',JSON.stringify(groups));_lastRenderHash='';renderGroups();}
-      if(remote.pin){pinColors=mergePins(pinColors,remote.pin);localStorage.setItem('cp_pin_row',JSON.stringify(pinColors));renderPinRow();}
-      if(remote.dividerColors){dividerColors=mergeDividerColors(dividerColors,remote.dividerColors);localStorage.setItem('cp_divider_colors',JSON.stringify(dividerColors));}
-    }
+    // ...既存の処理...
     await gistPut(groups,pinColors,dividerColors);lastEtag='';
-  }catch(e){console.error('sync push error:',e);}
+    setSyncBadge('synced','同期済み ✓'); // ← 追加
+    setTimeout(()=>setSyncBadge('synced','同期中'),2000); // ← 追加（2秒後に通常表示に戻す）
+  }catch(e){
+    console.error('sync push error:',e);
+    setSyncBadge('error','Push失敗'); // ← 追加
+  }
   finally{isSyncPushing=false;}
 }
-function scheduleSyncPush(){
+  function scheduleSyncPush(){
   if(!syncConfig.gistId||!syncConfig.token) return;
+  setSyncBadge('syncing','保存待ち…');
   if(!syncPushMaxTimer){
     syncPushMaxTimer=setTimeout(async()=>{
       syncPushMaxTimer=null;
       if(syncPushDebounceTimer){clearTimeout(syncPushDebounceTimer);syncPushDebounceTimer=null;}
       await _doPush();
-    },1000);
+    },3000);
   }
   if(syncPushDebounceTimer) clearTimeout(syncPushDebounceTimer);
   syncPushDebounceTimer=setTimeout(async()=>{
