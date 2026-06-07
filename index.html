@@ -137,8 +137,8 @@ body.mode-lock .pin-chip.locked{border-color:rgba(217,54,62,.4);box-shadow:0 0 0
 .pin-add-btn{height:34px;min-width:34px;border-radius:17px;border:1.5px dashed var(--border);background:none;color:var(--muted);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;line-height:1;padding:0 10px;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;}
 @media(hover:hover){.pin-add-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}}
 .pin-row-inner.drop-append-here{outline:2px dashed #b0b0bc;outline-offset:3px;border-radius:var(--radius)}
-.groups-list{display:flex;flex-direction:row;gap:12px;align-items:flex-start;flex-wrap:wrap;will-change:contents}
-.group-block{flex:1 1 calc(33.333% - 8px);min-width:200px;min-height:80px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);transform:translateZ(0);}
+.groups-list{display:flex;flex-direction:row;gap:12px;align-items:stretch;flex-wrap:wrap}
+.group-block{flex:1 1 calc(33.333% - 8px);min-width:200px;min-height:120px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);transform:translateZ(0);}
 @media(max-width:540px){.groups-list{flex-direction:column}.group-block{flex:1 1 100%;min-width:0}}
 .group-header{display:flex;align-items:center;padding:7px 12px;background:var(--surface2);border-bottom:1px solid var(--border);justify-content:center;position:relative;min-height:36px;user-select:none;-webkit-user-select:none;}
 .group-block.group-dragging{opacity:.45;pointer-events:none}
@@ -313,6 +313,8 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
 .divider-pos-slot-arrow{font-size:10px;flex-shrink:0;}
 .divider-pos-item{display:flex;align-items:center;justify-content:center;gap:8px;padding:5px 14px;font-size:13px;color:var(--text);background:var(--bg);border-left:3px solid transparent;user-select:none;min-height:28px;text-align:center;}
 .divider-pos-item.is-divider-item{padding:7px 14px;}
+#lastEditTime{font-size:13px;font-weight:700;color:var(--text);}
+#lastEditUser{font-size:10px;font-weight:400;color:var(--muted);}
 </style>
 </head>
 <body>
@@ -320,9 +322,9 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
   <header>
     <h1>Color Preview <span>文字色 × 背景色チェッカー</span></h1>
     <div style="display:flex;align-items:center;gap:8px;">
-      <div id="lastEditInfo" style="display:none;font-size:10px;color:var(--muted);text-align:right;line-height:1.5;">
-        <span id="lastEditTime" style="white-space:nowrap;"></span><br>
-        <span id="lastEditUser" style="font-weight:600;color:var(--text);white-space:nowrap;"></span>
+      <div id="lastEditInfo" style="display:none;text-align:right;line-height:1.5;">
+  <span id="lastEditTime" style="white-space:nowrap;"></span><br>
+  <span id="lastEditUser" style="white-space:nowrap;"></span>
       </div>
       <div class="sync-badge" id="syncBadge" onclick="toggleSyncSetupPanel()" title="クリックで同期設定を開閉">
         <span class="sync-dot"></span><span id="syncLabel">未接続</span><span class="sync-gear">⚙</span>
@@ -1211,7 +1213,8 @@ function renderPinRow() {
   const addBtn=document.createElement('button'); addBtn.className='pin-add-btn'; addBtn.textContent='+'; addBtn.title='短押し: 即追加 / 長押し: ラベル付き登録';
   addBtn.addEventListener('contextmenu',e=>e.preventDefault());
   let pinAddPressTimer=null,pinAddLongPress=false;
-  addBtn.addEventListener('pointerdown',()=>{pinAddLongPress=false;pinAddPressTimer=setTimeout(()=>{pinAddLongPress=true;pinAddPressTimer=null;openAddModalForPin();},400);});
+  addBtn.addEventListener('pointerdown',(e)=>{e.stopPropagation();pinAddLongPress=false;pinAddPressTimer=setTimeout(()=>{pinAddLongPress=true;pinAddPressTimer=null;openAddModalForPin();},400);
+});
   addBtn.addEventListener('pointerup',()=>{if(pinAddPressTimer){clearTimeout(pinAddPressTimer);pinAddPressTimer=null;}});
   addBtn.addEventListener('pointercancel',()=>{if(pinAddPressTimer){clearTimeout(pinAddPressTimer);pinAddPressTimer=null;}pinAddLongPress=false;});
   addBtn.addEventListener('click',()=>{
@@ -1342,9 +1345,13 @@ function renderGroups() {
       addRowBtn.addEventListener('contextmenu',e=>e.preventDefault());
       (function(capturedRow,capturedGi,capturedRi){
         let rowAddPressTimer=null,rowAddLongPress=false;
-        addRowBtn.addEventListener('pointerdown',()=>{rowAddLongPress=false;rowAddPressTimer=setTimeout(()=>{rowAddLongPress=true;rowAddPressTimer=null;openAddRowModal(capturedGi,capturedRi);},400);});
-        addRowBtn.addEventListener('pointerup',()=>{if(rowAddPressTimer){clearTimeout(rowAddPressTimer);rowAddPressTimer=null;}});
-        addRowBtn.addEventListener('pointercancel',()=>{if(rowAddPressTimer){clearTimeout(rowAddPressTimer);rowAddPressTimer=null;}rowAddLongPress=false;});
+        addRowBtn.addEventListener('pointerdown', (e) => {
+        e.stopPropagation();rowAddLongPress=false;rowAddPressTimer=setTimeout(()=>{rowAddLongPress=true;rowAddPressTimer=null;openAddRowModal(capturedGi,capturedRi);},400);
+      });
+        addRowBtn.addEventListener('pointerup',(e)=>{e.stopPropagation();if(rowAddPressTimer){clearTimeout(rowAddPressTimer);rowAddPressTimer=null;}
+      });
+        addRowBtn.addEventListener('pointercancel',(e)=>{e.stopPropagation();if(rowAddPressTimer){clearTimeout(rowAddPressTimer);rowAddPressTimer=null;}rowAddLongPress=false;
+      });
         addRowBtn.addEventListener('click',()=>{
   if(rowAddLongPress){rowAddLongPress=false;return;}
   const t=document.getElementById('tHex').value,b=document.getElementById('bHex').value;
