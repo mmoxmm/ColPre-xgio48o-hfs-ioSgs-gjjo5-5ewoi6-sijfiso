@@ -1803,7 +1803,7 @@ function clearSync(){
 function startPolling(){
   stopPolling();setSyncBadge('synced','同期中');
   pollTimer=setInterval(async()=>{
-    if (isSyncPushing || syncPushDebounceTimer !== null || syncPushMaxTimer !== null) return;
+    if(isSyncPushing) return;
     const data=await gistGet();
     if(data===null){setSyncBadge('error','エラー');return;}
     if(data){
