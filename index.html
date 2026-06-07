@@ -1226,7 +1226,7 @@ function renderPinRow() {
         chip.addEventListener('pointercancel',()=>{if(longPressTimer){clearTimeout(longPressTimer);longPressTimer=null;}longPressActive=false;longPressConsumed=false;});
         chip.addEventListener('click',e=>{
           e.stopPropagation();
-          if(appMode==='lock'){cC.locked=!cC.locked;cC.updatedAt=now();chip.classList.toggle('locked',cC.locked);showToast(cC.locked?'🔒 ロックしました':'🔓 解除しました');updateTooltip();return;}
+          if(appMode==='lock'){cC.locked=!cC.locked;cC.updatedAt=now();chip.classList.toggle('locked',cC.locked);saveGroups();showToast(cC.locked?'🔒 ロックしました':'🔓 解除しました');updateTooltip();return;}
           if(longPressActive||longPressConsumed){longPressActive=false;longPressConsumed=false;return;}
           chipTapCount++;
           if(chipTapCount===1){chipTapTimer=setTimeout(()=>{chipTapCount=0;applyHex('t',cC.t);applyHex('b',cC.b);copyText(cC.b.toUpperCase());showColorToast(cC.b.toUpperCase(),cC.b,cC.t,'背景色');},280);}
@@ -1335,7 +1335,7 @@ function _buildGroupBlock(g, gi) {
           chip.addEventListener('pointercancel',()=>{if(longPressTimer){clearTimeout(longPressTimer);longPressTimer=null;}longPressActive=false;longPressConsumed=false;});
           chip.addEventListener('click',e=>{
             e.stopPropagation();
-            if(appMode==='lock'){cC.locked=!cC.locked;cC.updatedAt=now();chip.classList.toggle('locked',cC.locked);showToast(cC.locked?'🔒 ロックしました':'🔓 解除しました');updateTooltip();return;}
+            if(appMode==='lock'){cC.locked=!cC.locked;cC.updatedAt=now();chip.classList.toggle('locked',cC.locked);saveGroups();showToast(cC.locked?'🔒 ロックしました':'🔓 解除しました');updateTooltip();return;}
             if(longPressActive||longPressConsumed){longPressActive=false;longPressConsumed=false;return;}
             chipTapCount++;
             if(chipTapCount===1){chipTapTimer=setTimeout(()=>{chipTapCount=0;applyHex('t',cC.t);applyHex('b',cC.b);copyText(cC.b.toUpperCase());showColorToast(cC.b.toUpperCase(),cC.b,cC.t,'背景色');},280);}
