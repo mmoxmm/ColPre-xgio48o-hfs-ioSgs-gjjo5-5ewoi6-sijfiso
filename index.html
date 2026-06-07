@@ -1245,7 +1245,7 @@ addBtn.addEventListener('pointercancel',()=>{if(pinAddPressTimer){clearTimeout(p
 addBtn.addEventListener('click',e=>e.preventDefault()); 
 
   frag.append(addBtn); container.replaceChildren(frag);
-  if(window._scheduleTwemoji) window._scheduleTwemoji();
+  if(window._scheduleTwemoji) requestAnimationFrame(()=>window._scheduleTwemoji());
 }
 
 // ============================================================
@@ -1393,9 +1393,8 @@ addRowBtn.addEventListener('click',e=>e.preventDefault()); // ゴーストクリ
     addRow.append(addBtn2,divBtn); block.append(addRow); frag.append(block);
   });
   el.replaceChildren(frag);
-  if(window._scheduleTwemoji) window._scheduleTwemoji();
+  if(window._scheduleTwemoji) requestAnimationFrame(()=>window._scheduleTwemoji());
 }
-
 document.addEventListener('click',e=>{
   if(appMode==='edit'&&swapSelected!==null&&!e.target.closest('.swatch-chip')&&!e.target.closest('.pin-chip')){swapSelected=null;_lastRenderHash='';renderGroups();renderPinRow();}
 });
@@ -2117,7 +2116,9 @@ document.getElementById('bHex').addEventListener('input',e=>{let v=normalizeHexI
 });
 document.getElementById('tName').oninput=render;document.getElementById('bName').oninput=render;
 document.addEventListener('touchstart',e=>{const active=document.activeElement;if(active&&active!==e.target&&!active.contains(e.target)){if(active.tagName!=='INPUT'&&active.tagName!=='TEXTAREA'&&active.tagName!=='SELECT')active.blur();}},{passive:true});
-
+document.addEventListener('pointerdown', () => {
+  // ポインター開始時に必ずリセット（初回クリック不発防止）
+}, { passive: true });
 // ============================================================
 //  初期化
 // ============================================================
@@ -2125,7 +2126,7 @@ document.addEventListener('touchstart',e=>{const active=document.activeElement;i
   const params=new URLSearchParams(location.search);const urlGistId=params.get('gist');
   loadSyncConfig();if(urlGistId){syncConfig.gistId=urlGistId;document.getElementById('gistIdInput').value=urlGistId;}
   if(syncConfig.token&&syncConfig.gistId){startPolling();updateSyncGistIdDisplay();document.getElementById('gistTokenInput').value=syncConfig.token;document.getElementById('gistIdInput').value=syncConfig.gistId;document.getElementById('syncSetup').style.display='none';}
-  syncUI('t');syncUI('b');render();renderPinRow();renderGroups();
+  syncUI('t');syncUI('b');render();renderGroups();renderPinRow();
   setupCopyHexPressEffect('copyHexBBtn');setupCopyHexPressEffect('copyHexTBtn');
 })();
 </script>
