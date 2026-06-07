@@ -1806,7 +1806,7 @@ function startPolling(){
     if (isSyncPushing || syncPushDebounceTimer !== null || syncPushMaxTimer !== null) return;
     const data=await gistGet();
     if(data===null){setSyncBadge('error','エラー');return;}
-    if(data&&data!=='unchanged'){
+    if(data){
       if(data.groups){groups=mergeGroups(groups,data.groups);localStorage.setItem('cp_groups5',JSON.stringify(groups));renderGroups();}
       if(data.pin){pinColors=mergePins(pinColors,data.pin);localStorage.setItem('cp_pin_row',JSON.stringify(pinColors));renderPinRow();}
       if(data.dividerColors){dividerColors=mergeDividerColors(dividerColors,data.dividerColors);localStorage.setItem('cp_divider_colors',JSON.stringify(dividerColors));}
