@@ -1226,17 +1226,24 @@ function renderPinRow() {
   });
   const addBtn=document.createElement('button'); addBtn.className='pin-add-btn'; addBtn.textContent='+'; addBtn.title='短押し: 即追加 / 長押し: ラベル付き登録';
   addBtn.addEventListener('contextmenu',e=>e.preventDefault());
-  let pinAddPressTimer=null,pinAddLongPress=false;
-  addBtn.addEventListener('pointerdown',(e)=>{e.stopPropagation();pinAddLongPress=false;pinAddPressTimer=setTimeout(()=>{pinAddLongPress=true;pinAddPressTimer=null;openAddModalForPin();},400);
+// After
+let pinAddPressTimer=null;
+addBtn.addEventListener('pointerdown',(e)=>{
+  e.stopPropagation();
+  pinAddPressTimer=setTimeout(()=>{pinAddPressTimer=null;openAddModalForPin();},400);
 });
-  addBtn.addEventListener('pointerup',()=>{if(pinAddPressTimer){clearTimeout(pinAddPressTimer);pinAddPressTimer=null;}});
-  addBtn.addEventListener('pointercancel',()=>{if(pinAddPressTimer){clearTimeout(pinAddPressTimer);pinAddPressTimer=null;}pinAddLongPress=false;});
-  addBtn.addEventListener('click',()=>{
-  if(pinAddLongPress){pinAddLongPress=false;return;}
-  const t=document.getElementById('tHex').value,b=document.getElementById('bHex').value;
-  pinColors.push({id:uid(),t,b,locked:false,label:'',copyTarget:'b',updatedAt:now(),order:maxOrder(pinColors)+1000,deleted:false});
-  savePinColors();renderPinRow();
-  });
+addBtn.addEventListener('pointerup',(e)=>{
+  e.stopPropagation();
+  if(pinAddPressTimer){
+    clearTimeout(pinAddPressTimer);pinAddPressTimer=null;
+    const t=document.getElementById('tHex').value,b=document.getElementById('bHex').value;
+    pinColors.push({id:uid(),t,b,locked:false,label:'',copyTarget:'b',updatedAt:now(),order:maxOrder(pinColors)+1000,deleted:false});
+    savePinColors();renderPinRow();
+  }
+});
+addBtn.addEventListener('pointercancel',()=>{if(pinAddPressTimer){clearTimeout(pinAddPressTimer);pinAddPressTimer=null;}});
+addBtn.addEventListener('click',e=>e.preventDefault()); 
+
   frag.append(addBtn); container.replaceChildren(frag);
   if(window._scheduleTwemoji) window._scheduleTwemoji();
 }
@@ -1358,20 +1365,22 @@ function renderGroups() {
       const addRowBtn=document.createElement('button'); addRowBtn.className='emoji-add-btn'; addRowBtn.textContent='+'; addRowBtn.title='短押し: 即追加 / 長押し: ラベル付き登録';
       addRowBtn.addEventListener('contextmenu',e=>e.preventDefault());
       (function(capturedRow,capturedGi,capturedRi){
-        let rowAddPressTimer=null,rowAddLongPress=false;
-        addRowBtn.addEventListener('pointerdown', (e) => {
-        e.stopPropagation();rowAddLongPress=false;rowAddPressTimer=setTimeout(()=>{rowAddLongPress=true;rowAddPressTimer=null;openAddRowModal(capturedGi,capturedRi);},400);
-      });
-        addRowBtn.addEventListener('pointerup',(e)=>{e.stopPropagation();if(rowAddPressTimer){clearTimeout(rowAddPressTimer);rowAddPressTimer=null;}
-      });
-        addRowBtn.addEventListener('pointercancel',(e)=>{e.stopPropagation();if(rowAddPressTimer){clearTimeout(rowAddPressTimer);rowAddPressTimer=null;}rowAddLongPress=false;
-      });
-        addRowBtn.addEventListener('click',()=>{
-  if(rowAddLongPress){rowAddLongPress=false;return;}
-  const t=document.getElementById('tHex').value,b=document.getElementById('bHex').value;
-  capturedRow.colors.push({id:uid(),t,b,locked:false,label:'',copyTarget:'b',updatedAt:now(),order:maxOrder(capturedRow.colors)+1000,deleted:false});
-  saveGroups();_lastRenderHash='';renderGroups();
+     let rowAddPressTimer=null;
+  addRowBtn.addEventListener('pointerdown',(e)=>{
+  e.stopPropagation();
+  rowAddPressTimer=setTimeout(()=>{rowAddPressTimer=null;openAddRowModal(capturedGi,capturedRi);},400);
 });
+  addRowBtn.addEventListener('pointerup',(e)=>{
+  e.stopPropagation();
+  if(rowAddPressTimer){
+    clearTimeout(rowAddPressTimer);rowAddPressTimer=null;
+    const t=document.getElementById('tHex').value,b=document.getElementById('bHex').value;
+    capturedRow.colors.push({id:uid(),t,b,locked:false,label:'',copyTarget:'b',updatedAt:now(),order:maxOrder(capturedRow.colors)+1000,deleted:false});
+    saveGroups();_lastRenderHash='';renderGroups();
+  }
+});
+addRowBtn.addEventListener('pointercancel',(e)=>{e.stopPropagation();if(rowAddPressTimer){clearTimeout(rowAddPressTimer);rowAddPressTimer=null;}});
+addRowBtn.addEventListener('click',e=>e.preventDefault()); // ゴーストクリック防止
       })(row,gi,currentRi);
       swatchesEl.append(addRowBtn); rowEl.append(swatchesEl); rowsEl.append(rowEl);
     });
