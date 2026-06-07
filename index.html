@@ -1228,11 +1228,15 @@ function renderPinRow() {
   addBtn.addEventListener('contextmenu',e=>e.preventDefault());
 // After
 let pinAddPressTimer=null;
+// pin+ボタンのpointerdown
 addBtn.addEventListener('pointerdown',(e)=>{
   e.stopPropagation();
+  // ← この2行を追加
+  if(longPressTimer){clearTimeout(longPressTimer);longPressTimer=null;}
+  longPressActive=false;longPressConsumed=false;
   pinAddPressTimer=setTimeout(()=>{pinAddPressTimer=null;openAddModalForPin();},400);
 });
-addBtn.addEventListener('pointerup',(e)=>{
+  addBtn.addEventListener('pointerup',(e)=>{
   e.stopPropagation();
   if(pinAddPressTimer){
     clearTimeout(pinAddPressTimer);pinAddPressTimer=null;
@@ -1366,8 +1370,12 @@ function renderGroups() {
       addRowBtn.addEventListener('contextmenu',e=>e.preventDefault());
       (function(capturedRow,capturedGi,capturedRi){
      let rowAddPressTimer=null;
-  addRowBtn.addEventListener('pointerdown',(e)=>{
+ // row+ボタンのpointerdown
+addRowBtn.addEventListener('pointerdown',(e)=>{
   e.stopPropagation();
+  // ← この2行を追加
+  if(longPressTimer){clearTimeout(longPressTimer);longPressTimer=null;}
+  longPressActive=false;longPressConsumed=false;
   rowAddPressTimer=setTimeout(()=>{rowAddPressTimer=null;openAddRowModal(capturedGi,capturedRi);},400);
 });
   addRowBtn.addEventListener('pointerup',(e)=>{
