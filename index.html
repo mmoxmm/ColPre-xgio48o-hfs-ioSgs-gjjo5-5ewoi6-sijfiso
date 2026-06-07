@@ -718,7 +718,7 @@ function normalizeChip(c) {
     locked: !!c.locked,
     label: c.label || '',
     copyTarget: c.copyTarget || 'b',
-    updatedAt: c.updatedAt || 0,
+    updatedAt: c.updatedAt || now(),
     deleted: !!c.deleted
   };
 }
@@ -730,7 +730,7 @@ function normalizeRow(r) {
     return {
       id: rid, key: r.key || '---', divider: true,
       label: r.label || '', color: r.color || '', colors: [],
-      updatedAt: r.updatedAt || 0, deleted: !!r.deleted
+      updatedAt: r.updatedAt || now(), deleted: !!r.deleted
     };
   }
   return {
@@ -748,7 +748,7 @@ function ensureIds(gs) {
       id: gid,
       name: g.name || '',
       rows: (g.rows || []).map(normalizeRow),
-      updatedAt: g.updatedAt || 0,
+      updatedAt: g.updatedAt || now(),
       deleted: !!g.deleted
     };
   });
@@ -1805,7 +1805,7 @@ function clearSync(){
 function startPolling(){
   stopPolling();setSyncBadge('synced','同期中');
   pollTimer=setInterval(async()=>{
-    if (isSyncPushing || syncPushDebounceTimer || syncPushMaxTimer) return;
+    if (isSyncPushing || syncPushDebounceTimer !== null || syncPushMaxTimer !== null) return;
     const data=await gistGet();if(data===null){setSyncBadge('error','エラー');return;}
     if(data&&data!=='unchanged'){
       if(data.groups){groups=mergeGroups(groups,data.groups);localStorage.setItem('cp_groups5',JSON.stringify(groups));renderGroups();}
