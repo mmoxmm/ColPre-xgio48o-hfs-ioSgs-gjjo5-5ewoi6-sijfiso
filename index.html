@@ -1216,7 +1216,7 @@ function renderPinRow() {
           if(appMode==='lock'){cC.locked=!cC.locked;cC.updatedAt=now();chip.classList.toggle('locked',cC.locked);showToast(cC.locked?'🔒 ロックしました':'🔓 解除しました');updateTooltip();return;}
           if(longPressActive||longPressConsumed){longPressActive=false;longPressConsumed=false;return;}
           chipTapCount++;
-          if(chipTapCount===1){chipTapTimer=setTimeout(()=>{chipTapCount=0;applyHex('t',cC.t);applyHex('b',cC.b);copyText(cC.b.toUpperCase());showColorToast(cC.b.toUpperCase(),cC.b,cC.t,'背景色');},280);}
+          if(chipTapCount===1){applyHex('t',cC.t);applyHex('b',cC.b);copyText(cC.b.toUpperCase());showColorToast(cC.b.toUpperCase(),cC.b,cC.t,'背景色');chipTapTimer=setTimeout(()=>{chipTapCount=0;},280);}
           else if(chipTapCount===2){clearTimeout(chipTapTimer);chipTapTimer=setTimeout(()=>{chipTapCount=0;applyHex('t',cC.t);applyHex('b',cC.b);copyText(cC.t.toUpperCase());showColorToast(cC.t.toUpperCase(),cC.t,cC.b,'文字色');},280);}
           else if(chipTapCount>=3){clearTimeout(chipTapTimer);chipTapTimer=null;chipTapCount=0;applyHex('t',cC.t);applyHex('b',cC.b);showToast('プレビューに反映しました（コピーなし）');}
         });
@@ -1354,7 +1354,7 @@ function renderGroups() {
               if(appMode==='lock'){cC.locked=!cC.locked;cC.updatedAt=now();chip.classList.toggle('locked',cC.locked);showToast(cC.locked?'🔒 ロックしました':'🔓 解除しました');updateTooltip();return;}
               if(longPressActive||longPressConsumed){longPressActive=false;longPressConsumed=false;return;}
               chipTapCount++;
-              if(chipTapCount===1){chipTapTimer=setTimeout(()=>{chipTapCount=0;applyHex('t',cC.t);applyHex('b',cC.b);copyText(cC.b.toUpperCase());showColorToast(cC.b.toUpperCase(),cC.b,cC.t,'背景色');},280);}
+              if(chipTapCount===1){applyHex('t',cC.t);applyHex('b',cC.b);copyText(cC.b.toUpperCase());showColorToast(cC.b.toUpperCase(),cC.b,cC.t,'背景色');chipTapTimer=setTimeout(()=>{chipTapCount=0;},280);}
               else if(chipTapCount===2){clearTimeout(chipTapTimer);chipTapTimer=setTimeout(()=>{chipTapCount=0;applyHex('t',cC.t);applyHex('b',cC.b);copyText(cC.t.toUpperCase());showColorToast(cC.t.toUpperCase(),cC.t,cC.b,'文字色');},280);}
               else if(chipTapCount>=3){clearTimeout(chipTapTimer);chipTapTimer=null;chipTapCount=0;applyHex('t',cC.t);applyHex('b',cC.b);showToast('プレビューに反映しました（コピーなし）');}
             });
@@ -1886,8 +1886,8 @@ function startPolling(){
     if(isSyncPushing||isPolling) return;
     isPolling=true;
     let data;
-    try{ data=await gistGet(); }catch(e){ setSyncBadge('error','エラー','通信エラー: '+e.message); return; }
-    if(data===null){ return; } // gistGet内でエラー表示済み
+    try{ data=await gistGet(); }catch(e){ setSyncBadge('error','エラー','通信エラー: '+e.message); isPolling=false; return; }
+    if(data===null){ isPolling=false; return; }
     updateLastEditInfo(data);
     if(data){
       const prevStr=JSON.stringify(groups)+'|'+JSON.stringify(pinColors);
