@@ -2127,7 +2127,7 @@ document.getElementById('bHex').addEventListener('input',e=>{let v=normalizeHexI
 document.getElementById('tName').oninput=render;document.getElementById('bName').oninput=render;
 document.addEventListener('touchstart',e=>{const active=document.activeElement;if(active&&active!==e.target&&!active.contains(e.target)){if(active.tagName!=='INPUT'&&active.tagName!=='TEXTAREA'&&active.tagName!=='SELECT')active.blur();}},{passive:true});
 document.addEventListener('pointerdown', () => {
-  // ポインター開始時に必ずリセット（初回クリック不発防止）
+  if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
 }, { passive: true });
 // ============================================================
 //  初期化
@@ -2139,14 +2139,6 @@ document.addEventListener('pointerdown', () => {
   syncUI('t');syncUI('b');render();renderGroups();renderPinRow();
   setupCopyHexPressEffect('copyHexBBtn');setupCopyHexPressEffect('copyHexTBtn');
 })();
-document.addEventListener('pointerup', () => {
-  if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
-  longPressActive = false;
-}, true);
-document.addEventListener('pointercancel', () => {
-  if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
-  longPressActive = false;
-}, true);
 </script>
 </body>
 </html>
