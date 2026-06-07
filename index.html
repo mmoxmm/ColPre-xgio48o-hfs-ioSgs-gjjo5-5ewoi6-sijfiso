@@ -1627,10 +1627,8 @@ async function gistGet(){
   if(!syncConfig.gistId||!syncConfig.token) return null;
   try{
     const headers={'Authorization':'token '+syncConfig.token,'Accept':'application/vnd.github.v3+json'};
-    if(lastEtag) headers['If-None-Match']=lastEtag;
     const r=await fetch('https://api.github.com/gists/'+syncConfig.gistId,{headers});
-    if(r.status===304) return 'unchanged';if(!r.ok) return null;
-    const etag=r.headers.get('ETag');if(etag) lastEtag=etag;
+    if(!r.ok) return null;
     const data=await r.json();
     return{groups:JSON.parse(data.files['presets.json'].content),pin:data.files['pin.json']?JSON.parse(data.files['pin.json'].content):null,dividerColors:data.files['divider_colors.json']?JSON.parse(data.files['divider_colors.json'].content):null};
   }catch(e){return null;}
