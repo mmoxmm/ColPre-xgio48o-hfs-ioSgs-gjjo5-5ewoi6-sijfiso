@@ -1927,7 +1927,7 @@ function scheduleSyncPush(){
       syncPushMaxTimer=null;
       if(syncPushDebounceTimer){clearTimeout(syncPushDebounceTimer);syncPushDebounceTimer=null;}
       await _doPush();
-    },3000);
+    },1000);
   }
   if(syncPushDebounceTimer) clearTimeout(syncPushDebounceTimer);
   syncPushDebounceTimer=setTimeout(async()=>{
