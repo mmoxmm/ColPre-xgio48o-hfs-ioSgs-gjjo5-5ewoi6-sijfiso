@@ -18,15 +18,28 @@
   var _pending = false;
   function applyTw(root){
     if(!root || typeof twemoji === 'undefined') return;
-    twemoji.parse(root, {
-      folder: 'svg', ext: '.svg',
-      base: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/',
-      attributes: function(){ return { style: 'height:1.1em;width:1.1em;vertical-align:-0.1em;display:inline-block;pointer-events:none;' }; }
+    // すでに変換済みの要素（data-tw-done）はスキップ
+    var targets = [root];
+    if(root.querySelectorAll) {
+      // data-tw-done のない子要素のみ対象
+      targets = Array.from(root.querySelectorAll('[data-gi]:not([data-tw-done]), .pin-row-inner:not([data-tw-done])'));
+      if(targets.length === 0) return;
+    }
+    targets.forEach(function(el){
+      twemoji.parse(el, {
+        folder: 'svg', ext: '.svg',
+        base: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/',
+        attributes: function(){ return { style: 'height:1.1em;width:1.1em;vertical-align:-0.1em;display:inline-block;pointer-events:none;' }; }
+      });
+      el.setAttribute('data-tw-done', '1');
     });
   }
   window._scheduleTwemoji = function(){
     if(_pending) return; _pending = true;
-    requestAnimationFrame(function(){ _pending = false; applyTw(document.getElementById('groupsList')); });
+    requestAnimationFrame(function(){
+      _pending = false;
+      applyTw(document.getElementById('groupsList'));
+    });
   };
   document.addEventListener('DOMContentLoaded', function(){ applyTw(document.body); });
 })();
@@ -134,10 +147,10 @@ body.mode-lock .pin-chip.locked{border-color:rgba(217,54,62,.4);box-shadow:0 0 0
 .pin-chip.chip-drop-before::before,.pin-chip.chip-drop-after::after{content:'';position:absolute;top:50%;transform:translateY(-50%);width:2.5px;height:34px;border-radius:2px;background:#999aaa;box-shadow:0 0 6px rgba(0,0,0,.18);pointer-events:none;z-index:10;}
 .pin-chip.chip-drop-before::before{right:calc(100% + 3px);left:auto}
 .pin-chip.chip-drop-after::after{left:calc(100% + 3px);right:auto}
-.pin-add-btn{height:34px;min-width:34px;border-radius:17px;border:1.5px dashed var(--border);background:none;color:var(--muted);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;line-height:1;padding:0 10px;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;}
+.pin-add-btn{height:34px;min-width:34px;border-radius:17px;border:1.5px dashed var(--border);background:none;color:var(--muted);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;line-height:1;padding:0 10px;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:manipulation;}
 @media(hover:hover){.pin-add-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}}
 .pin-row-inner.drop-append-here{outline:2px dashed #b0b0bc;outline-offset:3px;border-radius:var(--radius)}
-.groups-list{display:flex;flex-direction:row;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.groups-list{display:flex;flex-direction:row;gap:12px;align-items:flex-start;flex-wrap:wrap;contain:layout style;}
 .group-block{flex:1 1 calc(33.333% - 8px);min-width:200px;min-height:120px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);transform:translateZ(0);display:flex;flex-direction:column;}
 @media(max-width:540px){.groups-list{flex-direction:column}.group-block{flex:1 1 100%;min-width:0}}
 .group-header{display:flex;align-items:center;padding:7px 12px;background:var(--surface2);border-bottom:1px solid var(--border);justify-content:center;position:relative;min-height:36px;user-select:none;-webkit-user-select:none;}
@@ -199,7 +212,7 @@ body.mode-lock .swatch-chip.locked{border-color:rgba(217,54,62,.4);box-shadow:0 
 .emoji-swatches.drop-append-here{outline:2px dashed #b0b0bc;outline-offset:3px;border-radius:6px}
 .emoji-row.drop-row-highlight{background:var(--surface2);outline:1.5px dashed #b0b0bc;outline-offset:2px;border-radius:6px}
 #chipDragGhost{position:fixed;pointer-events:none;z-index:9998;opacity:.88;will-change:transform;transition:none;display:none}
-.emoji-add-btn{width:28px;height:28px;border-radius:50%;border:1.5px dashed var(--border);background:none;color:var(--muted);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;line-height:1;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;}
+.emoji-add-btn{width:28px;height:28px;border-radius:50%;border:1.5px dashed var(--border);background:none;color:var(--muted);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;line-height:1;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:manipulation;}
 @media(hover:hover){.emoji-add-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}}
 .group-add-row{padding:6px 12px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:6px;}
 .group-add-preset{display:flex;align-items:center;gap:5px;font-size:11px;font-family:'Syne',sans-serif;font-weight:600;color:var(--muted);cursor:pointer;background:none;border:none;transition:color .15s;padding:0;}
@@ -1237,142 +1250,151 @@ addBtn.addEventListener('click',()=>{if(pinAddLongPress){pinAddLongPress=false;r
 }
 
 // ============================================================
-//  グループレンダリング（変化なければスキップ）
+//  グループレンダリング（group-block単位の差分更新）
 // ============================================================
 let _lastRenderHash = '';
+const _groupBlockHashes = new Map();
+
+function _buildGroupBlock(g, gi) {
+  if(!g.id||g.id==='undefined') g.id=uid();
+  const block=document.createElement('div'); block.className='group-block'; block.dataset.groupId=g.id;
+  const hdr=document.createElement('div'); hdr.className='group-header';
+  const nameEl=document.createElement('div'); nameEl.className='group-name-display'; nameEl.contentEditable=appMode==='edit'?'false':'true'; nameEl.spellcheck=false; nameEl.textContent=g.name;
+  if(appMode!=='edit'){
+    nameEl.addEventListener('input',()=>{g.name=nameEl.textContent.trim()||g.name;g.updatedAt=now();saveGroups();});
+    nameEl.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();nameEl.blur();}if(e.key==='Escape'){nameEl.textContent=g.name;nameEl.blur();}});
+    nameEl.addEventListener('blur',()=>{const v=nameEl.textContent.trim();if(v) g.name=v;else nameEl.textContent=g.name;saveGroups();});
+  }
+  hdr.append(nameEl);
+  const delBtn=document.createElement('button'); delBtn.className='group-del-btn'; delBtn.textContent='×'; delBtn.title='グループを削除';
+  delBtn.addEventListener('mousedown',e=>{e.stopPropagation();e.preventDefault();});
+  (function(cgi){delBtn.addEventListener('click',e=>{e.stopPropagation();e.preventDefault();openDeleteGroupModal(cgi);});})(gi);
+  hdr.append(delBtn); block.append(hdr);
+  if(appMode==='edit') setupGroupHeaderPointerDnD(hdr,block,gi);
+  const rowsEl=document.createElement('div'); rowsEl.className='emoji-rows';
+  g.rows.forEach((row,ri) => {
+    if(row.deleted) return;
+    const currentRi = ri;
+    if(row.divider===true){
+      const divEl=document.createElement('div'); divEl.className='divider-row'; divEl.dataset.gi=gi; divEl.dataset.ri=currentRi;
+      const lineColor=row.color||'';
+      if(row.label){
+        const lineL=document.createElement('div'); lineL.className='divider-line'; if(lineColor){lineL.style.background=lineColor;lineL.style.opacity='0.8';}
+        const labelWrap=document.createElement('div'); labelWrap.className='divider-label-wrap';
+        const lbl=document.createElement('span'); lbl.className='divider-label'; lbl.textContent=row.label; if(lineColor) lbl.style.color=lineColor;
+        labelWrap.append(lbl);
+        const lineR=document.createElement('div'); lineR.className='divider-line'; if(lineColor){lineR.style.background=lineColor;lineR.style.opacity='0.8';}
+        const actions=document.createElement('div'); actions.className='divider-actions';
+        const delBtn2=document.createElement('button'); delBtn2.className='divider-del-btn'; delBtn2.title='区切りを削除'; delBtn2.textContent='×';
+        delBtn2.addEventListener('pointerdown',e=>{e.stopPropagation();});
+        (function(cGi,cRi){delBtn2.addEventListener('click',e=>{e.stopPropagation();groups[cGi].rows[cRi].deleted=true;groups[cGi].rows[cRi].updatedAt=now();saveGroups();_lastRenderHash='';renderGroups();showToast('区切りを削除しました');});})(gi,currentRi);
+        const handle=document.createElement('span'); handle.className='divider-drag-handle'; handle.textContent='⠿';
+        actions.append(delBtn2,handle); divEl.append(lineL,labelWrap,lineR,actions);
+      } else {
+        const lineOnly=document.createElement('div'); lineOnly.className='divider-line'; if(lineColor){lineOnly.style.background=lineColor;lineOnly.style.opacity='0.8';}
+        const actions=document.createElement('div'); actions.className='divider-actions';
+        const delBtn2=document.createElement('button'); delBtn2.className='divider-del-btn'; delBtn2.title='区切りを削除'; delBtn2.textContent='×';
+        delBtn2.addEventListener('pointerdown',e=>{e.stopPropagation();});
+        (function(cGi,cRi){delBtn2.addEventListener('click',e=>{e.stopPropagation();groups[cGi].rows[cRi].deleted=true;groups[cGi].rows[cRi].updatedAt=now();saveGroups();_lastRenderHash='';renderGroups();showToast('区切りを削除しました');});})(gi,currentRi);
+        const handle=document.createElement('span'); handle.className='divider-drag-handle'; handle.textContent='⠿';
+        actions.append(delBtn2,handle); divEl.append(lineOnly,actions);
+      }
+      if(appMode==='edit') setupRowKeyPointerDnD(divEl,divEl,gi,currentRi);
+      rowsEl.append(divEl); return;
+    }
+    const rowEl=document.createElement('div'); rowEl.className='emoji-row'; rowEl.dataset.gi=gi; rowEl.dataset.ri=currentRi;
+    const keySpan=document.createElement('span'); keySpan.className='emoji-key'; keySpan.textContent=row.key;
+    if(appMode==='edit'){setupRowKeyPointerDnD(keySpan,rowEl,gi,currentRi);}
+    else {
+      let keyTapCount=0,keyTapTimer=null;
+      (function(cGi,cRi){
+        keySpan.addEventListener('click',()=>{keyTapCount++;if(keyTapCount===1){keyTapTimer=setTimeout(()=>{keyTapCount=0;},350);}else if(keyTapCount>=2){clearTimeout(keyTapTimer);keyTapCount=0;openEditRowModal(cGi,cRi);}});
+        let lastTouch=0; keySpan.addEventListener('touchend',e=>{const nowt=Date.now();if(nowt-lastTouch<350){e.preventDefault();openEditRowModal(cGi,cRi);}lastTouch=nowt;});
+      })(gi,currentRi);
+    }
+    rowEl.append(keySpan);
+    const swatchesEl=document.createElement('div'); swatchesEl.className='emoji-swatches'; swatchesEl.dataset.gi=gi; swatchesEl.dataset.ri=currentRi;
+    let chipRenderIndex = 0;
+    row.colors.forEach((c) => {
+      if(c.deleted) return;
+      const ci = chipRenderIndex++;
+      const chip=document.createElement('div'); chip.className='swatch-chip'; chip.dataset.gi=gi; chip.dataset.ri=currentRi; chip.dataset.ci=ci;
+      if(c.locked) chip.classList.add('locked');
+      if(appMode==='edit'&&swapSelected&&swapSelected.type==='group'&&swapSelected.gi===gi&&swapSelected.ri===currentRi&&swapSelected.ci===ci){chip.classList.add('selected-for-swap');chip.style.setProperty('--chip-sel-color',c.t||'#1a1a2e');}
+      const inner=document.createElement('div'); inner.className='swatch-chip-inner'; inner.style.background=c.b; inner.style.color=c.t;
+      const label=getChipLabel(c); inner.textContent=label; applyChipLabelStyle(inner,label);
+      const tt=document.createElement('div'); tt.className='swatch-chip-tooltip';
+      const updateTooltip=()=>{if(appMode==='lock') tt.textContent=c.locked?'🔓 タップで解除':'🔒 タップでロック'; else tt.textContent='';};
+      updateTooltip(); chip.addEventListener('mouseenter',updateTooltip); chip.append(inner,tt);
+      if(appMode==='edit'){chip.style.touchAction='none';setupChipPointerDnD(chip,c,{type:'group',gi,ri:currentRi,ci});}
+      else {
+        chip.addEventListener('touchstart',()=>{if(document.activeElement&&document.activeElement!==chip)document.activeElement.blur();},{passive:true});
+        let chipTapCount=0,chipTapTimer=null;
+        (function(cC,cGi,cRi,cCi){
+          chip.addEventListener('pointerdown',e=>{if(appMode!=='normal')return;longPressActive=false;longPressConsumed=false;if(longPressTimer){clearTimeout(longPressTimer);longPressTimer=null;}longPressTimer=setTimeout(()=>{longPressActive=true;longPressConsumed=false;longPressTimer=null;chipTapCount=0;if(chipTapTimer){clearTimeout(chipTapTimer);chipTapTimer=null;}openLpModal(cC,cGi,cRi,cCi,'group');},300);});
+          chip.addEventListener('pointerup',()=>{if(longPressTimer){clearTimeout(longPressTimer);longPressTimer=null;}});
+          chip.addEventListener('pointercancel',()=>{if(longPressTimer){clearTimeout(longPressTimer);longPressTimer=null;}longPressActive=false;longPressConsumed=false;});
+          chip.addEventListener('click',e=>{
+            e.stopPropagation();
+            if(appMode==='lock'){cC.locked=!cC.locked;cC.updatedAt=now();chip.classList.toggle('locked',cC.locked);showToast(cC.locked?'🔒 ロックしました':'🔓 解除しました');updateTooltip();return;}
+            if(longPressActive||longPressConsumed){longPressActive=false;longPressConsumed=false;return;}
+            chipTapCount++;
+            if(chipTapCount===1){chipTapTimer=setTimeout(()=>{chipTapCount=0;applyHex('t',cC.t);applyHex('b',cC.b);copyText(cC.b.toUpperCase());showColorToast(cC.b.toUpperCase(),cC.b,cC.t,'背景色');},280);}
+            else if(chipTapCount===2){clearTimeout(chipTapTimer);chipTapTimer=setTimeout(()=>{chipTapCount=0;applyHex('t',cC.t);applyHex('b',cC.b);copyText(cC.t.toUpperCase());showColorToast(cC.t.toUpperCase(),cC.t,cC.b,'文字色');},280);}
+            else if(chipTapCount>=3){clearTimeout(chipTapTimer);chipTapTimer=null;chipTapCount=0;applyHex('t',cC.t);applyHex('b',cC.b);showToast('プレビューに反映しました（コピーなし）');}
+          });
+        })(c,gi,currentRi,ci);
+      }
+      chip.addEventListener('contextmenu',e=>e.preventDefault()); swatchesEl.append(chip);
+    });
+    const addRowBtn=document.createElement('button'); addRowBtn.className='emoji-add-btn'; addRowBtn.textContent='+'; addRowBtn.title='短押し: 即追加 / 長押し: ラベル付き登録';
+    addRowBtn.addEventListener('contextmenu',e=>e.preventDefault());
+    (function(capturedRow,capturedGi,capturedRi){
+      let rowAddPressTimer=null,rowAddLongPress=false;
+      addRowBtn.addEventListener('pointerdown',()=>{rowAddLongPress=false;rowAddPressTimer=setTimeout(()=>{rowAddLongPress=true;rowAddPressTimer=null;openAddRowModal(capturedGi,capturedRi);},400);});
+      addRowBtn.addEventListener('pointerup',()=>{if(rowAddPressTimer){clearTimeout(rowAddPressTimer);rowAddPressTimer=null;}});
+      addRowBtn.addEventListener('pointercancel',()=>{if(rowAddPressTimer){clearTimeout(rowAddPressTimer);rowAddPressTimer=null;}rowAddLongPress=false;});
+      addRowBtn.addEventListener('click',()=>{if(rowAddLongPress){rowAddLongPress=false;return;}const t=document.getElementById('tHex').value,b=document.getElementById('bHex').value;capturedRow.colors.push({id:uid(),t,b,locked:false,label:'',copyTarget:'b',updatedAt:now(),order:maxOrder(capturedRow.colors)+1000,deleted:false});saveGroups();_lastRenderHash='';renderGroups();});
+    })(row,gi,currentRi);
+    swatchesEl.append(addRowBtn); rowEl.append(swatchesEl); rowsEl.append(rowEl);
+  });
+  block.append(rowsEl);
+  const addRow=document.createElement('div'); addRow.className='group-add-row';
+  const addBtn2=document.createElement('button'); addBtn2.className='group-add-preset'; addBtn2.innerHTML='＋&thinsp;新規登録…';
+  (function(cGi){addBtn2.onclick=()=>openAddModal(cGi);})(gi);
+  const divBtn=document.createElement('button'); divBtn.className='group-add-preset'; divBtn.innerHTML='─&thinsp;区切り';
+  (function(cGi){divBtn.onclick=()=>openAddDividerModal(cGi);})(gi);
+  addRow.append(addBtn2,divBtn); block.append(addRow);
+  return block;
+}
+
 function renderGroups() {
-  // 変化チェック: 表示に影響する情報のハッシュ
-  const renderKey = appMode + '|' + swapSelected + '|' + JSON.stringify(
-    groups.filter(g=>!g.deleted).map(g=>({
-      id:g.id, name:g.name,
-      rows:g.rows.filter(r=>!r.deleted).map(r=>r.divider?{id:r.id,div:true,label:r.label,color:r.color}:{key:r.key,chips:r.colors.filter(c=>!c.deleted).map(c=>({id:c.id,t:c.t,b:c.b,locked:c.locked,label:c.label}))})
-    }))
-  );
+  const renderKey = appMode + '|' + (swapSelected?swapSelected._key:'null') + '|' + JSON.stringify(
+    groups.filter(g=>!g.deleted).map(g=>({id:g.id,name:g.name,rows:g.rows.filter(r=>!r.deleted).map(r=>r.divider?{id:r.id,div:true,label:r.label,color:r.color}:{key:r.key,chips:r.colors.filter(c=>!c.deleted).map(c=>({id:c.id,t:c.t,b:c.b,locked:c.locked,label:c.label}))})})
+  ));
   if (renderKey === _lastRenderHash) return;
   _lastRenderHash = renderKey;
-
   const el=document.getElementById('groupsList');
+  const existingBlocks = new Map();
+  el.querySelectorAll('.group-block[data-group-id]').forEach(b=>existingBlocks.set(b.dataset.groupId, b));
   const frag=document.createDocumentFragment();
   groups.forEach((g,gi) => {
     if(g.deleted) return;
     if(!g.id||g.id==='undefined') g.id=uid();
-    const block=document.createElement('div'); block.className='group-block'; block.dataset.groupId=g.id;
-    const hdr=document.createElement('div'); hdr.className='group-header';
-    const nameEl=document.createElement('div'); nameEl.className='group-name-display'; nameEl.contentEditable=appMode==='edit'?'false':'true'; nameEl.spellcheck=false; nameEl.textContent=g.name;
-    if(appMode!=='edit'){
-      nameEl.addEventListener('input',()=>{g.name=nameEl.textContent.trim()||g.name;g.updatedAt=now();saveGroups();});
-      nameEl.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();nameEl.blur();}if(e.key==='Escape'){nameEl.textContent=g.name;nameEl.blur();}});
-      nameEl.addEventListener('blur',()=>{const v=nameEl.textContent.trim();if(v) g.name=v;else nameEl.textContent=g.name;saveGroups();});
+    const blockHash = appMode+'|'+(swapSelected?swapSelected._key:'null')+'|'+gi+'|'+JSON.stringify({id:g.id,name:g.name,rows:g.rows.filter(r=>!r.deleted).map(r=>r.divider?{id:r.id,div:true,label:r.label,color:r.color}:{key:r.key,chips:r.colors.filter(c=>!c.deleted).map(c=>({id:c.id,t:c.t,b:c.b,locked:c.locked,label:c.label}))})});
+    if(_groupBlockHashes.get(g.id)===blockHash && existingBlocks.has(g.id)){
+      frag.append(existingBlocks.get(g.id));
+    } else {
+      const block=_buildGroupBlock(g,gi);
+      _groupBlockHashes.set(g.id,blockHash);
+      frag.append(block);
+      if(window._scheduleTwemoji) requestAnimationFrame(()=>window._scheduleTwemoji());
     }
-    hdr.append(nameEl);
-    const delBtn=document.createElement('button'); delBtn.className='group-del-btn'; delBtn.textContent='×'; delBtn.title='グループを削除';
-    delBtn.addEventListener('mousedown',e=>{e.stopPropagation();e.preventDefault();});
-    (function(cgi){delBtn.addEventListener('click',e=>{e.stopPropagation();e.preventDefault();openDeleteGroupModal(cgi);});})(gi);
-    hdr.append(delBtn); block.append(hdr);
-    if(appMode==='edit') setupGroupHeaderPointerDnD(hdr,block,gi);
-
-    const rowsEl=document.createElement('div'); rowsEl.className='emoji-rows';
-    g.rows.forEach((row,ri) => {
-      if(row.deleted) return;
-      const currentRi = ri;
-
-      if(row.divider===true){
-        const divEl=document.createElement('div'); divEl.className='divider-row'; divEl.dataset.gi=gi; divEl.dataset.ri=currentRi;
-        const lineColor=row.color||'';
-        if(row.label){
-          const lineL=document.createElement('div'); lineL.className='divider-line'; if(lineColor){lineL.style.background=lineColor;lineL.style.opacity='0.8';}
-          const labelWrap=document.createElement('div'); labelWrap.className='divider-label-wrap';
-          const lbl=document.createElement('span'); lbl.className='divider-label'; lbl.textContent=row.label; if(lineColor) lbl.style.color=lineColor;
-          labelWrap.append(lbl);
-          const lineR=document.createElement('div'); lineR.className='divider-line'; if(lineColor){lineR.style.background=lineColor;lineR.style.opacity='0.8';}
-          const actions=document.createElement('div'); actions.className='divider-actions';
-          const delBtn2=document.createElement('button'); delBtn2.className='divider-del-btn'; delBtn2.title='区切りを削除'; delBtn2.textContent='×';
-          delBtn2.addEventListener('pointerdown',e=>{e.stopPropagation();});
-          (function(cGi,cRi){delBtn2.addEventListener('click',e=>{e.stopPropagation();groups[cGi].rows[cRi].deleted=true;groups[cGi].rows[cRi].updatedAt=now();saveGroups();_lastRenderHash='';renderGroups();showToast('区切りを削除しました');});})(gi,currentRi);
-          const handle=document.createElement('span'); handle.className='divider-drag-handle'; handle.textContent='⠿';
-          actions.append(delBtn2,handle); divEl.append(lineL,labelWrap,lineR,actions);
-        } else {
-          const lineOnly=document.createElement('div'); lineOnly.className='divider-line'; if(lineColor){lineOnly.style.background=lineColor;lineOnly.style.opacity='0.8';}
-          const actions=document.createElement('div'); actions.className='divider-actions';
-          const delBtn2=document.createElement('button'); delBtn2.className='divider-del-btn'; delBtn2.title='区切りを削除'; delBtn2.textContent='×';
-          delBtn2.addEventListener('pointerdown',e=>{e.stopPropagation();});
-          (function(cGi,cRi){delBtn2.addEventListener('click',e=>{e.stopPropagation();groups[cGi].rows[cRi].deleted=true;groups[cGi].rows[cRi].updatedAt=now();saveGroups();_lastRenderHash='';renderGroups();showToast('区切りを削除しました');});})(gi,currentRi);
-          const handle=document.createElement('span'); handle.className='divider-drag-handle'; handle.textContent='⠿';
-          actions.append(delBtn2,handle); divEl.append(lineOnly,actions);
-        }
-        if(appMode==='edit') setupRowKeyPointerDnD(divEl,divEl,gi,currentRi);
-        rowsEl.append(divEl); return;
-      }
-
-      const rowEl=document.createElement('div'); rowEl.className='emoji-row'; rowEl.dataset.gi=gi; rowEl.dataset.ri=currentRi;
-      const keySpan=document.createElement('span'); keySpan.className='emoji-key'; keySpan.textContent=row.key;
-      if(appMode==='edit'){setupRowKeyPointerDnD(keySpan,rowEl,gi,currentRi);}
-      else {
-        let keyTapCount=0,keyTapTimer=null;
-        (function(cGi,cRi){
-          keySpan.addEventListener('click',()=>{keyTapCount++;if(keyTapCount===1){keyTapTimer=setTimeout(()=>{keyTapCount=0;},350);}else if(keyTapCount>=2){clearTimeout(keyTapTimer);keyTapCount=0;openEditRowModal(cGi,cRi);}});
-          let lastTouch=0; keySpan.addEventListener('touchend',e=>{const nowt=Date.now();if(nowt-lastTouch<350){e.preventDefault();openEditRowModal(cGi,cRi);}lastTouch=nowt;});
-        })(gi,currentRi);
-      }
-      rowEl.append(keySpan);
-      const swatchesEl=document.createElement('div'); swatchesEl.className='emoji-swatches'; swatchesEl.dataset.gi=gi; swatchesEl.dataset.ri=currentRi;
-
-      let chipRenderIndex = 0;
-      row.colors.forEach((c) => {
-        if(c.deleted) return;
-        const ci = chipRenderIndex++;
-        const chip=document.createElement('div'); chip.className='swatch-chip'; chip.dataset.gi=gi; chip.dataset.ri=currentRi; chip.dataset.ci=ci;
-        if(c.locked) chip.classList.add('locked');
-        if(appMode==='edit'&&swapSelected&&swapSelected.type==='group'&&swapSelected.gi===gi&&swapSelected.ri===currentRi&&swapSelected.ci===ci){chip.classList.add('selected-for-swap');chip.style.setProperty('--chip-sel-color',c.t||'#1a1a2e');}
-        const inner=document.createElement('div'); inner.className='swatch-chip-inner'; inner.style.background=c.b; inner.style.color=c.t;
-        const label=getChipLabel(c); inner.textContent=label; applyChipLabelStyle(inner,label);
-        const tt=document.createElement('div'); tt.className='swatch-chip-tooltip';
-        const updateTooltip=()=>{if(appMode==='lock') tt.textContent=c.locked?'🔓 タップで解除':'🔒 タップでロック'; else tt.textContent='';};
-        updateTooltip(); chip.addEventListener('mouseenter',updateTooltip); chip.append(inner,tt);
-        if(appMode==='edit'){chip.style.touchAction='none';setupChipPointerDnD(chip,c,{type:'group',gi,ri:currentRi,ci});}
-        else {
-          chip.addEventListener('touchstart',()=>{if(document.activeElement&&document.activeElement!==chip)document.activeElement.blur();},{passive:true});
-          let chipTapCount=0,chipTapTimer=null;
-          (function(cC,cGi,cRi,cCi){
-            chip.addEventListener('pointerdown',e=>{if(appMode!=='normal')return;longPressActive=false;longPressConsumed=false;if(longPressTimer){clearTimeout(longPressTimer);longPressTimer=null;}longPressTimer=setTimeout(()=>{longPressActive=true;longPressConsumed=false;longPressTimer=null;chipTapCount=0;if(chipTapTimer){clearTimeout(chipTapTimer);chipTapTimer=null;}openLpModal(cC,cGi,cRi,cCi,'group');},300);});
-            chip.addEventListener('pointerup',()=>{if(longPressTimer){clearTimeout(longPressTimer);longPressTimer=null;}});
-            chip.addEventListener('pointercancel',()=>{if(longPressTimer){clearTimeout(longPressTimer);longPressTimer=null;}longPressActive=false;longPressConsumed=false;});
-            chip.addEventListener('click',e=>{
-              e.stopPropagation();
-              if(appMode==='lock'){cC.locked=!cC.locked;cC.updatedAt=now();chip.classList.toggle('locked',cC.locked);showToast(cC.locked?'🔒 ロックしました':'🔓 解除しました');updateTooltip();return;}
-              if(longPressActive||longPressConsumed){longPressActive=false;longPressConsumed=false;return;}
-              chipTapCount++;
-              if(chipTapCount===1){chipTapTimer=setTimeout(()=>{chipTapCount=0;applyHex('t',cC.t);applyHex('b',cC.b);copyText(cC.b.toUpperCase());showColorToast(cC.b.toUpperCase(),cC.b,cC.t,'背景色');},280);}
-              else if(chipTapCount===2){clearTimeout(chipTapTimer);chipTapTimer=setTimeout(()=>{chipTapCount=0;applyHex('t',cC.t);applyHex('b',cC.b);copyText(cC.t.toUpperCase());showColorToast(cC.t.toUpperCase(),cC.t,cC.b,'文字色');},280);}
-              else if(chipTapCount>=3){clearTimeout(chipTapTimer);chipTapTimer=null;chipTapCount=0;applyHex('t',cC.t);applyHex('b',cC.b);showToast('プレビューに反映しました（コピーなし）');}
-            });
-          })(c,gi,currentRi,ci);
-        }
-        chip.addEventListener('contextmenu',e=>e.preventDefault()); swatchesEl.append(chip);
-      });
-      const addRowBtn=document.createElement('button'); addRowBtn.className='emoji-add-btn'; addRowBtn.textContent='+'; addRowBtn.title='短押し: 即追加 / 長押し: ラベル付き登録';
-      addRowBtn.addEventListener('contextmenu',e=>e.preventDefault());
-      (function(capturedRow,capturedGi,capturedRi){
-        let rowAddPressTimer=null,rowAddLongPress=false;
-        addRowBtn.addEventListener('pointerdown',()=>{rowAddLongPress=false;rowAddPressTimer=setTimeout(()=>{rowAddLongPress=true;rowAddPressTimer=null;openAddRowModal(capturedGi,capturedRi);},400);});
-        addRowBtn.addEventListener('pointerup',()=>{if(rowAddPressTimer){clearTimeout(rowAddPressTimer);rowAddPressTimer=null;}});
-        addRowBtn.addEventListener('pointercancel',()=>{if(rowAddPressTimer){clearTimeout(rowAddPressTimer);rowAddPressTimer=null;}rowAddLongPress=false;});
-        addRowBtn.addEventListener('click',()=>{if(rowAddLongPress){rowAddLongPress=false;return;}const t=document.getElementById('tHex').value,b=document.getElementById('bHex').value;capturedRow.colors.push({id:uid(),t,b,locked:false,label:'',copyTarget:'b',updatedAt:now(),order:maxOrder(capturedRow.colors)+1000,deleted:false});saveGroups();_lastRenderHash='';renderGroups();});
-      })(row,gi,currentRi);
-      swatchesEl.append(addRowBtn); rowEl.append(swatchesEl); rowsEl.append(rowEl);
-    });
-    block.append(rowsEl);
-    const addRow=document.createElement('div'); addRow.className='group-add-row';
-    const addBtn2=document.createElement('button'); addBtn2.className='group-add-preset'; addBtn2.innerHTML='＋&thinsp;新規登録…';
-    (function(cGi){addBtn2.onclick=()=>openAddModal(cGi);})(gi);
-    const divBtn=document.createElement('button'); divBtn.className='group-add-preset'; divBtn.innerHTML='─&thinsp;区切り';
-    (function(cGi){divBtn.onclick=()=>openAddDividerModal(cGi);})(gi);
-    addRow.append(addBtn2,divBtn); block.append(addRow); frag.append(block);
   });
   el.replaceChildren(frag);
-  if(window._scheduleTwemoji) requestAnimationFrame(()=>window._scheduleTwemoji());
 }
 document.addEventListener('click',e=>{
+
   if(appMode==='edit'&&swapSelected!==null&&!e.target.closest('.swatch-chip')&&!e.target.closest('.pin-chip')){swapSelected=null;_lastRenderHash='';renderGroups();renderPinRow();}
 });
 
