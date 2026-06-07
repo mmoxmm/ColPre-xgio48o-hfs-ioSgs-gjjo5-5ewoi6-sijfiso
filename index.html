@@ -1246,7 +1246,6 @@ addBtn.addEventListener('pointercancel',()=>{if(pinAddPressTimer){clearTimeout(p
 addBtn.addEventListener('click',()=>{if(pinAddLongPress){pinAddLongPress=false;return;}const t=document.getElementById('tHex').value,b=document.getElementById('bHex').value;pinColors.push({id:uid(),t,b,locked:false,label:'',copyTarget:'b',updatedAt:now(),order:maxOrder(pinColors)+1000,deleted:false});savePinColors();renderPinRow();});
 
   frag.append(addBtn); container.replaceChildren(frag);
-  if(window._scheduleTwemoji) requestAnimationFrame(()=>window._scheduleTwemoji());
 }
 
 // ============================================================
@@ -1388,10 +1387,10 @@ function renderGroups() {
       const block=_buildGroupBlock(g,gi);
       _groupBlockHashes.set(g.id,blockHash);
       frag.append(block);
-      if(window._scheduleTwemoji) requestAnimationFrame(()=>window._scheduleTwemoji());
     }
   });
-  el.replaceChildren(frag);
+el.replaceChildren(frag);
+if(window._scheduleTwemoji) window._scheduleTwemoji();
 }
 document.addEventListener('click',e=>{
 
@@ -1990,14 +1989,18 @@ function closeAddDividerModal(){document.getElementById('addDividerModal').style
 function confirmAddDivider() {
   const label = document.getElementById('dividerLabelInput').value.trim();
   const color = _dividerSelectedColor;
+  
+  // ✅ 先に宣言する
+  const visibleRows = groups[dividerTargetGi].rows.filter(r=>!r.deleted);
+  
   let insertAfterKey = null;
   if (_dividerInsertAt > 0 && _dividerInsertAt <= visibleRows.length) {
     const refRow = visibleRows[_dividerInsertAt - 1];
     insertAfterKey = refRow.divider ? refRow.id : refRow.key;
   }
+  
   const divId = 'div_' + uid();
-  const visibleRows = groups[dividerTargetGi].rows.filter(r=>!r.deleted);
-
+  
 const prevRow = _dividerInsertAt > 0 ? visibleRows[_dividerInsertAt-1] : undefined;
 
 const nextRow = visibleRows[_dividerInsertAt] ?? undefined;
