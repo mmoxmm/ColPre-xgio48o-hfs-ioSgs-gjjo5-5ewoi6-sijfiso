@@ -137,8 +137,8 @@ body.mode-lock .pin-chip.locked{border-color:rgba(217,54,62,.4);box-shadow:0 0 0
 .pin-add-btn{height:34px;min-width:34px;border-radius:17px;border:1.5px dashed var(--border);background:none;color:var(--muted);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;line-height:1;padding:0 10px;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;}
 @media(hover:hover){.pin-add-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}}
 .pin-row-inner.drop-append-here{outline:2px dashed #b0b0bc;outline-offset:3px;border-radius:var(--radius)}
-.groups-list{display:flex;flex-direction:row;gap:12px;align-items:stretch;flex-wrap:wrap}
-.group-block{flex:1 1 calc(33.333% - 8px);min-width:200px;min-height:120px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);transform:translateZ(0);}
+.groups-list{display:flex;flex-direction:row;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.group-block{flex:1 1 calc(33.333% - 8px);min-width:200px;min-height:120px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);transform:translateZ(0);display:flex;flex-direction:column;}
 @media(max-width:540px){.groups-list{flex-direction:column}.group-block{flex:1 1 100%;min-width:0}}
 .group-header{display:flex;align-items:center;padding:7px 12px;background:var(--surface2);border-bottom:1px solid var(--border);justify-content:center;position:relative;min-height:36px;user-select:none;-webkit-user-select:none;}
 .group-block.group-dragging{opacity:.45;pointer-events:none}
@@ -154,7 +154,7 @@ body.mode-edit .group-name-display{pointer-events:none}
 .group-del-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;transition:color .12s;flex-shrink:0;position:absolute;right:10px;top:50%;transform:translateY(-50%);display:none;padding:2px 4px}
 @media(hover:hover){.group-del-btn:hover{color:#d9363e}}
 body.mode-edit .group-del-btn{display:block}
-.emoji-rows{padding:10px 12px;display:flex;flex-direction:column;gap:0}
+.emoji-rows{padding:10px 12px;display:flex;flex-direction:column;gap:0;flex:1;}
 .emoji-row{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;border-radius:6px;transition:background .12s;padding:5px 0;}
 .emoji-row + .emoji-row{border-top:1px solid rgba(224,224,232,0.55);}
 .divider-row{display:flex;align-items:center;gap:0;padding:7px 0;cursor:default;width:100%;position:relative;min-height:28px;}
