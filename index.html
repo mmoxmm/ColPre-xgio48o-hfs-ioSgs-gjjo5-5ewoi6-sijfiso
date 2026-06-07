@@ -28,7 +28,7 @@
     if(_pending) return; _pending = true;
     requestAnimationFrame(function(){ _pending = false; applyTw(document.getElementById('groupsList')); });
   };
-  document.addEventListener('DOMContentLoaded', function(){ applyTw(document.body); });
+  document.addEventListener('DOMContentLoaded', function(){ applyTw(document.getElementById('groupsList')); applyTw(document.getElementById('pinRowInner')); });
 })();
 </script>
 <style>
@@ -1692,7 +1692,7 @@ document.getElementById('addGroupNameInput').addEventListener('keydown',e=>{if(e
 // ============================================================
 //  Sync — GitHub Gist（LWW マージ）
 // ============================================================
-let syncConfig={token:'',gistId:''},pollTimer=null,lastEtag='',isSyncPushing=false;
+let syncConfig={token:'',gistId:''},pollTimer=null,lastEtag='',isSyncPushing=false,isPolling=false;
 
 function setSyncBadge(state,label,errorMsg){
   document.getElementById('syncBadge').className='sync-badge '+(state||'');
@@ -1883,7 +1883,8 @@ function clearSync(){
 function startPolling(){
   stopPolling();setSyncBadge('synced','同期中');
   pollTimer=setInterval(async()=>{
-    if(isSyncPushing) return;
+    if(isSyncPushing||isPolling) return;
+    isPolling=true;
     let data;
     try{ data=await gistGet(); }catch(e){ setSyncBadge('error','エラー','通信エラー: '+e.message); return; }
     if(data===null){ return; } // gistGet内でエラー表示済み
@@ -1896,6 +1897,7 @@ function startPolling(){
       const newStr=JSON.stringify(groups)+'|'+JSON.stringify(pinColors);
       if(newStr!==prevStr){_lastRenderHash='';renderGroups();renderPinRow();}
     }
+    isPolling=false;
   },1000);
 }
 function stopPolling(){if(pollTimer){clearInterval(pollTimer);pollTimer=null;}}
