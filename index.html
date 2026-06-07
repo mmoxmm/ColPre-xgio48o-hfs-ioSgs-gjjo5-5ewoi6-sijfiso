@@ -1804,9 +1804,10 @@ function clearSync(){
 }
 function startPolling(){
   stopPolling();setSyncBadge('synced','同期中');
-  pollTimer=setInterval(async()=>{
+pollTimer=setInterval(async()=>{
+    lastEtag='';
     if (isSyncPushing || syncPushDebounceTimer !== null || syncPushMaxTimer !== null) return;
-    const data=await gistGet();if(data===null){setSyncBadge('error','エラー');return;}
+  const data=await gistGet();if(data===null){setSyncBadge('error','エラー');return;}
     if(data&&data!=='unchanged'){
       if(data.groups){groups=mergeGroups(groups,data.groups);localStorage.setItem('cp_groups5',JSON.stringify(groups));renderGroups();}
       if(data.pin){pinColors=mergePins(pinColors,data.pin);localStorage.setItem('cp_pin_row',JSON.stringify(pinColors));renderPinRow();}
