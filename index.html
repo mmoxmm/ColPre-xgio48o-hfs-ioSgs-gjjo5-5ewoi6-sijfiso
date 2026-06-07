@@ -1554,41 +1554,59 @@ async function gistPut(gs,pin,dc){
   const r=await fetch('https://api.github.com/gists/'+syncConfig.gistId,{method:'PATCH',headers:{'Authorization':'token '+syncConfig.token,'Content-Type':'application/json'},body:JSON.stringify({files})});
   return r.ok;
 }
-function mergeGroups(localGs,remoteGs){
-  // リモートを正とし、ローカルにしか存在しない「新規追加」チップのみ追記する。
-  // 削除はリモートに反映済みなのでリモートを採用することで正しく消える。
-  const remoteChipIds=new Set();
-  remoteGs.forEach(g=>g.rows.forEach(r=>{if(!r.divider)r.colors.forEach(c=>{if(c.id)remoteChipIds.add(c.id);});}));
-  // ローカル独自チップ = ローカルにあってリモートにない かつ 最後のpush以降に追加されたもの
-  // push済みIDセットを使って「まだpushしていない新規のみ」を追記する
-  const pendingIds=_getPendingChipIds();
-  const localOnlyChips=[];
-  localGs.forEach(lg=>lg.rows.forEach(lr=>{
-    if(!lr.divider)lr.colors.forEach(c=>{
-      if(c.id&&!remoteChipIds.has(c.id)&&pendingIds.has(c.id))
-        localOnlyChips.push({chip:c,groupName:lg.name,rowKey:lr.key});
-    });
-  }));
-  const remoteDividerIds=new Set();
-  remoteGs.forEach(g=>g.rows.forEach(r=>{if(r.divider&&r.id)remoteDividerIds.add(r.id);}));
-  const pendingDividerIds=_getPendingDividerIds();
-  const localOnlyDividers=[];
-  localGs.forEach(lg=>lg.rows.forEach(lr=>{
-    if(lr.divider&&lr.id&&!remoteDividerIds.has(lr.id)&&pendingDividerIds.has(lr.id))
-      localOnlyDividers.push({divider:lr,groupName:lg.name});
-  }));
-  const merged=ensureIds(remoteGs);
-  localOnlyChips.forEach(({chip,groupName,rowKey})=>{const tg=merged.find(g=>g.name===groupName);if(!tg)return;const tr=tg.rows.find(r=>!r.divider&&r.key===rowKey);if(!tr)return;tr.colors.push(chip);});
-  localOnlyDividers.forEach(({divider,groupName})=>{const tg=merged.find(g=>g.name===groupName);if(!tg)return;tg.rows.push({...divider});});
-  return merged;
-}
-// pushしていない（ローカルのみの）チップIDを追跡する
 let _localPendingChipIds = (() => {
   try { return new Set(JSON.parse(localStorage.getItem('cp_pending_chip_ids') || '[]')); } catch { return new Set(); }
 })();
 let _localPendingDividerIds = (() => {
   try { return new Set(JSON.parse(localStorage.getItem('cp_pending_div_ids') || '[]')); } catch { return new Set(); }
 })();
+  
+function mergeGroups(localGs, remoteGs) {
+  const remoteChipIds = new Set();
+  remoteGs.forEach(g => g.rows.forEach(r => {
+    if (!r.divider) r.colors.forEach(c => { if (c.id) remoteChipIds.add(c.id); });
+  }));
+  const pendingIds = _getPendingChipIds();
+  const localOnlyChips = [];
+  localGs.forEach(lg => lg.rows.forEach(lr => {
+    if (!lr.divider) lr.colors.forEach(c => {
+      if (c.id && !remoteChipIds.has(c.id) && pendingIds.has(c.id))
+        localOnlyChips.push({ chip: c, groupId: lg.id, groupName: lg.name, rowKey: lr.key });
+    });
+  }));
+  const remoteDividerIds = new Set();
+  remoteGs.forEach(g => g.rows.forEach(r => { if (r.divider && r.id) remoteDividerIds.add(r.id); }));
+  const pendingDividerIds = _getPendingDividerIds();
+  const localOnlyDividers = [];
+  localGs.forEach(lg => lg.rows.forEach(lr => {
+    if (lr.divider && lr.id && !remoteDividerIds.has(lr.id) && pendingDividerIds.has(lr.id))
+      localOnlyDividers.push({ divider: lr, groupId: lg.id, groupName: lg.name });
+  }));
+  const merged = ensureIds(remoteGs);
+
+  // ★ ローカルにしかないグループを追加
+  const remoteGroupIds = new Set(remoteGs.map(g => g.id).filter(Boolean));
+  localGs.forEach(lg => {
+    if (lg.id && !remoteGroupIds.has(lg.id)) {
+      merged.push(JSON.parse(JSON.stringify(lg)));
+    }
+  });
+
+  localOnlyChips.forEach(({ chip, groupId, groupName, rowKey }) => {
+    const tg = merged.find(g => g.id === groupId) || merged.find(g => g.name === groupName);
+    if (!tg) return;
+    // ★ 行がなければ作る
+    let tr = tg.rows.find(r => !r.divider && r.key === rowKey);
+    if (!tr) { tr = { key: rowKey, colors: [] }; tg.rows.push(tr); }
+    tr.colors.push(chip);
+  });
+  localOnlyDividers.forEach(({ divider, groupId, groupName }) => {
+    const tg = merged.find(g => g.id === groupId) || merged.find(g => g.name === groupName);
+    if (!tg) return;
+    tg.rows.push({ ...divider });
+  });
+  return merged;
+}
 function _getPendingChipIds() { return _localPendingChipIds; }
 function _getPendingDividerIds() { return _localPendingDividerIds; }
 function _registerPendingChip(id) {
@@ -1623,7 +1641,10 @@ async function setupSync(){
   if(gistId){
     syncConfig.gistId=gistId;const data=await gistGet();
     if(data&&data!=='unchanged'){if(data.groups){groups=mergeGroups(groups,data.groups);localStorage.setItem('cp_groups5',JSON.stringify(groups));renderGroups();}if(data.pin){pinColors=mergePins(pinColors,data.pin);localStorage.setItem('cp_pin_row',JSON.stringify(pinColors));renderPinRow();}if(data.dividerColors){dividerColors=mergeDividerColors(dividerColors,data.dividerColors);localStorage.setItem('cp_divider_colors',JSON.stringify(dividerColors));}}
-    localStorage.setItem('cp_sync',JSON.stringify(syncConfig));startPolling();updateSyncShareUrl();document.getElementById('syncSetup').style.display='none';
+    localStorage.setItem('cp_sync', JSON.stringify(syncConfig));
+await _doPush(); // ← ローカルの未反映データをpush
+startPolling(); updateSyncShareUrl();
+document.getElementById('syncSetup').style.display = 'none';
   }else{
     const r=await fetch('https://api.github.com/gists',{method:'POST',headers:{'Authorization':'token '+token,'Content-Type':'application/json'},body:JSON.stringify({description:'ColorPreview',public:false,files:{'presets.json':{content:JSON.stringify(groups)},'pin.json':{content:JSON.stringify(pinColors)},'divider_colors.json':{content:JSON.stringify(dividerColors)}}})});
     const d=await r.json();
@@ -1631,11 +1652,14 @@ async function setupSync(){
     else setSyncBadge('error','エラー');
   }
 }
-function clearSync(){stopPolling();syncConfig={token:'',gistId:''};localStorage.removeItem('cp_sync');setSyncBadge('','未接続');document.getElementById('syncShareUrlRow').style.display='none';document.getElementById('syncSetup').style.display='block';}
+function clearSync(){  stopPolling();
+  if (syncPushDebounceTimer) { clearTimeout(syncPushDebounceTimer); syncPushDebounceTimer = null; }
+  if (syncPushMaxTimer) { clearTimeout(syncPushMaxTimer); syncPushMaxTimer = null; }
+  syncConfig = { token: '', gistId: '' };localStorage.removeItem('cp_sync');setSyncBadge('','未接続');document.getElementById('syncShareUrlRow').style.display='none';document.getElementById('syncSetup').style.display='block';}
 function startPolling(){
   stopPolling();setSyncBadge('synced','同期中');
   pollTimer=setInterval(async()=>{
-    if(isSyncPushing||syncPushDebounceTimer) return;
+    if (isSyncPushing || syncPushDebounceTimer || syncPushMaxTimer) return;
     const data=await gistGet();if(data===null){setSyncBadge('error','エラー');return;}
     if(data&&data!=='unchanged'){
       if(data.groups){groups=mergeGroups(groups,data.groups);localStorage.setItem('cp_groups5',JSON.stringify(groups));renderGroups();}
@@ -1736,11 +1760,14 @@ function openAddDividerModal(gi){
   document.getElementById('addDividerModal').style.display='flex';setTimeout(()=>document.getElementById('dividerLabelInput').focus(),60);
 }
 function closeAddDividerModal(){document.getElementById('addDividerModal').style.display='none';}
-function confirmAddDivider(){
-  const label=document.getElementById('dividerLabelInput').value.trim();const color=_dividerSelectedColor;
-  const insertAt=Math.max(0,Math.min(_dividerInsertAt,groups[dividerTargetGi].rows.length));
-  groups[dividerTargetGi].rows.splice(insertAt,0,{id:'div_'+uid(),key:'---',divider:true,label,color,colors:[]});
-  saveGroups();renderGroups();closeAddDividerModal();showToast('区切りを追加しました');
+function confirmAddDivider() {
+  const label = document.getElementById('dividerLabelInput').value.trim();
+  const color = _dividerSelectedColor;
+  const insertAt = Math.max(0, Math.min(_dividerInsertAt, groups[dividerTargetGi].rows.length));
+  const divId = 'div_' + uid(); // ← IDを先に生成
+  groups[dividerTargetGi].rows.splice(insertAt, 0, { id: divId, key: '---', divider: true, label, color, colors: [] });
+  _registerPendingDivider(divId); // ← 追加
+  saveGroups(); renderGroups(); closeAddDividerModal(); showToast('区切りを追加しました');
 }
 document.getElementById('dividerLabelInput').addEventListener('keydown',e=>{if(e.key==='Enter')confirmAddDivider();if(e.key==='Escape')closeAddDividerModal();});
 document.getElementById('dividerColorInput').addEventListener('input',e=>{const c=e.target.value;document.getElementById('dividerHexInput').value=c;document.getElementById('dividerColorSwatch').style.background=c;_dividerSelectedColor=validHex(c)?c:'';});
