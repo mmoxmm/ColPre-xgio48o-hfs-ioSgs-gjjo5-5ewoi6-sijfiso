@@ -2131,6 +2131,14 @@ document.addEventListener('pointerdown', () => {
   syncUI('t');syncUI('b');render();renderGroups();renderPinRow();
   setupCopyHexPressEffect('copyHexBBtn');setupCopyHexPressEffect('copyHexTBtn');
 })();
+document.addEventListener('pointerup', () => {
+  if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+  longPressActive = false;
+}, true);
+document.addEventListener('pointercancel', () => {
+  if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+  longPressActive = false;
+}, true);
 </script>
 </body>
 </html>
