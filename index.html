@@ -1124,7 +1124,7 @@ function renderPinRow() {
   addBtn.addEventListener('pointerdown',()=>{pinAddLongPress=false;pinAddPressTimer=setTimeout(()=>{pinAddLongPress=true;pinAddPressTimer=null;openAddModalForPin();},400);});
   addBtn.addEventListener('pointerup',()=>{if(pinAddPressTimer){clearTimeout(pinAddPressTimer);pinAddPressTimer=null;}});
   addBtn.addEventListener('pointercancel',()=>{if(pinAddPressTimer){clearTimeout(pinAddPressTimer);pinAddPressTimer=null;}pinAddLongPress=false;});
-  addBtn.addEventListener('click',()=>{if(pinAddLongPress){pinAddLongPress=false;return;}const t=document.getElementById('tHex').value,b=document.getElementById('bHex').value;pinColors.push({id:uid(),t,b,locked:false,label:'',copyTarget:'b'});savePinColors();renderPinRow();});
+  addBtn.addEventListener('click',()=>{if(pinAddLongPress){pinAddLongPress=false;return;}const t=document.getElementById('tHex').value,b=document.getElementById('bHex').value;const _iid=uid();pinColors.push({id:_iid,t,b,locked:false,label:'',copyTarget:'b'});_registerPendingChip(_iid);savePinColors();renderPinRow();});
   frag.append(addBtn); container.replaceChildren(frag);
   if(window._scheduleTwemoji) window._scheduleTwemoji();
 }
@@ -1232,7 +1232,7 @@ function renderGroups() {
         addRowBtn.addEventListener('pointerdown',()=>{rowAddLongPress=false;rowAddPressTimer=setTimeout(()=>{rowAddLongPress=true;rowAddPressTimer=null;openAddRowModal(capturedGi,capturedRi);},400);});
         addRowBtn.addEventListener('pointerup',()=>{if(rowAddPressTimer){clearTimeout(rowAddPressTimer);rowAddPressTimer=null;}});
         addRowBtn.addEventListener('pointercancel',()=>{if(rowAddPressTimer){clearTimeout(rowAddPressTimer);rowAddPressTimer=null;}rowAddLongPress=false;});
-        addRowBtn.addEventListener('click',()=>{if(rowAddLongPress){rowAddLongPress=false;return;}const t=document.getElementById('tHex').value,b=document.getElementById('bHex').value;capturedRow.colors.push({id:uid(),t,b,locked:false,label:'',copyTarget:'b'});saveGroups();renderGroups();});
+        addRowBtn.addEventListener('click',()=>{if(rowAddLongPress){rowAddLongPress=false;return;}const t=document.getElementById('tHex').value,b=document.getElementById('bHex').value;const _cid=uid();capturedRow.colors.push({id:_cid,t,b,locked:false,label:'',copyTarget:'b'});_registerPendingChip(_cid);saveGroups();renderGroups();});
       })(row,gi,ri);
       swatchesEl.append(addRowBtn); rowEl.append(swatchesEl); rowsEl.append(rowEl);
     });
@@ -1289,11 +1289,11 @@ function closeModal(){document.getElementById('addModal').style.display='none';}
 function confirmAdd(){
   const t=document.getElementById('tHex').value,b=document.getElementById('bHex').value;
   const label=document.getElementById('addLabel').value.trim();
-  if(modalTargetPin){pinColors.push({id:uid(),t,b,locked:false,label,copyTarget:'b'});savePinColors();renderPinRow();closeModal();return;}
+  if(modalTargetPin){const _pid=uid();pinColors.push({id:_pid,t,b,locked:false,label,copyTarget:'b'});_registerPendingChip(_pid);savePinColors();renderPinRow();closeModal();return;}
   const keyInput=document.getElementById('modalKeyInput').value.trim();const key=keyInput||'⭐';
   let row=groups[modalTargetGi].rows.find(r=>!r.divider&&r.key===key);
   if(!row){row={key,colors:[]};groups[modalTargetGi].rows.push(row);}
-  row.colors.push({id:uid(),t,b,locked:false,label,copyTarget:'b'});
+  const _gid=uid();row.colors.push({id:_gid,t,b,locked:false,label,copyTarget:'b'});_registerPendingChip(_gid);
   saveGroups();renderGroups();closeModal();
 }
 
@@ -1339,7 +1339,7 @@ function confirmAddRow(){
   const label=document.getElementById('addRowLabel').value.trim();
   const targetRow=groups[addRowTargetGi].rows[addRowTargetRi];
   if(!targetRow||targetRow.divider){showToast('行が見つかりません');closeAddRowModal();return;}
-  targetRow.colors.push({id:uid(),t,b,locked:false,label,copyTarget:'b'});
+  const _rid=uid();targetRow.colors.push({id:_rid,t,b,locked:false,label,copyTarget:'b'});_registerPendingChip(_rid);
   saveGroups();renderGroups();closeAddRowModal();
 }
 
@@ -1629,7 +1629,6 @@ function startPolling(){
 function stopPolling(){if(pollTimer){clearInterval(pollTimer);pollTimer=null;}}
 let syncPushDebounceTimer=null;
 let syncPushMaxTimer=null;  // ← 追加
-
 function scheduleSyncPush(){
   if(!syncConfig.gistId||!syncConfig.token) return;
 
@@ -1640,7 +1639,7 @@ function scheduleSyncPush(){
       if(syncPushDebounceTimer){clearTimeout(syncPushDebounceTimer);syncPushDebounceTimer=null;}
       if(isSyncPushing) return;
       isSyncPushing=true;
-      try{await gistPut(groups,pinColors,dividerColors);lastEtag='';}catch(e){}
+      try{await gistPut(groups,pinColors,dividerColors);lastEtag='';_clearPendingAfterPush();}catch(e){}
       finally{isSyncPushing=false;}
     },3000);
   }
@@ -1652,10 +1651,10 @@ function scheduleSyncPush(){
     if(syncPushMaxTimer){clearTimeout(syncPushMaxTimer);syncPushMaxTimer=null;}
     if(isSyncPushing) return;
     isSyncPushing=true;
-    try{await gistPut(groups,pinColors,dividerColors);lastEtag='';}catch(e){}
+    try{await gistPut(groups,pinColors,dividerColors);lastEtag='';_clearPendingAfterPush();}catch(e){}
     finally{isSyncPushing=false;}
   },800);
-}  
+}
 function updateSyncShareUrl(){if(!syncConfig.gistId)return;const url=location.href.split('?')[0]+'?gist='+syncConfig.gistId;document.getElementById('syncShareUrlRow').style.display='flex';document.getElementById('syncShareInput').value=url;}
 function copySyncUrl(){navigator.clipboard.writeText(document.getElementById('syncShareInput').value);showToast('同期用URLをコピーしました');}
 
