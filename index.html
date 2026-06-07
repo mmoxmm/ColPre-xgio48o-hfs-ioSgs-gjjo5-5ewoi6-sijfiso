@@ -1188,7 +1188,9 @@ function renderPinRow() {
 //  グループレンダリング（deleted チップ・行をスキップ）
 // ============================================================
 function renderGroups() {
-  const el=document.getElementById('groupsList'); const frag=document.createDocumentFragment();
+  const el=document.getElementById('groupsList');
+  el.style.minHeight = el.offsetHeight + 'px'; 
+  const frag=document.createDocumentFragment();
   groups.forEach((g,gi) => {
     if(g.deleted) return; // deleted グループはスキップ
     if(!g.id||g.id==='undefined') g.id=uid();
@@ -1553,7 +1555,7 @@ function lpSaveSettings(){
 }
 function lpDelete(){
   if(!lpTarget) return;
-  if(lpTarget.c.locked){showToast('🔒 ロックされているため削除できません。先にロックを解除してください。');return;}
+  if(lpTarget.c.locked&&!lpTarget.tempUnlocked){showToast('🔒 ロックされているため削除できません。先にロックを解除してください。');return;}
   const {gi,ri,ci,chipType}=lpTarget;closeLpModal();
   // ② チップ削除: deleted:true に変更
   if(chipType==='pin'){
