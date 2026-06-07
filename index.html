@@ -1887,8 +1887,9 @@ function clearSync(){
 
 function startPolling(){
   stopPolling();setSyncBadge('synced','同期中');
-  pollTimer=setInterval(async()=>{
-    if(isSyncPushing) return;
+  pollTimer = setInterval(async () => {
+  if(isSyncPushing) return;
+  if(Date.now() - lastPushTime < 1500) return;  // ← Push直後はスキップ
     let data;
     try{ data=await gistGet(); }catch(e){ setSyncBadge('error','エラー','通信エラー: '+e.message); return; }
     if(data===null){ return; } // gistGet内でエラー表示済み
@@ -1906,42 +1907,46 @@ function startPolling(){
 function stopPolling(){if(pollTimer){clearInterval(pollTimer);pollTimer=null;}}
 let syncPushDebounceTimer=null;
 let syncPushMaxTimer=null;
-async function _doPush(){
+  async function _doPush(skipMerge = false) {
   if(isSyncPushing) return;
-  isSyncPushing=true;
-  setSyncBadge('syncing','同期中…');
-  try{
-    const remote=await gistGet();
-    if(remote&&remote!=='unchanged'){
-      if(remote.groups){groups=mergeGroups(groups,remote.groups);localStorage.setItem('cp_groups5',JSON.stringify(groups));_lastRenderHash='';renderGroups();}
-      if(remote.pin){pinColors=mergePins(pinColors,remote.pin);localStorage.setItem('cp_pin_row',JSON.stringify(pinColors));renderPinRow();}
-      if(remote.dividerColors){dividerColors=mergeDividerColors(dividerColors,remote.dividerColors);localStorage.setItem('cp_divider_colors',JSON.stringify(dividerColors));}
+  isSyncPushing = true;
+  setSyncBadge('syncing', '同期中…');
+  try {
+    if (!skipMerge) {
+      const remote = await gistGet();
+      if (remote) {
+        if(remote.groups){ groups=mergeGroups(groups,remote.groups); localStorage.setItem('cp_groups5',JSON.stringify(groups)); _lastRenderHash=''; renderGroups(); }
+        if(remote.pin){ pinColors=mergePins(pinColors,remote.pin); localStorage.setItem('cp_pin_row',JSON.stringify(pinColors)); renderPinRow(); }
+        if(remote.dividerColors){ dividerColors=mergeDividerColors(dividerColors,remote.dividerColors); localStorage.setItem('cp_divider_colors',JSON.stringify(dividerColors)); }
+      }
     }
-    await gistPut(groups,pinColors,dividerColors);lastEtag='';
-    setSyncBadge('synced','反映待ち…');       // ← 変更
-    setTimeout(()=>setSyncBadge('synced','同期中'),5000); // ← 5秒後に戻す
-  }catch(e){
-    console.error('sync push error:',e);
-    setSyncBadge('error','Push失敗');
+    await gistPut(groups, pinColors, dividerColors);
+    lastPushTime = Date.now();  // ← 追加
+    lastEtag = '';
+    setSyncBadge('synced', '同期中');  // ← 「反映待ち」表示と5秒タイマーを削除
+  } catch(e) {
+    setSyncBadge('error', 'Push失敗');
+  } finally {
+    isSyncPushing = false;
   }
-  finally{isSyncPushing=false;}
 }
-  function scheduleSyncPush(){
-  if(!syncConfig.gistId||!syncConfig.token) return;
-  setSyncBadge('syncing','保存待ち…');
-  if(!syncPushMaxTimer){
-    syncPushMaxTimer=setTimeout(async()=>{
-      syncPushMaxTimer=null;
-      if(syncPushDebounceTimer){clearTimeout(syncPushDebounceTimer);syncPushDebounceTimer=null;}
-      await _doPush();
-    },3000);
+// scheduleSyncPush のタイマーを短縮
+function scheduleSyncPush() {
+  if(!syncConfig.gistId || !syncConfig.token) return;
+  setSyncBadge('syncing', '保存待ち…');
+  if (!syncPushMaxTimer) {
+    syncPushMaxTimer = setTimeout(async () => {
+      syncPushMaxTimer = null;
+      if(syncPushDebounceTimer){ clearTimeout(syncPushDebounceTimer); syncPushDebounceTimer = null; }
+      await _doPush(true);  // ← maxTimer発火時はskipMerge=true（速度優先）
+    }, 1500);  // 3000 → 1500ms
   }
   if(syncPushDebounceTimer) clearTimeout(syncPushDebounceTimer);
-  syncPushDebounceTimer=setTimeout(async()=>{
-    syncPushDebounceTimer=null;
-    if(syncPushMaxTimer){clearTimeout(syncPushMaxTimer);syncPushMaxTimer=null;}
-    await _doPush();
-  },800);
+  syncPushDebounceTimer = setTimeout(async () => {
+    syncPushDebounceTimer = null;
+    if(syncPushMaxTimer){ clearTimeout(syncPushMaxTimer); syncPushMaxTimer = null; }
+    await _doPush(false);  // デバウンス後は通常マージ
+  }, 400);  // 800 → 400ms
 }
 
 // ============================================================
