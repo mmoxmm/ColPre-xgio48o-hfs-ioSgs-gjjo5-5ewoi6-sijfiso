@@ -1353,7 +1353,14 @@ function _buildGroupBlock(g, gi) {
       addRowBtn.addEventListener('pointerdown',()=>{rowAddLongPress=false;rowAddPressTimer=setTimeout(()=>{rowAddLongPress=true;rowAddPressTimer=null;openAddRowModal(capturedGi,capturedRi);},400);});
       addRowBtn.addEventListener('pointerup',()=>{if(rowAddPressTimer){clearTimeout(rowAddPressTimer);rowAddPressTimer=null;}});
       addRowBtn.addEventListener('pointercancel',()=>{if(rowAddPressTimer){clearTimeout(rowAddPressTimer);rowAddPressTimer=null;}rowAddLongPress=false;});
-      addRowBtn.addEventListener('click',()=>{if(rowAddLongPress){rowAddLongPress=false;return;}const t=document.getElementById('tHex').value,b=document.getElementById('bHex').value;capturedRow.colors.push({id:uid(),t,b,locked:false,label:'',copyTarget:'b',updatedAt:now(),order:maxOrder(capturedRow.colors)+1000,deleted:false});saveGroups();_lastRenderHash='';renderGroups();});
+      addRowBtn.addEventListener('click',()=>{
+  if(rowAddLongPress){rowAddLongPress=false;return;}
+  const t=document.getElementById('tHex').value,b=document.getElementById('bHex').value;
+  const liveRow=groups[capturedGi].rows[capturedRi];
+  if(!liveRow||liveRow.deleted){showToast('行が見つかりません');return;}
+  liveRow.colors.push({id:uid(),t,b,locked:false,label:'',copyTarget:'b',updatedAt:now(),order:maxOrder(liveRow.colors)+1000,deleted:false});
+  saveGroups();_lastRenderHash='';_groupBlockHashes.clear();renderGroups();
+});
     })(row,gi,currentRi);
     swatchesEl.append(addRowBtn); rowEl.append(swatchesEl); rowsEl.append(rowEl);
   });
