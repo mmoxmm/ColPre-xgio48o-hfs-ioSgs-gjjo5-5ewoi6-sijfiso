@@ -895,7 +895,7 @@ function applyMigrations() {
 }
 applyMigrations();
 
-function saveGroups() {   const ts = now();   groups.forEach(g => {     if(!g.deleted && g.updatedAt <= ts) g.updatedAt = ts;   });   localStorage.setItem('cp_groups5', JSON.stringify(groups));   scheduleSyncPush(); }
+function saveGroups() {   const ts = now();   groups.forEach(g => { if(!g.deleted) g.updatedAt = ts; });   localStorage.setItem('cp_groups5', JSON.stringify(groups));   scheduleSyncPush(); }
 
 // ============================================================
 //  モード管理
@@ -1226,7 +1226,7 @@ function renderPinRow() {
         chip.addEventListener('pointercancel',()=>{if(longPressTimer){clearTimeout(longPressTimer);longPressTimer=null;}longPressActive=false;longPressConsumed=false;});
         chip.addEventListener('click',e=>{
           e.stopPropagation();
-          if(appMode==='lock'){cC.locked=!cC.locked;cC.updatedAt=now()+10000;chip.classList.toggle('locked',cC.locked);savePinColors();showToast(cC.locked?'🔒 ロックしました':'🔓 解除しました');updateTooltip();return;}
+          if(appMode==='lock'){cC.locked=!cC.locked;cC.updatedAt=now();chip.classList.toggle('locked',cC.locked);saveGroups();showToast(cC.locked?'🔒 ロックしました':'🔓 解除しました');updateTooltip();return;}
           if(longPressActive||longPressConsumed){longPressActive=false;longPressConsumed=false;return;}
           chipTapCount++;
           if(chipTapCount===1){chipTapTimer=setTimeout(()=>{chipTapCount=0;applyHex('t',cC.t);applyHex('b',cC.b);copyText(cC.b.toUpperCase());showColorToast(cC.b.toUpperCase(),cC.b,cC.t,'背景色');},280);}
@@ -1335,7 +1335,7 @@ function _buildGroupBlock(g, gi) {
           chip.addEventListener('pointercancel',()=>{if(longPressTimer){clearTimeout(longPressTimer);longPressTimer=null;}longPressActive=false;longPressConsumed=false;});
           chip.addEventListener('click',e=>{
             e.stopPropagation();
-            if(appMode==='lock'){cC.locked=!cC.locked;cC.updatedAt=now()+10000;chip.classList.toggle('locked',cC.locked);saveGroups();showToast(cC.locked?'🔒 ロックしました':'🔓 解除しました');updateTooltip();return;}
+            if(appMode==='lock'){cC.locked=!cC.locked;cC.updatedAt=now();chip.classList.toggle('locked',cC.locked);saveGroups();showToast(cC.locked?'🔒 ロックしました':'🔓 解除しました');updateTooltip();return;}
             if(longPressActive||longPressConsumed){longPressActive=false;longPressConsumed=false;return;}
             chipTapCount++;
             if(chipTapCount===1){chipTapTimer=setTimeout(()=>{chipTapCount=0;applyHex('t',cC.t);applyHex('b',cC.b);copyText(cC.b.toUpperCase());showColorToast(cC.b.toUpperCase(),cC.b,cC.t,'背景色');},280);}
@@ -1779,7 +1779,7 @@ function mergeChipsLWW(localChips, remoteChips) {
     c = normalizeChip(c, i * 1000);
     if (!c.id) return;
     const existing = map.get(c.id);
-    if (!existing || c.updatedAt >= existing.updatedAt) {
+    if (!existing || c.updatedAt > existing.updatedAt) {
       map.set(c.id, c);
     }
   });
@@ -1887,9 +1887,8 @@ function clearSync(){
 
 function startPolling(){
   stopPolling();setSyncBadge('synced','同期中');
-  pollTimer = setInterval(async () => {
-  if(isSyncPushing) return;
-  if(Date.now() - lastPushTime < 1500) return;  // ← Push直後はスキップ
+  pollTimer=setInterval(async()=>{
+    if(isSyncPushing) return;
     let data;
     try{ data=await gistGet(); }catch(e){ setSyncBadge('error','エラー','通信エラー: '+e.message); return; }
     if(data===null){ return; } // gistGet内でエラー表示済み
@@ -1907,46 +1906,37 @@ function startPolling(){
 function stopPolling(){if(pollTimer){clearInterval(pollTimer);pollTimer=null;}}
 let syncPushDebounceTimer=null;
 let syncPushMaxTimer=null;
-  async function _doPush(skipMerge = false) {
+async function _doPush(){
   if(isSyncPushing) return;
-  isSyncPushing = true;
-  setSyncBadge('syncing', '同期中…');
-  try {
-    if (!skipMerge) {
-      const remote = await gistGet();
-      if (remote) {
-        if(remote.groups){ groups=mergeGroups(groups,remote.groups); localStorage.setItem('cp_groups5',JSON.stringify(groups)); _lastRenderHash=''; renderGroups(); }
-        if(remote.pin){ pinColors=mergePins(pinColors,remote.pin); localStorage.setItem('cp_pin_row',JSON.stringify(pinColors)); renderPinRow(); }
-        if(remote.dividerColors){ dividerColors=mergeDividerColors(dividerColors,remote.dividerColors); localStorage.setItem('cp_divider_colors',JSON.stringify(dividerColors)); }
-      }
-    }
-    await gistPut(groups, pinColors, dividerColors);
-    lastPushTime = Date.now();  // ← 追加
-    lastEtag = '';
-    setSyncBadge('synced', '同期中');  // ← 「反映待ち」表示と5秒タイマーを削除
-  } catch(e) {
-    setSyncBadge('error', 'Push失敗');
-  } finally {
-    isSyncPushing = false;
+  isSyncPushing=true;
+  setSyncBadge('syncing','同期中…'); // ← 追加
+  try{
+    // ...既存の処理...
+    await gistPut(groups,pinColors,dividerColors);lastEtag='';
+    setSyncBadge('synced','同期済み ✓'); // ← 追加
+    setTimeout(()=>setSyncBadge('synced','同期中'),2000); // ← 追加（2秒後に通常表示に戻す）
+  }catch(e){
+    console.error('sync push error:',e);
+    setSyncBadge('error','Push失敗'); // ← 追加
   }
+  finally{isSyncPushing=false;}
 }
-// scheduleSyncPush のタイマーを短縮
-function scheduleSyncPush() {
-  if(!syncConfig.gistId || !syncConfig.token) return;
-  setSyncBadge('syncing', '保存待ち…');
-  if (!syncPushMaxTimer) {
-    syncPushMaxTimer = setTimeout(async () => {
-      syncPushMaxTimer = null;
-      if(syncPushDebounceTimer){ clearTimeout(syncPushDebounceTimer); syncPushDebounceTimer = null; }
-      await _doPush(true);  // ← maxTimer発火時はskipMerge=true（速度優先）
-    }, 1500);  // 3000 → 1500ms
+  function scheduleSyncPush(){
+  if(!syncConfig.gistId||!syncConfig.token) return;
+  setSyncBadge('syncing','保存待ち…');
+  if(!syncPushMaxTimer){
+    syncPushMaxTimer=setTimeout(async()=>{
+      syncPushMaxTimer=null;
+      if(syncPushDebounceTimer){clearTimeout(syncPushDebounceTimer);syncPushDebounceTimer=null;}
+      await _doPush();
+    },3000);
   }
   if(syncPushDebounceTimer) clearTimeout(syncPushDebounceTimer);
-  syncPushDebounceTimer = setTimeout(async () => {
-    syncPushDebounceTimer = null;
-    if(syncPushMaxTimer){ clearTimeout(syncPushMaxTimer); syncPushMaxTimer = null; }
-    await _doPush(false);  // デバウンス後は通常マージ
-  }, 400);  // 800 → 400ms
+  syncPushDebounceTimer=setTimeout(async()=>{
+    syncPushDebounceTimer=null;
+    if(syncPushMaxTimer){clearTimeout(syncPushMaxTimer);syncPushMaxTimer=null;}
+    await _doPush();
+  },800);
 }
 
 // ============================================================
