@@ -718,7 +718,7 @@ function normalizeChip(c) {
     locked: !!c.locked,
     label: c.label || '',
     copyTarget: c.copyTarget || 'b',
-    updatedAt: c.updatedAt || now(),
+    updatedAt: (c.updatedAt != null) ? c.updatedAt : now(),
     deleted: !!c.deleted
   };
 }
@@ -730,13 +730,13 @@ function normalizeRow(r) {
     return {
       id: rid, key: r.key || '---', divider: true,
       label: r.label || '', color: r.color || '', colors: [],
-      updatedAt: r.updatedAt || now(), deleted: !!r.deleted
+      updatedAt: (r.updatedAt != null) ? r.updatedAt : now(), deleted: !!r.deleted
     };
   }
   return {
     key: r.key || '?',
     colors: (r.colors || []).map(normalizeChip),
-    updatedAt: r.updatedAt || now(), deleted: !!r.deleted
+    updatedAt: (r.updatedAt != null) ? r.updatedAt : now(), deleted: !!r.deleted
   };
 }
 
@@ -748,7 +748,7 @@ function ensureIds(gs) {
       id: gid,
       name: g.name || '',
       rows: (g.rows || []).map(normalizeRow),
-      updatedAt: g.updatedAt || now(),
+      updatedAt: (g.updatedAt != null) ? g.updatedAt : now(),
       deleted: !!g.deleted
     };
   });
@@ -1695,7 +1695,7 @@ function mergeGroups(localGs, remoteGs) {
       return;
     }
     // グループメタ（name, deleted）: LWW
-    const merged = lg.updatedAt >= rg.updatedAt ? lg : rg;
+    const winMeta = lg.updatedAt >= rg.updatedAt ? lg : rg;     const merged = Object.assign({}, winMeta);
     merged.rows = mergeRowsLWW(lg.rows, rg.rows);
     groupMap.set(rg.id, merged);
   });
