@@ -1189,7 +1189,6 @@ function renderPinRow() {
 // ============================================================
 function renderGroups() {
   const el=document.getElementById('groupsList');
-  el.style.minHeight = el.offsetHeight + 'px'; 
   const frag=document.createDocumentFragment();
   groups.forEach((g,gi) => {
     if(g.deleted) return; // deleted グループはスキップ
