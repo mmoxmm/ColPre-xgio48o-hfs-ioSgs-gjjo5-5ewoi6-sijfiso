@@ -338,6 +338,7 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
     <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
       <button class="sync-action-btn primary" onclick="setupSync()">接続 / 作成</button>
       <button class="sync-action-btn secondary" onclick="clearSync()">切断</button>
+      <button class="sync-action-btn secondary" onclick="gistPut(groups,pinColors,dividerColors).then(()=>showToast('このデバイスのデータをGistに保存しました！'))">↑ 強制Push</button>
     </div>
     <div class="sync-note" id="syncNote">
       <a href="https://github.com/settings/tokens/new?scopes=gist&description=ColorPreview" target="_blank">① GitHubでgistスコープのトークンを作成</a> →
