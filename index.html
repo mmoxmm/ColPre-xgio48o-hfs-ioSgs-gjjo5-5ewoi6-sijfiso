@@ -709,12 +709,24 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
 const uid = () => Math.random().toString(36).slice(2, 9);
 const now = () => Date.now();
 
+function orderBetween(prev, next) {
+  // prev/next は number|undefined
+  const a = (prev != null) ? prev : 0;
+  const b = (next != null) ? next : a + 2000;
+  return (a + b) / 2;
+}
+function maxOrder(arr) {
+  if (!arr || arr.length === 0) return 0;
+  return Math.max(...arr.filter(x => !x.deleted).map(x => x.order ?? 0));
+}
+  
+  
 // ============================================================
 //  ① データ定義・ロード
 // ============================================================
-function normalizeChip(c) {
+function normalizeChip(c, fallbackOrder) {
   if (typeof c === 'string') {
-    return { id: uid(), t: '#1a1a2e', b: c, locked: false, label: '', copyTarget: 'b', updatedAt: 0, deleted: false };
+    return { id: uid(), t: '#1a1a2e', b: c, locked: false, label: '', copyTarget: 'b', updatedAt: 0, order: fallbackOrder ?? 0, deleted: false };
   }
   return {
     id: (c.id && c.id !== 'undefined' && c.id !== 'null') ? c.id : uid(),
@@ -724,39 +736,43 @@ function normalizeChip(c) {
     label: c.label || '',
     copyTarget: c.copyTarget || 'b',
     updatedAt: (c.updatedAt != null) ? c.updatedAt : now(),
+    order: (c.order != null) ? c.order : (fallbackOrder ?? 0),
     deleted: !!c.deleted
   };
 }
 
-function normalizeRow(r) {
+function normalizeRow(r, fallbackOrder) {
   if (r.divider === true) {
     const rid = (r.id && r.id !== 'undefined' && r.id !== 'null') ? r.id : ('div_' + uid());
     return {
       id: rid, key: r.key || '---', divider: true,
       label: r.label || '', color: r.color || '', colors: [],
+      order: (r.order != null) ? r.order : (fallbackOrder ?? 0),
       updatedAt: (r.updatedAt != null) ? r.updatedAt : now(), deleted: !!r.deleted
     };
   }
   return {
     key: r.key || '?',
-    colors: (r.colors || []).map(normalizeChip),
+    colors: (r.colors || []).map((c, i) => normalizeChip(c, i * 1000)),
+    order: (r.order != null) ? r.order : (fallbackOrder ?? 0),
     updatedAt: (r.updatedAt != null) ? r.updatedAt : now(), deleted: !!r.deleted
   };
 }
 
 function ensureIds(gs) {
-  return gs.map(g => {
+  return gs.map((g, gi) => {
     const gid = (g.id && g.id !== 'undefined' && g.id !== 'null') ? g.id : ('grp_' + uid());
     return {
       id: gid,
       name: g.name || '',
-      rows: (g.rows || []).map(normalizeRow),
+      order: (g.order != null) ? g.order : gi * 1000,
+      rows: (g.rows || []).map((r, ri) => normalizeRow(r, ri * 1000)),
       updatedAt: (g.updatedAt != null) ? g.updatedAt : now(),
       deleted: !!g.deleted
     };
   });
 }
-
+  
 const INJECTS = [
   { key: '🐹', b: '#f9c89b' }, { key: '🥽', b: '#efea5a' },
   { key: '🐸', b: '#eef1d0' }, { key: '🩰', b: '#ffe4e1' },
@@ -925,19 +941,25 @@ function doMoveChip(src, dst) {
   const srcDataIdx = resolveChipDataIndex(srcRow, src.ci);
   if (srcDataIdx < 0) return;
   const [moved] = srcRow.splice(srcDataIdx, 1);
-  moved.updatedAt = now();
 
   if (dst.position === 'append') {
-    if (dst.type==='pin') pinColors.push(moved);
-    else groups[dst.gi].rows[dst.ri].colors.push(moved);
+    const targetArr = dst.type==='pin' ? pinColors : groups[dst.gi].rows[dst.ri].colors;
+    moved.order = maxOrder(targetArr) + 1000;
+    targetArr.push(moved);
   } else {
     const dstRow = dst.type==='pin' ? pinColors : groups[dst.gi].rows[dst.ri].colors;
     let dstDataIdx = resolveChipDataIndex(dstRow, dst.ci);
     if (dstDataIdx < 0) dstDataIdx = dstRow.length;
     let insertIdx = dstDataIdx;
     if (dst.position === 'after') insertIdx++;
-    dstRow.splice(Math.max(0, insertIdx), 0, moved);
+    insertIdx = Math.max(0, insertIdx);
+    dstRow.splice(insertIdx, 0, moved);
+    const prevChipOrder = dstRow[insertIdx-1] ? (dstRow[insertIdx-1].order ?? (insertIdx-1)*1000) : undefined;
+    const nextChipOrder = dstRow[insertIdx+1] ? (dstRow[insertIdx+1].order ?? (insertIdx+1)*1000) : undefined;
+    moved.order = orderBetween(prevChipOrder, nextChipOrder);
   }
+
+  moved.updatedAt = now();
   saveGroups(); savePinColors(); renderGroups(); renderPinRow();
 }
 
@@ -993,9 +1015,18 @@ function setupGroupHeaderPointerDnD(hdr, block, gi) {
     cancelGrpDrag();
     if (wasActive&&srcId&&dstDataIdx!==null&&dstDataIdx>=0) {
       const srcDataIdx=groups.findIndex(g=>g.id===srcId); if(srcDataIdx<0||srcDataIdx===dstDataIdx) return;
-      const moved=groups.splice(srcDataIdx,1)[0]; let insertIdx=dstDataIdx; if(srcDataIdx<dstDataIdx) insertIdx=dstDataIdx-1; if(!insertBefore) insertIdx++;
-      insertIdx=Math.max(0,Math.min(insertIdx,groups.length)); groups.splice(insertIdx,0,moved);
-      saveGroups(); renderGroups(); showToast('グループを移動しました');
+      const moved=groups.splice(srcDataIdx,1)[0];
+let insertIdx=dstDataIdx;
+if(srcDataIdx<dstDataIdx) insertIdx=dstDataIdx-1;
+if(!insertBefore) insertIdx++;
+insertIdx=Math.max(0,Math.min(insertIdx,groups.length));
+groups.splice(insertIdx,0,moved);
+// order を前後の中間値で更新
+const prevOrder = groups[insertIdx-1] ? (groups[insertIdx-1].order ?? (insertIdx-1)*1000) : undefined;
+const nextOrder = groups[insertIdx+1] ? (groups[insertIdx+1].order ?? (insertIdx+1)*1000) : undefined;
+moved.order = orderBetween(prevOrder, nextOrder);
+moved.updatedAt = now();
+saveGroups(); renderGroups(); showToast('グループを移動しました');
     }
   });
   hdr.addEventListener('pointercancel', ()=>cancelGrpDrag());
@@ -1041,10 +1072,18 @@ function setupRowKeyPointerDnD(keySpan, rowEl, gi, ri) {
     const targetRow=elemBelow.closest('.emoji-row,.divider-row');
     if (!targetRow||targetRow===rowEl||+targetRow.dataset.gi!==srcGi) return;
     const dstRi=+targetRow.dataset.ri; const rect=targetRow.getBoundingClientRect(); const insertBefore=e.clientY<rect.top+rect.height/2;
-    const rows=groups[srcGi].rows; const [moved]=rows.splice(srcRi,1);
-    let insertIdx=dstRi; if(srcRi<dstRi) insertIdx=dstRi-1; if(!insertBefore) insertIdx++;
-    rows.splice(Math.max(0,Math.min(insertIdx,rows.length)),0,moved);
-    saveGroups(); renderGroups(); showToast('行を移動しました');
+    const rows=groups[srcGi].rows;
+const [moved]=rows.splice(srcRi,1);
+let insertIdx=dstRi;
+if(srcRi<dstRi) insertIdx=dstRi-1;
+if(!insertBefore) insertIdx++;
+insertIdx=Math.max(0,Math.min(insertIdx,rows.length));
+rows.splice(insertIdx,0,moved);
+const prevRowOrder = rows[insertIdx-1] ? (rows[insertIdx-1].order ?? (insertIdx-1)*1000) : undefined;
+const nextRowOrder = rows[insertIdx+1] ? (rows[insertIdx+1].order ?? (insertIdx+1)*1000) : undefined;
+moved.order = orderBetween(prevRowOrder, nextRowOrder);
+moved.updatedAt = now();
+saveGroups(); renderGroups(); showToast('行を移動しました');
   });
   keySpan.addEventListener('pointercancel', ()=>cancelRowDrag());
 }
@@ -1176,10 +1215,10 @@ function renderPinRow() {
   addBtn.addEventListener('pointerup',()=>{if(pinAddPressTimer){clearTimeout(pinAddPressTimer);pinAddPressTimer=null;}});
   addBtn.addEventListener('pointercancel',()=>{if(pinAddPressTimer){clearTimeout(pinAddPressTimer);pinAddPressTimer=null;}pinAddLongPress=false;});
   addBtn.addEventListener('click',()=>{
-    if(pinAddLongPress){pinAddLongPress=false;return;}
-    const t=document.getElementById('tHex').value,b=document.getElementById('bHex').value;
-    pinColors.push({id:uid(),t,b,locked:false,label:'',copyTarget:'b',updatedAt:now(),deleted:false});
-    savePinColors();renderPinRow();
+  if(pinAddLongPress){pinAddLongPress=false;return;}
+  const t=document.getElementById('tHex').value,b=document.getElementById('bHex').value;
+  pinColors.push({id:uid(),t,b,locked:false,label:'',copyTarget:'b',updatedAt:now(),order:maxOrder(pinColors)+1000,deleted:false});
+  savePinColors();renderPinRow();
   });
   frag.append(addBtn); container.replaceChildren(frag);
   if(window._scheduleTwemoji) window._scheduleTwemoji();
@@ -1307,11 +1346,11 @@ function renderGroups() {
         addRowBtn.addEventListener('pointerup',()=>{if(rowAddPressTimer){clearTimeout(rowAddPressTimer);rowAddPressTimer=null;}});
         addRowBtn.addEventListener('pointercancel',()=>{if(rowAddPressTimer){clearTimeout(rowAddPressTimer);rowAddPressTimer=null;}rowAddLongPress=false;});
         addRowBtn.addEventListener('click',()=>{
-          if(rowAddLongPress){rowAddLongPress=false;return;}
-          const t=document.getElementById('tHex').value,b=document.getElementById('bHex').value;
-          capturedRow.colors.push({id:uid(),t,b,locked:false,label:'',copyTarget:'b',updatedAt:now(),deleted:false});
-          saveGroups();_lastRenderHash='';renderGroups();
-        });
+  if(rowAddLongPress){rowAddLongPress=false;return;}
+  const t=document.getElementById('tHex').value,b=document.getElementById('bHex').value;
+  capturedRow.colors.push({id:uid(),t,b,locked:false,label:'',copyTarget:'b',updatedAt:now(),order:maxOrder(capturedRow.colors)+1000,deleted:false});
+  saveGroups();_lastRenderHash='';renderGroups();
+});
       })(row,gi,currentRi);
       swatchesEl.append(addRowBtn); rowEl.append(swatchesEl); rowsEl.append(rowEl);
     });
@@ -1368,13 +1407,17 @@ function confirmAdd(){
   const t=document.getElementById('tHex').value,b=document.getElementById('bHex').value;
   const label=document.getElementById('addLabel').value.trim();
   if(modalTargetPin){
-    pinColors.push({id:uid(),t,b,locked:false,label,copyTarget:'b',updatedAt:now(),deleted:false});
+    pinColors.push({id:uid(),t,b,locked:false,label,copyTarget:'b',updatedAt:now(),order:maxOrder(pinColors)+1000,deleted:false});
     savePinColors();renderPinRow();closeModal();return;
   }
   const keyInput=document.getElementById('modalKeyInput').value.trim();const key=keyInput||'⭐';
   let row=groups[modalTargetGi].rows.find(r=>!r.divider&&!r.deleted&&r.key===key);
-  if(!row){row={key,colors:[],updatedAt:now(),deleted:false};groups[modalTargetGi].rows.push(row);}
-  row.colors.push({id:uid(),t,b,locked:false,label,copyTarget:'b',updatedAt:now(),deleted:false});
+  if(!row){
+    const newRowOrder=maxOrder(groups[modalTargetGi].rows)+1000;
+    row={key,colors:[],order:newRowOrder,updatedAt:now(),deleted:false};
+    groups[modalTargetGi].rows.push(row);
+  }
+  row.colors.push({id:uid(),t,b,locked:false,label,copyTarget:'b',updatedAt:now(),order:maxOrder(row.colors)+1000,deleted:false});
   saveGroups();_lastRenderHash='';renderGroups();closeModal();
 }
 
@@ -1420,7 +1463,7 @@ function confirmAddRow(){
   const label=document.getElementById('addRowLabel').value.trim();
   const targetRow=groups[addRowTargetGi].rows[addRowTargetRi];
   if(!targetRow||targetRow.divider){showToast('行が見つかりません');closeAddRowModal();return;}
-  targetRow.colors.push({id:uid(),t,b,locked:false,label,copyTarget:'b',updatedAt:now(),deleted:false});
+  targetRow.colors.push({id:uid(),t,b,locked:false,label,copyTarget:'b',updatedAt:now(),order:maxOrder(targetRow.colors)+1000,deleted:false});
   saveGroups();_lastRenderHash='';renderGroups();closeAddRowModal();
 }
 
@@ -1643,8 +1686,8 @@ function updateLastEditInfo(data){
   const d=new Date(data.updatedAt);
   const pad=n=>String(n).padStart(2,'0');
   const str=`${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  timeEl.textContent=str;
   userEl.textContent=data.owner?'by @'+data.owner:'';
+  timeEl.textContent=str;
   el.style.display='block';
 }
 
@@ -1694,24 +1737,19 @@ async function gistPut(gs,pin,dc){
 // ============================================================
 function mergeChipsLWW(localChips, remoteChips) {
   const map = new Map();
-  localChips.forEach(c => { if(c.id) map.set(c.id, normalizeChip(c)); });
-  remoteChips.forEach(c => {
-    c = normalizeChip(c);
+  localChips.forEach((c, i) => {
+    const nc = normalizeChip(c, i * 1000);
+    if (nc.id) map.set(nc.id, nc);
+  });
+  remoteChips.forEach((c, i) => {
+    c = normalizeChip(c, i * 1000);
     if (!c.id) return;
     const existing = map.get(c.id);
     if (!existing || c.updatedAt >= existing.updatedAt) {
       map.set(c.id, c);
     }
   });
-  const result = [];
-  const seen = new Set();
-  localChips.forEach(lc => {
-    if (!lc.id) return;
-    const merged = map.get(lc.id);
-    if (merged) { result.push(merged); seen.add(lc.id); }
-  });
-  map.forEach((c, id) => { if (!seen.has(id)) result.push(c); });
-  return result;
+  return Array.from(map.values()).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 }
 
 function mergeGroups(localGs, remoteGs) {
@@ -1722,31 +1760,29 @@ function mergeGroups(localGs, remoteGs) {
   remoteNorm.forEach(rg => {
     const lg = groupMap.get(rg.id);
     if (!lg) { groupMap.set(rg.id, JSON.parse(JSON.stringify(rg))); return; }
+    // メタ（name等）は新しい方を採用
     const winMeta = lg.updatedAt >= rg.updatedAt ? lg : rg;
-    const merged = Object.assign({}, winMeta);
+    // orderは新しい方を採用
+    const winOrder = (lg.updatedAt >= rg.updatedAt) ? lg.order : rg.order;
+    const merged = Object.assign({}, winMeta, { order: winOrder });
     merged.rows = mergeRowsLWW(lg.rows, rg.rows);
     groupMap.set(rg.id, merged);
   });
-  const result = [];
-  const seen = new Set();
-  localNorm.forEach(lg => {
-    const m = groupMap.get(lg.id);
-    if (m) { result.push(m); seen.add(lg.id); }
-  });
-  groupMap.forEach((g, id) => { if (!seen.has(id)) result.push(g); });
-  return result;
+  return Array.from(groupMap.values())
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 }
 
 function mergeRowsLWW(localRows, remoteRows) {
   const divMap = new Map();
   const normalMap = new Map();
-  localRows.forEach(r => {
-    const nr = normalizeRow(r);
-    if (nr.divider) { if(nr.id) divMap.set(nr.id, nr); }
+
+  localRows.forEach((r, i) => {
+    const nr = normalizeRow(r, i * 1000);
+    if (nr.divider) { if (nr.id) divMap.set(nr.id, nr); }
     else normalMap.set(nr.key, nr);
   });
-  remoteRows.forEach(r => {
-    const nr = normalizeRow(r);
+  remoteRows.forEach((r, i) => {
+    const nr = normalizeRow(r, i * 1000);
     if (nr.divider) {
       if (!nr.id) return;
       const existing = divMap.get(nr.id);
@@ -1755,28 +1791,21 @@ function mergeRowsLWW(localRows, remoteRows) {
       const existing = normalMap.get(nr.key);
       if (!existing) { normalMap.set(nr.key, nr); }
       else {
+        // orderは新しい方を採用
+        const winOrder = existing.updatedAt >= nr.updatedAt ? existing.order : nr.order;
         const winRow = existing.updatedAt >= nr.updatedAt ? existing : nr;
         winRow.colors = mergeChipsLWW(existing.colors, nr.colors);
+        winRow.order = winOrder;
         normalMap.set(nr.key, winRow);
       }
     }
   });
-  const result = [];
-  const seenDiv = new Set();
-  const seenKey = new Set();
-  localRows.forEach(r => {
-    const nr = normalizeRow(r);
-    if (nr.divider) {
-      const m = nr.id ? divMap.get(nr.id) : null;
-      if (m) { result.push(m); seenDiv.add(nr.id); }
-    } else {
-      const m = normalMap.get(nr.key);
-      if (m) { result.push(m); seenKey.add(nr.key); }
-    }
-  });
-  divMap.forEach((d, id) => { if (!seenDiv.has(id)) result.push(d); });
-  normalMap.forEach((row, key) => { if (!seenKey.has(key)) result.push(row); });
-  return result;
+
+  const all = [
+    ...Array.from(divMap.values()),
+    ...Array.from(normalMap.values()),
+  ];
+  return all.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 }
 
 function mergePins(localPins, remotePins) {
@@ -1933,14 +1962,21 @@ function closeAddDividerModal(){document.getElementById('addDividerModal').style
 function confirmAddDivider() {
   const label = document.getElementById('dividerLabelInput').value.trim();
   const color = _dividerSelectedColor;
-  const visibleRows = groups[dividerTargetGi].rows.filter(r=>!r.deleted);
   let insertAfterKey = null;
   if (_dividerInsertAt > 0 && _dividerInsertAt <= visibleRows.length) {
     const refRow = visibleRows[_dividerInsertAt - 1];
     insertAfterKey = refRow.divider ? refRow.id : refRow.key;
   }
   const divId = 'div_' + uid();
-  const newDivider = { id: divId, key: '---', divider: true, label, color, colors: [], updatedAt: now(), deleted: false };
+  const visibleRows = groups[dividerTargetGi].rows.filter(r=>!r.deleted);
+
+const prevRow = _dividerInsertAt > 0 ? visibleRows[_dividerInsertAt-1] : undefined;
+
+const nextRow = visibleRows[_dividerInsertAt] ?? undefined;
+
+const newDivOrder = orderBetween(prevRow?.order, nextRow?.order);
+
+const newDivider = { id: divId, key: '---', divider: true, label, color, colors: [], order: newDivOrder, updatedAt: now(), deleted: false };
 
   if (insertAfterKey === null) {
     const firstVisibleIdx = groups[dividerTargetGi].rows.findIndex(r=>!r.deleted);
