@@ -28,7 +28,7 @@
     if(_pending) return; _pending = true;
     requestAnimationFrame(function(){ _pending = false; applyTw(document.getElementById('groupsList')); });
   };
-  document.addEventListener('DOMContentLoaded', function(){ applyTw(document.getElementById('groupsList')); applyTw(document.getElementById('pinRowInner')); });
+  document.addEventListener('DOMContentLoaded', function(){ applyTw(document.body); });
 })();
 </script>
 <style>
@@ -1216,7 +1216,7 @@ function renderPinRow() {
           if(appMode==='lock'){cC.locked=!cC.locked;cC.updatedAt=now();chip.classList.toggle('locked',cC.locked);showToast(cC.locked?'🔒 ロックしました':'🔓 解除しました');updateTooltip();return;}
           if(longPressActive||longPressConsumed){longPressActive=false;longPressConsumed=false;return;}
           chipTapCount++;
-          if(chipTapCount===1){applyHex('t',cC.t);applyHex('b',cC.b);copyText(cC.b.toUpperCase());showColorToast(cC.b.toUpperCase(),cC.b,cC.t,'背景色');chipTapTimer=setTimeout(()=>{chipTapCount=0;},280);}
+          if(chipTapCount===1){chipTapTimer=setTimeout(()=>{chipTapCount=0;applyHex('t',cC.t);applyHex('b',cC.b);copyText(cC.b.toUpperCase());showColorToast(cC.b.toUpperCase(),cC.b,cC.t,'背景色');},280);}
           else if(chipTapCount===2){clearTimeout(chipTapTimer);chipTapTimer=setTimeout(()=>{chipTapCount=0;applyHex('t',cC.t);applyHex('b',cC.b);copyText(cC.t.toUpperCase());showColorToast(cC.t.toUpperCase(),cC.t,cC.b,'文字色');},280);}
           else if(chipTapCount>=3){clearTimeout(chipTapTimer);chipTapTimer=null;chipTapCount=0;applyHex('t',cC.t);applyHex('b',cC.b);showToast('プレビューに反映しました（コピーなし）');}
         });
@@ -1228,15 +1228,11 @@ function renderPinRow() {
   addBtn.addEventListener('contextmenu',e=>e.preventDefault());
 // After
 let pinAddPressTimer=null;
-// pin+ボタンのpointerdown
 addBtn.addEventListener('pointerdown',(e)=>{
   e.stopPropagation();
-  // ← この2行を追加
-  if(longPressTimer){clearTimeout(longPressTimer);longPressTimer=null;}
-  longPressActive=false;longPressConsumed=false;
   pinAddPressTimer=setTimeout(()=>{pinAddPressTimer=null;openAddModalForPin();},400);
 });
-  addBtn.addEventListener('pointerup',(e)=>{
+addBtn.addEventListener('pointerup',(e)=>{
   e.stopPropagation();
   if(pinAddPressTimer){
     clearTimeout(pinAddPressTimer);pinAddPressTimer=null;
@@ -1358,7 +1354,7 @@ function renderGroups() {
               if(appMode==='lock'){cC.locked=!cC.locked;cC.updatedAt=now();chip.classList.toggle('locked',cC.locked);showToast(cC.locked?'🔒 ロックしました':'🔓 解除しました');updateTooltip();return;}
               if(longPressActive||longPressConsumed){longPressActive=false;longPressConsumed=false;return;}
               chipTapCount++;
-              if(chipTapCount===1){applyHex('t',cC.t);applyHex('b',cC.b);copyText(cC.b.toUpperCase());showColorToast(cC.b.toUpperCase(),cC.b,cC.t,'背景色');chipTapTimer=setTimeout(()=>{chipTapCount=0;},280);}
+              if(chipTapCount===1){chipTapTimer=setTimeout(()=>{chipTapCount=0;applyHex('t',cC.t);applyHex('b',cC.b);copyText(cC.b.toUpperCase());showColorToast(cC.b.toUpperCase(),cC.b,cC.t,'背景色');},280);}
               else if(chipTapCount===2){clearTimeout(chipTapTimer);chipTapTimer=setTimeout(()=>{chipTapCount=0;applyHex('t',cC.t);applyHex('b',cC.b);copyText(cC.t.toUpperCase());showColorToast(cC.t.toUpperCase(),cC.t,cC.b,'文字色');},280);}
               else if(chipTapCount>=3){clearTimeout(chipTapTimer);chipTapTimer=null;chipTapCount=0;applyHex('t',cC.t);applyHex('b',cC.b);showToast('プレビューに反映しました（コピーなし）');}
             });
@@ -1370,12 +1366,8 @@ function renderGroups() {
       addRowBtn.addEventListener('contextmenu',e=>e.preventDefault());
       (function(capturedRow,capturedGi,capturedRi){
      let rowAddPressTimer=null;
- // row+ボタンのpointerdown
-addRowBtn.addEventListener('pointerdown',(e)=>{
+  addRowBtn.addEventListener('pointerdown',(e)=>{
   e.stopPropagation();
-  // ← この2行を追加
-  if(longPressTimer){clearTimeout(longPressTimer);longPressTimer=null;}
-  longPressActive=false;longPressConsumed=false;
   rowAddPressTimer=setTimeout(()=>{rowAddPressTimer=null;openAddRowModal(capturedGi,capturedRi);},400);
 });
   addRowBtn.addEventListener('pointerup',(e)=>{
@@ -1700,7 +1692,7 @@ document.getElementById('addGroupNameInput').addEventListener('keydown',e=>{if(e
 // ============================================================
 //  Sync — GitHub Gist（LWW マージ）
 // ============================================================
-let syncConfig={token:'',gistId:''},pollTimer=null,lastEtag='',isSyncPushing=false,isPolling=false;
+let syncConfig={token:'',gistId:''},pollTimer=null,lastEtag='',isSyncPushing=false;
 
 function setSyncBadge(state,label,errorMsg){
   document.getElementById('syncBadge').className='sync-badge '+(state||'');
@@ -1891,11 +1883,10 @@ function clearSync(){
 function startPolling(){
   stopPolling();setSyncBadge('synced','同期中');
   pollTimer=setInterval(async()=>{
-    if(isSyncPushing||isPolling) return;
-    isPolling=true;
+    if(isSyncPushing) return;
     let data;
-    try{ data=await gistGet(); }catch(e){ setSyncBadge('error','エラー','通信エラー: '+e.message); isPolling=false; return; }
-    if(data===null){ isPolling=false; return; }
+    try{ data=await gistGet(); }catch(e){ setSyncBadge('error','エラー','通信エラー: '+e.message); return; }
+    if(data===null){ return; } // gistGet内でエラー表示済み
     updateLastEditInfo(data);
     if(data){
       const prevStr=JSON.stringify(groups)+'|'+JSON.stringify(pinColors);
@@ -1905,7 +1896,6 @@ function startPolling(){
       const newStr=JSON.stringify(groups)+'|'+JSON.stringify(pinColors);
       if(newStr!==prevStr){_lastRenderHash='';renderGroups();renderPinRow();}
     }
-    isPolling=false;
   },1000);
 }
 function stopPolling(){if(pollTimer){clearInterval(pollTimer);pollTimer=null;}}
@@ -2127,7 +2117,7 @@ document.getElementById('bHex').addEventListener('input',e=>{let v=normalizeHexI
 document.getElementById('tName').oninput=render;document.getElementById('bName').oninput=render;
 document.addEventListener('touchstart',e=>{const active=document.activeElement;if(active&&active!==e.target&&!active.contains(e.target)){if(active.tagName!=='INPUT'&&active.tagName!=='TEXTAREA'&&active.tagName!=='SELECT')active.blur();}},{passive:true});
 document.addEventListener('pointerdown', () => {
-  if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+  // ポインター開始時に必ずリセット（初回クリック不発防止）
 }, { passive: true });
 // ============================================================
 //  初期化
