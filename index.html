@@ -1583,14 +1583,33 @@ function mergeGroups(localGs,remoteGs){
   return merged;
 }
 // pushしていない（ローカルのみの）チップIDを追跡する
-let _localPendingChipIds=new Set();
-let _localPendingDividerIds=new Set();
-function _getPendingChipIds(){return _localPendingChipIds;}
-function _getPendingDividerIds(){return _localPendingDividerIds;}
-function _registerPendingChip(id){if(id)_localPendingChipIds.add(id);}
-function _registerPendingDivider(id){if(id)_localPendingDividerIds.add(id);}
-function _clearPendingAfterPush(){_localPendingChipIds=new Set();_localPendingDividerIds=new Set();}
-
+let _localPendingChipIds = (() => {
+  try { return new Set(JSON.parse(localStorage.getItem('cp_pending_chip_ids') || '[]')); } catch { return new Set(); }
+})();
+let _localPendingDividerIds = (() => {
+  try { return new Set(JSON.parse(localStorage.getItem('cp_pending_div_ids') || '[]')); } catch { return new Set(); }
+})();
+function _getPendingChipIds() { return _localPendingChipIds; }
+function _getPendingDividerIds() { return _localPendingDividerIds; }
+function _registerPendingChip(id) {
+  if (id) {
+    _localPendingChipIds.add(id);
+    localStorage.setItem('cp_pending_chip_ids', JSON.stringify([..._localPendingChipIds]));
+  }
+}
+function _registerPendingDivider(id) {
+  if (id) {
+    _localPendingDividerIds.add(id);
+    localStorage.setItem('cp_pending_div_ids', JSON.stringify([..._localPendingDividerIds]));
+  }
+}
+function _clearPendingAfterPush() {
+  _localPendingChipIds = new Set();
+  _localPendingDividerIds = new Set();
+  localStorage.removeItem('cp_pending_chip_ids');
+  localStorage.removeItem('cp_pending_div_ids');
+}
+  
 function mergePins(localPins,remotePins){
   if(!remotePins)return localPins;
   const remoteIds=new Set(remotePins.map(c=>c.id).filter(Boolean));
@@ -1628,34 +1647,38 @@ function startPolling(){
 }
 function stopPolling(){if(pollTimer){clearInterval(pollTimer);pollTimer=null;}}
 let syncPushDebounceTimer=null;
-let syncPushMaxTimer=null;  // ← 追加
+let syncPushMaxTimer=null;
+async function _doPush(){
+  if(isSyncPushing) return;
+  isSyncPushing=true;
+  try{
+    const remote=await gistGet();
+    if(remote&&remote!=='unchanged'){
+      if(remote.groups){groups=mergeGroups(groups,remote.groups);localStorage.setItem('cp_groups5',JSON.stringify(groups));renderGroups();}
+      if(remote.pin){pinColors=mergePins(pinColors,remote.pin);localStorage.setItem('cp_pin_row',JSON.stringify(pinColors));renderPinRow();}
+      if(remote.dividerColors){dividerColors=mergeDividerColors(dividerColors,remote.dividerColors);localStorage.setItem('cp_divider_colors',JSON.stringify(dividerColors));}
+    }
+    await gistPut(groups,pinColors,dividerColors);lastEtag='';_clearPendingAfterPush();
+  }catch(e){console.error('sync push error:',e);}
+  finally{isSyncPushing=false;}
+}
 function scheduleSyncPush(){
   if(!syncConfig.gistId||!syncConfig.token) return;
-
-  // 最大待機タイマー：最初の変更から3秒後には必ずpush
   if(!syncPushMaxTimer){
     syncPushMaxTimer=setTimeout(async()=>{
       syncPushMaxTimer=null;
       if(syncPushDebounceTimer){clearTimeout(syncPushDebounceTimer);syncPushDebounceTimer=null;}
-      if(isSyncPushing) return;
-      isSyncPushing=true;
-      try{await gistPut(groups,pinColors,dividerColors);lastEtag='';_clearPendingAfterPush();}catch(e){}
-      finally{isSyncPushing=false;}
+      await _doPush();
     },3000);
   }
-
-  // デバウンス：操作が止まってから800ms後にpush
   if(syncPushDebounceTimer) clearTimeout(syncPushDebounceTimer);
   syncPushDebounceTimer=setTimeout(async()=>{
     syncPushDebounceTimer=null;
     if(syncPushMaxTimer){clearTimeout(syncPushMaxTimer);syncPushMaxTimer=null;}
-    if(isSyncPushing) return;
-    isSyncPushing=true;
-    try{await gistPut(groups,pinColors,dividerColors);lastEtag='';_clearPendingAfterPush();}catch(e){}
-    finally{isSyncPushing=false;}
+    await _doPush();
   },800);
 }
-function updateSyncShareUrl(){if(!syncConfig.gistId)return;const url=location.href.split('?')[0]+'?gist='+syncConfig.gistId;document.getElementById('syncShareUrlRow').style.display='flex';document.getElementById('syncShareInput').value=url;}
+  function updateSyncShareUrl(){if(!syncConfig.gistId)return;const url=location.href.split('?')[0]+'?gist='+syncConfig.gistId;document.getElementById('syncShareUrlRow').style.display='flex';document.getElementById('syncShareInput').value=url;}
 function copySyncUrl(){navigator.clipboard.writeText(document.getElementById('syncShareInput').value);showToast('同期用URLをコピーしました');}
 
 // ============================================================
