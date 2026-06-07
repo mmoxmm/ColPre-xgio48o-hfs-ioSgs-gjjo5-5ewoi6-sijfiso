@@ -157,13 +157,11 @@ body.mode-edit .group-del-btn{display:block}
 .emoji-rows{padding:10px 12px;display:flex;flex-direction:column;gap:0}
 .emoji-row{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;border-radius:6px;transition:background .12s;padding:5px 0;}
 .emoji-row + .emoji-row{border-top:1px solid rgba(224,224,232,0.55);}
-/* 区切り行 */
 .divider-row{display:flex;align-items:center;gap:0;padding:7px 0;cursor:default;width:100%;position:relative;min-height:28px;}
 .divider-row + .emoji-row,.emoji-row + .divider-row,.divider-row + .divider-row{border-top:none;}
 .divider-line{flex:1;height:2px;border-radius:1px;background:var(--border);opacity:0.75;}
 .divider-label-wrap{flex-shrink:0;display:flex;align-items:center;gap:8px;padding:0 10px;}
 .divider-label{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;white-space:nowrap;flex-shrink:0;text-transform:uppercase;opacity:0.7;}
-/* 区切りアクション: absolute で右端に重ね置き → 線の左右対称を崩さない */
 .divider-actions{position:absolute;right:0;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:3px;opacity:0;pointer-events:none;transition:opacity .15s;background:var(--surface);padding-left:6px;}
 body.mode-edit .divider-actions{opacity:1;pointer-events:auto;}
 body.mode-edit .divider-row{cursor:grab;}
@@ -203,7 +201,6 @@ body.mode-lock .swatch-chip.locked{border-color:rgba(217,54,62,.4);box-shadow:0 
 #chipDragGhost{position:fixed;pointer-events:none;z-index:9998;opacity:.88;will-change:transform;transition:none;display:none}
 .emoji-add-btn{width:28px;height:28px;border-radius:50%;border:1.5px dashed var(--border);background:none;color:var(--muted);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;line-height:1;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;}
 @media(hover:hover){.emoji-add-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}}
-/* group-add-row: 左:新規登録 右:区切り */
 .group-add-row{padding:6px 12px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:6px;}
 .group-add-preset{display:flex;align-items:center;gap:5px;font-size:11px;font-family:'Syne',sans-serif;font-weight:600;color:var(--muted);cursor:pointer;background:none;border:none;transition:color .15s;padding:0;}
 @media(hover:hover){.group-add-preset:hover{color:var(--text)}}
@@ -311,7 +308,6 @@ body.mode-lock .swatch-chip.locked{border-color:rgba(217,54,62,.4);box-shadow:0 
 footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line-height:1.8}
 .divider-color-picker-row{display:flex;align-items:center;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:6px;}
 .divider-color-presets-row{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;min-height:28px;margin-bottom:8px;}
-/* 挿入位置ピッカー */
 .divider-pos-list{border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;max-height:230px;overflow-y:auto;background:var(--bg);}
 .divider-pos-slot{display:flex;align-items:center;justify-content:center;gap:7px;padding:7px 14px;cursor:pointer;font-family:'Syne',sans-serif;font-size:11px;font-weight:600;color:var(--muted);background:var(--surface);border-left:3px solid transparent;transition:background .12s,border-left-color .12s,color .12s;user-select:none;-webkit-tap-highlight-color:transparent;text-align:center;}
 .divider-pos-slot:hover{background:var(--accent-light);color:var(--accent);border-left-color:var(--accent-border);}
@@ -343,7 +339,7 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
     <div class="sync-note" id="syncNote">
       <a href="https://github.com/settings/tokens/new?scopes=gist&description=ColorPreview" target="_blank">① GitHubでgistスコープのトークンを作成</a> →
       ② 1人目が「接続/作成」→ 共有URLをコピーして相手に送る<br>
-      ⚠️ 同時編集対応: IDベースでマージします。同じチップを同時に編集した場合のみコンフリクトが発生します。
+      ⚠️ 同時編集対応: updatedAt によるLWW（Last-Write-Wins）マージを使用します。削除はトゥームストーンで伝搬します。
     </div>
     <div class="sync-share-url" id="syncShareUrlRow" style="display:none">
       <input type="text" class="sync-share-input" id="syncShareInput" readonly>
@@ -704,10 +700,67 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
 
 <script>
 const uid = () => Math.random().toString(36).slice(2, 9);
+const now = () => Date.now();
 
 // ============================================================
-//  データ定義・ロード（増殖バグ修正済み）
+//  ① データ定義・ロード — updatedAt / deleted を追加
 // ============================================================
+
+// チップオブジェクトを正規化（updatedAt / deleted を確保）
+function normalizeChip(c) {
+  if (typeof c === 'string') {
+    return { id: uid(), t: '#1a1a2e', b: c, locked: false, label: '', copyTarget: 'b', updatedAt: 0, deleted: false };
+  }
+  return {
+    id: (c.id && c.id !== 'undefined' && c.id !== 'null') ? c.id : uid(),
+    t: c.t || '#1a1a2e',
+    b: c.b || '#ffffff',
+    locked: !!c.locked,
+    label: c.label || '',
+    copyTarget: c.copyTarget || 'b',
+    updatedAt: c.updatedAt || 0,
+    deleted: !!c.deleted
+  };
+}
+
+// 行オブジェクトを正規化（updatedAt / deleted を確保）
+function normalizeRow(r) {
+  if (r.divider === true) {
+    const rid = (r.id && r.id !== 'undefined' && r.id !== 'null') ? r.id : ('div_' + uid());
+    return {
+      id: rid, key: r.key || '---', divider: true,
+      label: r.label || '', color: r.color || '', colors: [],
+      updatedAt: r.updatedAt || 0, deleted: !!r.deleted
+    };
+  }
+  return {
+    key: r.key || '?',
+    colors: (r.colors || []).map(normalizeChip),
+    updatedAt: r.updatedAt || 0, deleted: !!r.deleted
+  };
+}
+
+// グループオブジェクトを正規化
+function ensureIds(gs) {
+  return gs.map(g => {
+    const gid = (g.id && g.id !== 'undefined' && g.id !== 'null') ? g.id : ('grp_' + uid());
+    return {
+      id: gid,
+      name: g.name || '',
+      rows: (g.rows || []).map(normalizeRow),
+      updatedAt: g.updatedAt || 0,
+      deleted: !!g.deleted
+    };
+  });
+}
+
+const INJECTS = [
+  { key: '🐹', b: '#f9c89b' }, { key: '🥽', b: '#efea5a' },
+  { key: '🐸', b: '#eef1d0' }, { key: '🩰', b: '#ffe4e1' },
+  { key: '🐱', b: '#ffdab9' }, { key: '🐰', b: '#fff799' },
+  { key: '🎀', b: '#fff0f5' }
+];
+
 const DEFAULT_GROUPS = [
   { id: 'grp_night', name: '🌃', rows: [
     { key: '👓', colors: [] }, { key: '🐹', colors: [] }, { key: '🥽', colors: [] },
@@ -719,46 +772,15 @@ const DEFAULT_GROUPS = [
   ]}
 ];
 
-// IDが壊れているものだけ再生成。既存IDは絶対に変えない
-function ensureIds(gs) {
-  return gs.map(g => {
-    const gid = (g.id && g.id !== 'undefined' && g.id !== 'null') ? g.id : ('grp_' + uid());
-    return {
-      id: gid,
-      name: g.name || '',
-      rows: (g.rows || []).map(r => {
-        if (r.divider === true) {
-          const rid = (r.id && r.id !== 'undefined' && r.id !== 'null') ? r.id : ('div_' + uid());
-          return { id: rid, key: r.key || '---', divider: true, label: r.label || '', color: r.color || '', colors: [] };
-        }
-        return {
-          key: r.key || '?',
-          colors: (r.colors || []).map(c => {
-            if (typeof c === 'string') return { id: uid(), t: '#1a1a2e', b: c, locked: false, label: '', copyTarget: 'b' };
-            return { id: (c.id && c.id !== 'undefined' && c.id !== 'null') ? c.id : uid(), t: c.t || '#1a1a2e', b: c.b || '#ffffff', locked: !!c.locked, label: c.label || '', copyTarget: c.copyTarget || 'b' };
-          })
-        };
-      })
-    };
-  });
-}
-
-// injects: 初回のみ適用。既存データには一切触れない
-const INJECTS = [
-  { key: '🐹', b: '#f9c89b' }, { key: '🥽', b: '#efea5a' },
-  { key: '🐸', b: '#eef1d0' }, { key: '🩰', b: '#ffe4e1' },
-  { key: '🐱', b: '#ffdab9' }, { key: '🐰', b: '#fff799' },
-  { key: '🎀', b: '#fff0f5' }
-];
 function applyInjects(gs) {
   gs.forEach(group => {
     group.rows.forEach(row => {
-      if (row.divider) return;
+      if (row.divider || row.deleted) return;
       const target = INJECTS.find(i => i.key === row.key);
       if (!target) return;
       const bLower = target.b.toLowerCase();
       if (!row.colors.some(c => c.b && c.b.toLowerCase() === bLower)) {
-        row.colors.push({ id: uid(), t: '#1a1a2e', b: target.b, locked: false, label: '', copyTarget: 'b' });
+        row.colors.push({ id: uid(), t: '#1a1a2e', b: target.b, locked: false, label: '', copyTarget: 'b', updatedAt: 0, deleted: false });
       }
     });
   });
@@ -770,10 +792,8 @@ let groups = (() => {
   try {
     const d = localStorage.getItem('cp_groups5') || localStorage.getItem('cp_groups_v7') || localStorage.getItem('cp_groups');
     if (d) {
-      // 既存データ: ensureIdsのみ。injectは一切しない（増殖防止）
       g = ensureIds(JSON.parse(d));
     } else {
-      // 初回: デフォルト + inject
       g = ensureIds(DEFAULT_GROUPS);
       applyInjects(g);
       localStorage.setItem('cp_groups5', JSON.stringify(g));
@@ -791,7 +811,7 @@ let groups = (() => {
 let pinColors = (() => {
   try {
     const d = localStorage.getItem('cp_pin_row');
-    if (d) return JSON.parse(d).map(c => ({ id: (c.id && c.id !== 'undefined') ? c.id : uid(), t: c.t || '#1a1a2e', b: c.b || '#ffffff', locked: !!c.locked, label: c.label || '', copyTarget: c.copyTarget || 'b' }));
+    if (d) return JSON.parse(d).map(normalizeChip);
   } catch(e) {}
   return [];
 })();
@@ -810,7 +830,7 @@ function applyMigrations() {
     if (nightGroup) {
       const desired = ['👓', '🐹', '🥽', '🕶️', '🐸', '🩰'];
       const rowMap = new Map(nightGroup.rows.filter(r => !r.divider).map(r => [r.key, r]));
-      const newRows = desired.map(key => rowMap.get(key) || { key, colors: [] });
+      const newRows = desired.map(key => rowMap.get(key) || { key, colors: [], updatedAt: 0, deleted: false });
       nightGroup.rows.filter(r => !r.divider && !desired.includes(r.key)).forEach(r => newRows.push(r));
       nightGroup.rows.filter(r => r.divider).forEach(r => newRows.push(r));
       nightGroup.rows = newRows;
@@ -887,15 +907,35 @@ function applyChipLabelStyle(inner, label) {
 // ============================================================
 //  チップ移動
 // ============================================================
+// レンダリング用インデックス（deleted除外後）→ データ配列上の実インデックスに変換
+function resolveChipDataIndex(colors, renderIndex) {
+  let count = -1;
+  for (let i = 0; i < colors.length; i++) {
+    if (!colors[i].deleted) count++;
+    if (count === renderIndex) return i;
+  }
+  return -1;
+}
+
 function doMoveChip(src, dst) {
   function getRow(info) { return info.type==='pin' ? pinColors : groups[info.gi].rows[info.ri].colors; }
-  const srcRow = getRow(src); const [moved] = srcRow.splice(src.ci, 1); let dstCi = dst.ci;
-  if (dst.position !== 'append' && dst.type === src.type) {
-    if (dst.type === 'group' && src.gi===dst.gi && src.ri===dst.ri && src.ci<dst.ci) dstCi--;
-    if (dst.type === 'pin' && src.ci<dst.ci) dstCi--;
+  const srcRow = getRow(src);
+  const srcDataIdx = resolveChipDataIndex(srcRow, src.ci);
+  if (srcDataIdx < 0) return;
+  const [moved] = srcRow.splice(srcDataIdx, 1);
+  moved.updatedAt = now();
+
+  if (dst.position === 'append') {
+    if (dst.type==='pin') pinColors.push(moved);
+    else groups[dst.gi].rows[dst.ri].colors.push(moved);
+  } else {
+    const dstRow = dst.type==='pin' ? pinColors : groups[dst.gi].rows[dst.ri].colors;
+    let dstDataIdx = resolveChipDataIndex(dstRow, dst.ci);
+    if (dstDataIdx < 0) dstDataIdx = dstRow.length;
+    let insertIdx = dstDataIdx;
+    if (dst.position === 'after') insertIdx++;
+    dstRow.splice(Math.max(0, insertIdx), 0, moved);
   }
-  if (dst.position === 'append') { if (dst.type==='pin') pinColors.push(moved); else groups[dst.gi].rows[dst.ri].colors.push(moved); }
-  else { const dstRow = dst.type==='pin' ? pinColors : groups[dst.gi].rows[dst.ri].colors; let idx=dstCi; if(dst.position==='after') idx++; dstRow.splice(Math.max(0,idx),0,moved); }
   saveGroups(); savePinColors(); renderGroups(); renderPinRow();
 }
 
@@ -917,17 +957,14 @@ function setupGroupHeaderPointerDnD(hdr, block, gi) {
     if (e.button!==0 && e.pointerType!=='touch') return;
     if (e.target.closest('.group-del-btn')) return;
     e.preventDefault();
-    // フォーカス中の編集要素があればblurしてキャプチャを確保
-    if (document.activeElement && document.activeElement !== document.body) {
-      document.activeElement.blur();
-    }
+    if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur();
     grpDragSrc={groupId:srcGroupId,block,hdr,startX:e.clientX,startY:e.clientY};
     grpDragActive=false; grpDragOverGi=null; grpDropInsertBefore=true; grpPointerId=e.pointerId;
     try{hdr.setPointerCapture(e.pointerId);}catch(_){}
   });
   hdr.addEventListener('pointermove', e => {
     if (grpPointerId===null||e.pointerId!==grpPointerId||!grpDragSrc) return;
-    e.preventDefault(); // スクロールによるpointercancelを防ぐ
+    e.preventDefault();
     const dx=e.clientX-grpDragSrc.startX,dy=e.clientY-grpDragSrc.startY;
     if (!grpDragActive&&Math.sqrt(dx*dx+dy*dy)>6) {
       grpDragActive=true; grpDragSrc.block.classList.add('group-dragging'); grpDragSrc.hdr.classList.add('is-grabbing');
@@ -1073,10 +1110,18 @@ function setupChipPointerDnD(chip, c, srcInfo) {
       if (swapSelected===null) { swapSelected={...src,_key:tapKey}; renderGroups(); renderPinRow(); showToast('入れ替え先のチップをタップ（同じチップでキャンセル）'); }
       else if (swapSelected._key===tapKey) { swapSelected=null; renderGroups(); renderPinRow(); }
       else {
-        function getCell(info){return info.type==='pin'?pinColors:groups[info.gi].rows[info.ri].colors;}
-        const rowA=getCell(swapSelected),rowB=getCell(src);
-        if (!rowA||!rowB||swapSelected.ci>=rowA.length||src.ci>=rowB.length){swapSelected=null;renderGroups();renderPinRow();return;}
-        const tmp=rowA[swapSelected.ci]; rowA[swapSelected.ci]=rowB[src.ci]; rowB[src.ci]=tmp;
+        function getCell(info){
+          const colors = info.type==='pin' ? pinColors : groups[info.gi].rows[info.ri].colors;
+          const dataIdx = resolveChipDataIndex(colors, info.ci);
+          return { colors, dataIdx };
+        }
+        const a=getCell(swapSelected),b2=getCell(src);
+        if (a.dataIdx<0||b2.dataIdx<0){swapSelected=null;renderGroups();renderPinRow();return;}
+        const tmp=a.colors[a.dataIdx];
+        a.colors[a.dataIdx]=b2.colors[b2.dataIdx];
+        b2.colors[b2.dataIdx]=tmp;
+        a.colors[a.dataIdx].updatedAt = now();
+        b2.colors[b2.dataIdx].updatedAt = now();
         swapSelected=null; saveGroups(); savePinColors(); renderGroups(); renderPinRow(); showToast('2色を入れ替えました ↔');
       }
     }
@@ -1085,11 +1130,15 @@ function setupChipPointerDnD(chip, c, srcInfo) {
 }
 
 // ============================================================
-//  ピン行レンダリング
+//  ピン行レンダリング（deleted チップをスキップ）
 // ============================================================
 function renderPinRow() {
   const container=document.getElementById('pinRowInner'); const frag=document.createDocumentFragment(); container.dataset.type='pin';
-  pinColors.forEach((c,ci) => {
+  // renderIndex = deleted を除いた連番
+  let renderIndex = 0;
+  pinColors.forEach((c) => {
+    if (c.deleted) return; // ② トゥームストーンをスキップ
+    const ci = renderIndex++;
     const chip=document.createElement('div'); chip.className='pin-chip'; chip.dataset.type='pin'; chip.dataset.ci=ci;
     if(c.locked) chip.classList.add('locked');
     if(appMode==='edit'&&swapSelected&&swapSelected.type==='pin'&&swapSelected.ci===ci){chip.classList.add('selected-for-swap');chip.style.setProperty('--chip-sel-color',c.t||'#1a1a2e');}
@@ -1108,7 +1157,7 @@ function renderPinRow() {
         chip.addEventListener('pointercancel',()=>{if(longPressTimer){clearTimeout(longPressTimer);longPressTimer=null;}longPressActive=false;longPressConsumed=false;});
         chip.addEventListener('click',e=>{
           e.stopPropagation();
-          if(appMode==='lock'){cC.locked=!cC.locked;chip.classList.toggle('locked',cC.locked);showToast(cC.locked?'🔒 ロックしました':'🔓 解除しました');updateTooltip();return;}
+          if(appMode==='lock'){cC.locked=!cC.locked;cC.updatedAt=now();chip.classList.toggle('locked',cC.locked);showToast(cC.locked?'🔒 ロックしました':'🔓 解除しました');updateTooltip();return;}
           if(longPressActive||longPressConsumed){longPressActive=false;longPressConsumed=false;return;}
           chipTapCount++;
           if(chipTapCount===1){chipTapTimer=setTimeout(()=>{chipTapCount=0;applyHex('t',cC.t);applyHex('b',cC.b);copyText(cC.b.toUpperCase());showColorToast(cC.b.toUpperCase(),cC.b,cC.t,'背景色');},280);}
@@ -1125,23 +1174,29 @@ function renderPinRow() {
   addBtn.addEventListener('pointerdown',()=>{pinAddLongPress=false;pinAddPressTimer=setTimeout(()=>{pinAddLongPress=true;pinAddPressTimer=null;openAddModalForPin();},400);});
   addBtn.addEventListener('pointerup',()=>{if(pinAddPressTimer){clearTimeout(pinAddPressTimer);pinAddPressTimer=null;}});
   addBtn.addEventListener('pointercancel',()=>{if(pinAddPressTimer){clearTimeout(pinAddPressTimer);pinAddPressTimer=null;}pinAddLongPress=false;});
-  addBtn.addEventListener('click',()=>{if(pinAddLongPress){pinAddLongPress=false;return;}const t=document.getElementById('tHex').value,b=document.getElementById('bHex').value;const _iid=uid();pinColors.push({id:_iid,t,b,locked:false,label:'',copyTarget:'b'});_registerPendingChip(_iid);savePinColors();renderPinRow();});
+  addBtn.addEventListener('click',()=>{
+    if(pinAddLongPress){pinAddLongPress=false;return;}
+    const t=document.getElementById('tHex').value,b=document.getElementById('bHex').value;
+    pinColors.push({id:uid(),t,b,locked:false,label:'',copyTarget:'b',updatedAt:now(),deleted:false});
+    savePinColors();renderPinRow();
+  });
   frag.append(addBtn); container.replaceChildren(frag);
   if(window._scheduleTwemoji) window._scheduleTwemoji();
 }
 
 // ============================================================
-//  グループレンダリング
+//  グループレンダリング（deleted チップ・行をスキップ）
 // ============================================================
 function renderGroups() {
   const el=document.getElementById('groupsList'); const frag=document.createDocumentFragment();
   groups.forEach((g,gi) => {
+    if(g.deleted) return; // deleted グループはスキップ
     if(!g.id||g.id==='undefined') g.id=uid();
     const block=document.createElement('div'); block.className='group-block'; block.dataset.groupId=g.id;
     const hdr=document.createElement('div'); hdr.className='group-header';
     const nameEl=document.createElement('div'); nameEl.className='group-name-display'; nameEl.contentEditable=appMode==='edit'?'false':'true'; nameEl.spellcheck=false; nameEl.textContent=g.name;
     if(appMode!=='edit'){
-      nameEl.addEventListener('input',()=>{g.name=nameEl.textContent.trim()||g.name;saveGroups();});
+      nameEl.addEventListener('input',()=>{g.name=nameEl.textContent.trim()||g.name;g.updatedAt=now();saveGroups();});
       nameEl.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();nameEl.blur();}if(e.key==='Escape'){nameEl.textContent=g.name;nameEl.blur();}});
       nameEl.addEventListener('blur',()=>{const v=nameEl.textContent.trim();if(v) g.name=v;else nameEl.textContent=g.name;saveGroups();});
     }
@@ -1153,10 +1208,14 @@ function renderGroups() {
     if(appMode==='edit') setupGroupHeaderPointerDnD(hdr,block,gi);
 
     const rowsEl=document.createElement('div'); rowsEl.className='emoji-rows';
+    let rowRenderIndex = 0;
     g.rows.forEach((row,ri) => {
+      if(row.deleted) return; // deleted 行はスキップ
+      const currentRi = ri; // データ上の実インデックス
+
       // 区切り行
       if(row.divider===true){
-        const divEl=document.createElement('div'); divEl.className='divider-row'; divEl.dataset.gi=gi; divEl.dataset.ri=ri;
+        const divEl=document.createElement('div'); divEl.className='divider-row'; divEl.dataset.gi=gi; divEl.dataset.ri=currentRi;
         const lineColor=row.color||'';
         if(row.label){
           const lineL=document.createElement('div'); lineL.className='divider-line'; if(lineColor){lineL.style.background=lineColor;lineL.style.opacity='0.8';}
@@ -1167,7 +1226,8 @@ function renderGroups() {
           const actions=document.createElement('div'); actions.className='divider-actions';
           const delBtn2=document.createElement('button'); delBtn2.className='divider-del-btn'; delBtn2.title='区切りを削除'; delBtn2.textContent='×';
           delBtn2.addEventListener('pointerdown',e=>{e.stopPropagation();});
-          (function(cGi,cRi){delBtn2.addEventListener('click',e=>{e.stopPropagation();groups[cGi].rows.splice(cRi,1);saveGroups();renderGroups();showToast('区切りを削除しました');});})(gi,ri);
+          // ② 区切り行削除: deleted:true に変更
+          (function(cGi,cRi){delBtn2.addEventListener('click',e=>{e.stopPropagation();groups[cGi].rows[cRi].deleted=true;groups[cGi].rows[cRi].updatedAt=now();saveGroups();renderGroups();showToast('区切りを削除しました');});})(gi,currentRi);
           const handle=document.createElement('span'); handle.className='divider-drag-handle'; handle.textContent='⠿';
           actions.append(delBtn2,handle); divEl.append(lineL,labelWrap,lineR,actions);
         } else {
@@ -1175,37 +1235,42 @@ function renderGroups() {
           const actions=document.createElement('div'); actions.className='divider-actions';
           const delBtn2=document.createElement('button'); delBtn2.className='divider-del-btn'; delBtn2.title='区切りを削除'; delBtn2.textContent='×';
           delBtn2.addEventListener('pointerdown',e=>{e.stopPropagation();});
-          (function(cGi,cRi){delBtn2.addEventListener('click',e=>{e.stopPropagation();groups[cGi].rows.splice(cRi,1);saveGroups();renderGroups();showToast('区切りを削除しました');});})(gi,ri);
+          (function(cGi,cRi){delBtn2.addEventListener('click',e=>{e.stopPropagation();groups[cGi].rows[cRi].deleted=true;groups[cGi].rows[cRi].updatedAt=now();saveGroups();renderGroups();showToast('区切りを削除しました');});})(gi,currentRi);
           const handle=document.createElement('span'); handle.className='divider-drag-handle'; handle.textContent='⠿';
           actions.append(delBtn2,handle); divEl.append(lineOnly,actions);
         }
-        if(appMode==='edit') setupRowKeyPointerDnD(divEl,divEl,gi,ri);
-        rowsEl.append(divEl); return;
+        if(appMode==='edit') setupRowKeyPointerDnD(divEl,divEl,gi,currentRi);
+        rowsEl.append(divEl); rowRenderIndex++; return;
       }
 
       // 通常行
-      const rowEl=document.createElement('div'); rowEl.className='emoji-row'; rowEl.dataset.gi=gi; rowEl.dataset.ri=ri;
+      const rowEl=document.createElement('div'); rowEl.className='emoji-row'; rowEl.dataset.gi=gi; rowEl.dataset.ri=currentRi;
       const keySpan=document.createElement('span'); keySpan.className='emoji-key'; keySpan.textContent=row.key;
-      if(appMode==='edit'){setupRowKeyPointerDnD(keySpan,rowEl,gi,ri);}
+      if(appMode==='edit'){setupRowKeyPointerDnD(keySpan,rowEl,gi,currentRi);}
       else {
         let keyTapCount=0,keyTapTimer=null;
         (function(cGi,cRi){
           keySpan.addEventListener('click',()=>{keyTapCount++;if(keyTapCount===1){keyTapTimer=setTimeout(()=>{keyTapCount=0;},350);}else if(keyTapCount>=2){clearTimeout(keyTapTimer);keyTapCount=0;openEditRowModal(cGi,cRi);}});
-          let lastTouch=0; keySpan.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTouch<350){e.preventDefault();openEditRowModal(cGi,cRi);}lastTouch=now;});
-        })(gi,ri);
+          let lastTouch=0; keySpan.addEventListener('touchend',e=>{const nowt=Date.now();if(nowt-lastTouch<350){e.preventDefault();openEditRowModal(cGi,cRi);}lastTouch=nowt;});
+        })(gi,currentRi);
       }
       rowEl.append(keySpan);
-      const swatchesEl=document.createElement('div'); swatchesEl.className='emoji-swatches'; swatchesEl.dataset.gi=gi; swatchesEl.dataset.ri=ri;
-      row.colors.forEach((c,ci)=>{
-        const chip=document.createElement('div'); chip.className='swatch-chip'; chip.dataset.gi=gi; chip.dataset.ri=ri; chip.dataset.ci=ci;
+      const swatchesEl=document.createElement('div'); swatchesEl.className='emoji-swatches'; swatchesEl.dataset.gi=gi; swatchesEl.dataset.ri=currentRi;
+
+      // deleted チップをスキップして renderIndex を付与
+      let chipRenderIndex = 0;
+      row.colors.forEach((c) => {
+        if(c.deleted) return; // ② トゥームストーンをスキップ
+        const ci = chipRenderIndex++;
+        const chip=document.createElement('div'); chip.className='swatch-chip'; chip.dataset.gi=gi; chip.dataset.ri=currentRi; chip.dataset.ci=ci;
         if(c.locked) chip.classList.add('locked');
-        if(appMode==='edit'&&swapSelected&&swapSelected.type==='group'&&swapSelected.gi===gi&&swapSelected.ri===ri&&swapSelected.ci===ci){chip.classList.add('selected-for-swap');chip.style.setProperty('--chip-sel-color',c.t||'#1a1a2e');}
+        if(appMode==='edit'&&swapSelected&&swapSelected.type==='group'&&swapSelected.gi===gi&&swapSelected.ri===currentRi&&swapSelected.ci===ci){chip.classList.add('selected-for-swap');chip.style.setProperty('--chip-sel-color',c.t||'#1a1a2e');}
         const inner=document.createElement('div'); inner.className='swatch-chip-inner'; inner.style.background=c.b; inner.style.color=c.t;
         const label=getChipLabel(c); inner.textContent=label; applyChipLabelStyle(inner,label);
         const tt=document.createElement('div'); tt.className='swatch-chip-tooltip';
         const updateTooltip=()=>{if(appMode==='lock') tt.textContent=c.locked?'🔓 タップで解除':'🔒 タップでロック'; else tt.textContent='';};
         updateTooltip(); chip.addEventListener('mouseenter',updateTooltip); chip.append(inner,tt);
-        if(appMode==='edit'){chip.style.touchAction='none';setupChipPointerDnD(chip,c,{type:'group',gi,ri,ci});}
+        if(appMode==='edit'){chip.style.touchAction='none';setupChipPointerDnD(chip,c,{type:'group',gi,ri:currentRi,ci});}
         else {
           chip.addEventListener('touchstart',()=>{if(document.activeElement&&document.activeElement!==chip)document.activeElement.blur();},{passive:true});
           let chipTapCount=0,chipTapTimer=null;
@@ -1215,14 +1280,14 @@ function renderGroups() {
             chip.addEventListener('pointercancel',()=>{if(longPressTimer){clearTimeout(longPressTimer);longPressTimer=null;}longPressActive=false;longPressConsumed=false;});
             chip.addEventListener('click',e=>{
               e.stopPropagation();
-              if(appMode==='lock'){cC.locked=!cC.locked;chip.classList.toggle('locked',cC.locked);showToast(cC.locked?'🔒 ロックしました':'🔓 解除しました');updateTooltip();return;}
+              if(appMode==='lock'){cC.locked=!cC.locked;cC.updatedAt=now();chip.classList.toggle('locked',cC.locked);showToast(cC.locked?'🔒 ロックしました':'🔓 解除しました');updateTooltip();return;}
               if(longPressActive||longPressConsumed){longPressActive=false;longPressConsumed=false;return;}
               chipTapCount++;
               if(chipTapCount===1){chipTapTimer=setTimeout(()=>{chipTapCount=0;applyHex('t',cC.t);applyHex('b',cC.b);copyText(cC.b.toUpperCase());showColorToast(cC.b.toUpperCase(),cC.b,cC.t,'背景色');},280);}
               else if(chipTapCount===2){clearTimeout(chipTapTimer);chipTapTimer=setTimeout(()=>{chipTapCount=0;applyHex('t',cC.t);applyHex('b',cC.b);copyText(cC.t.toUpperCase());showColorToast(cC.t.toUpperCase(),cC.t,cC.b,'文字色');},280);}
               else if(chipTapCount>=3){clearTimeout(chipTapTimer);chipTapTimer=null;chipTapCount=0;applyHex('t',cC.t);applyHex('b',cC.b);showToast('プレビューに反映しました（コピーなし）');}
             });
-          })(c,gi,ri,ci);
+          })(c,gi,currentRi,ci);
         }
         chip.addEventListener('contextmenu',e=>e.preventDefault()); swatchesEl.append(chip);
       });
@@ -1233,12 +1298,17 @@ function renderGroups() {
         addRowBtn.addEventListener('pointerdown',()=>{rowAddLongPress=false;rowAddPressTimer=setTimeout(()=>{rowAddLongPress=true;rowAddPressTimer=null;openAddRowModal(capturedGi,capturedRi);},400);});
         addRowBtn.addEventListener('pointerup',()=>{if(rowAddPressTimer){clearTimeout(rowAddPressTimer);rowAddPressTimer=null;}});
         addRowBtn.addEventListener('pointercancel',()=>{if(rowAddPressTimer){clearTimeout(rowAddPressTimer);rowAddPressTimer=null;}rowAddLongPress=false;});
-        addRowBtn.addEventListener('click',()=>{if(rowAddLongPress){rowAddLongPress=false;return;}const t=document.getElementById('tHex').value,b=document.getElementById('bHex').value;const _cid=uid();capturedRow.colors.push({id:_cid,t,b,locked:false,label:'',copyTarget:'b'});_registerPendingChip(_cid);saveGroups();renderGroups();});
-      })(row,gi,ri);
+        addRowBtn.addEventListener('click',()=>{
+          if(rowAddLongPress){rowAddLongPress=false;return;}
+          const t=document.getElementById('tHex').value,b=document.getElementById('bHex').value;
+          capturedRow.colors.push({id:uid(),t,b,locked:false,label:'',copyTarget:'b',updatedAt:now(),deleted:false});
+          saveGroups();renderGroups();
+        });
+      })(row,gi,currentRi);
       swatchesEl.append(addRowBtn); rowEl.append(swatchesEl); rowsEl.append(rowEl);
+      rowRenderIndex++;
     });
     block.append(rowsEl);
-    // 下部: 左=新規登録 右=区切り
     const addRow=document.createElement('div'); addRow.className='group-add-row';
     const addBtn2=document.createElement('button'); addBtn2.className='group-add-preset'; addBtn2.innerHTML='＋&thinsp;新規登録…';
     (function(cGi){addBtn2.onclick=()=>openAddModal(cGi);})(gi);
@@ -1265,7 +1335,7 @@ function openAddModal(gi){
   document.getElementById('modalInfo').innerHTML=`${t}&nbsp;/&nbsp;${b}`;
   const chip=document.getElementById('modalChipPreview');chip.style.background=b;chip.style.color=t;chip.textContent='Aa';chip.style.fontSize='13px';
   document.getElementById('addLabel').value='';document.getElementById('modalKeyInput').value='';
-  const sel=document.getElementById('modalGroup');sel.innerHTML=groups.map((g,i)=>`<option value="${i}">${g.name}</option>`).join('');sel.value=modalTargetGi;
+  const sel=document.getElementById('modalGroup');sel.innerHTML=groups.filter(g=>!g.deleted).map((g,i)=>`<option value="${groups.indexOf(g)}">${g.name}</option>`).join('');sel.value=modalTargetGi;
   document.getElementById('modalGroupField').style.display='';document.getElementById('modalKeyField').style.display='';
   document.getElementById('addModal').style.display='flex';setTimeout(()=>document.getElementById('modalKeyInput').focus(),60);
 }
@@ -1290,11 +1360,14 @@ function closeModal(){document.getElementById('addModal').style.display='none';}
 function confirmAdd(){
   const t=document.getElementById('tHex').value,b=document.getElementById('bHex').value;
   const label=document.getElementById('addLabel').value.trim();
-  if(modalTargetPin){const _pid=uid();pinColors.push({id:_pid,t,b,locked:false,label,copyTarget:'b'});_registerPendingChip(_pid);savePinColors();renderPinRow();closeModal();return;}
+  if(modalTargetPin){
+    pinColors.push({id:uid(),t,b,locked:false,label,copyTarget:'b',updatedAt:now(),deleted:false});
+    savePinColors();renderPinRow();closeModal();return;
+  }
   const keyInput=document.getElementById('modalKeyInput').value.trim();const key=keyInput||'⭐';
-  let row=groups[modalTargetGi].rows.find(r=>!r.divider&&r.key===key);
-  if(!row){row={key,colors:[]};groups[modalTargetGi].rows.push(row);}
-  const _gid=uid();row.colors.push({id:_gid,t,b,locked:false,label,copyTarget:'b'});_registerPendingChip(_gid);
+  let row=groups[modalTargetGi].rows.find(r=>!r.divider&&!r.deleted&&r.key===key);
+  if(!row){row={key,colors:[],updatedAt:now(),deleted:false};groups[modalTargetGi].rows.push(row);}
+  row.colors.push({id:uid(),t,b,locked:false,label,copyTarget:'b',updatedAt:now(),deleted:false});
   saveGroups();renderGroups();closeModal();
 }
 
@@ -1320,7 +1393,7 @@ function openAddRowModal(gi,ri){
 function buildRowKeyGrid(gi,activeRi){
   const grid=document.getElementById('rowKeyGrid');grid.innerHTML='';
   groups[gi].rows.forEach((row,ri)=>{
-    if(row.divider) return;
+    if(row.divider||row.deleted) return;
     const btn=document.createElement('button');btn.className='row-key-grid-btn';if(ri===activeRi) btn.classList.add('selected');btn.textContent=row.key;
     btn.addEventListener('click',()=>{addRowTargetRi=ri;grid.querySelectorAll('.row-key-grid-btn').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');document.getElementById('rowKeyDisplayEmoji').textContent=row.key;document.getElementById('rowKeyDisplayLabel').textContent='この行に追加';document.getElementById('rowKeyAllPanel').classList.remove('open');document.getElementById('rowKeyDisplayHint').textContent='▼ タップで切り替え';addRowAllKeyShown=false;});
     grid.append(btn);
@@ -1340,7 +1413,7 @@ function confirmAddRow(){
   const label=document.getElementById('addRowLabel').value.trim();
   const targetRow=groups[addRowTargetGi].rows[addRowTargetRi];
   if(!targetRow||targetRow.divider){showToast('行が見つかりません');closeAddRowModal();return;}
-  const _rid=uid();targetRow.colors.push({id:_rid,t,b,locked:false,label,copyTarget:'b'});_registerPendingChip(_rid);
+  targetRow.colors.push({id:uid(),t,b,locked:false,label,copyTarget:'b',updatedAt:now(),deleted:false});
   saveGroups();renderGroups();closeAddRowModal();
 }
 
@@ -1349,15 +1422,22 @@ function confirmAddRow(){
 // ============================================================
 let editGi,editRi;
 function openEditRowModal(gi,ri){editGi=gi;editRi=ri;document.getElementById('editRowInput').value=groups[gi].rows[ri].key;document.getElementById('editRowModal').style.display='flex';setTimeout(()=>document.getElementById('editRowInput').focus(),50);}
-function saveEditRow(){const val=document.getElementById('editRowInput').value.trim();if(val) groups[editGi].rows[editRi].key=val;saveGroups();renderGroups();closeEditRowModal();}
+function saveEditRow(){const val=document.getElementById('editRowInput').value.trim();if(val){groups[editGi].rows[editRi].key=val;groups[editGi].rows[editRi].updatedAt=now();}saveGroups();renderGroups();closeEditRowModal();}
 function deleteEditRow(){
-  // confirm()はiPad/WKWebViewで動作しないため、モーダル内で確認UIを表示
   const btns=document.getElementById('editRowModalBtns');
   const confirmArea=document.getElementById('editRowDeleteConfirm');
   btns.style.display='none';
   confirmArea.style.display='flex';
 }
-function confirmDeleteRow(){groups[editGi].rows.splice(editRi,1);saveGroups();renderGroups();closeEditRowModal();}
+// ② 行削除: deleted:true に変更（含まれるチップも deleted:true に）
+function confirmDeleteRow(){
+  const row=groups[editGi].rows[editRi];
+  const ts = now();
+  row.deleted=true; row.updatedAt=ts;
+  // 行内のチップも tombstone
+  row.colors.forEach(c=>{ c.deleted=true; c.updatedAt=ts; });
+  saveGroups();renderGroups();closeEditRowModal();
+}
 function cancelDeleteRow(){document.getElementById('editRowModalBtns').style.display='';document.getElementById('editRowDeleteConfirm').style.display='none';}
 function closeEditRowModal(){document.getElementById('editRowModal').style.display='none';cancelDeleteRow();}
 document.getElementById('editRowInput').addEventListener('keydown',e=>{if(e.key==='Enter') saveEditRow();if(e.key==='Escape') closeEditRowModal();});
@@ -1365,10 +1445,13 @@ document.getElementById('editRowInput').addEventListener('keydown',e=>{if(e.key=
 // ============================================================
 //  長押し編集モーダル
 // ============================================================
-function getLpChipByIndex(chipType,gi,ri,ci){
-  if(chipType==='pin') return (ci>=0&&ci<pinColors.length)?pinColors[ci]:null;
-  const g=groups[gi];if(!g) return null;const r=g.rows[ri];if(!r) return null;
-  return (ci>=0&&ci<r.colors.length)?r.colors[ci]:null;
+// renderIndex → データ配列上の実チップを取得
+function getLpChipByRenderIndex(chipType,gi,ri,renderCi){
+  let colors;
+  if(chipType==='pin') colors=pinColors;
+  else {const g=groups[gi];if(!g) return null;const r=g.rows[ri];if(!r) return null;colors=r.colors;}
+  const dataIdx=resolveChipDataIndex(colors,renderCi);
+  return dataIdx>=0?colors[dataIdx]:null;
 }
 function lpUpdateCanvas(){
   const bVal=document.getElementById('lpBHex').value,tVal=document.getElementById('lpTHex').value;
@@ -1391,7 +1474,7 @@ function updateLpOverwriteBtn(){
   const ok=validHex(bVal)&&validHex(tVal);btn.disabled=!ok;
   if(ok){
     btn.style.background=bVal;btn.style.color=tVal;btn.style.borderColor='rgba(0,0,0,.08)';
-    label.textContent='変更前後を確認して上書き保存';  // ← ラベル変更
+    label.textContent='変更前後を確認して上書き保存';
   }else{
     btn.style.background='var(--surface2)';btn.style.color='var(--muted)';btn.style.borderColor='var(--border)';
     label.textContent='有効なHEXを入力してください';
@@ -1454,52 +1537,46 @@ function lpSaveSettings(){
   const tVal=document.getElementById('lpTHex').value;
   const {ci, chipType, gi, ri, tempUnlocked}=lpTarget;
   const isLocked=lpTarget.c.locked&&!tempUnlocked;
-
-  // --- データを先に確定させてからモーダルを閉じる ---
-  if(chipType==='pin'){
-    if(ci>=0&&ci<pinColors.length){
-      pinColors[ci].label=newLabel;
-      if(!isLocked&&validHex(bVal)&&validHex(tVal)){
-        pinColors[ci].b=bVal;
-        pinColors[ci].t=tVal;
-      }
+  const chip = getLpChipByRenderIndex(chipType,gi,ri,ci);
+  if(chip){
+    chip.label=newLabel;
+    if(!isLocked&&validHex(bVal)&&validHex(tVal)){
+      chip.b=bVal; chip.t=tVal;
     }
-  } else if(chipType==='group'){
-    const row=groups[gi]&&groups[gi].rows[ri];
-    if(row&&!row.divider&&ci>=0&&ci<row.colors.length){
-      row.colors[ci].label=newLabel;
-      if(!isLocked&&validHex(bVal)&&validHex(tVal)){
-        row.colors[ci].b=bVal;
-        row.colors[ci].t=tVal;
-      }
-    }
+    chip.updatedAt=now();
   }
-
-  // --- データ確定後にモーダルを閉じて保存・再描画 ---
-  lpTarget=null;
-  longPressActive=false;
-  longPressConsumed=false;
+  lpTarget=null; longPressActive=false; longPressConsumed=false;
   document.getElementById('longPressEditModal').style.display='none';
-
   if(chipType==='pin'){savePinColors();renderPinRow();}
   else{saveGroups();renderGroups();}
   showToast('設定を保存しました ✓');
 }
-  function lpDelete(){
+function lpDelete(){
   if(!lpTarget) return;
   if(lpTarget.c.locked){showToast('🔒 ロックされているため削除できません。先にロックを解除してください。');return;}
   const {gi,ri,ci,chipType}=lpTarget;closeLpModal();
-  if(chipType==='pin'){if(ci>=0&&ci<pinColors.length)pinColors.splice(ci,1);savePinColors();renderPinRow();}
-  else{const row=groups[gi]&&groups[gi].rows[ri];if(row&&!row.divider&&ci>=0&&ci<row.colors.length)row.colors.splice(ci,1);saveGroups();renderGroups();}
+  // ② チップ削除: deleted:true に変更
+  if(chipType==='pin'){
+    const dataIdx=resolveChipDataIndex(pinColors,ci);
+    if(dataIdx>=0){pinColors[dataIdx].deleted=true;pinColors[dataIdx].updatedAt=now();}
+    savePinColors();renderPinRow();
+  } else {
+    const row=groups[gi]&&groups[gi].rows[ri];
+    if(row&&!row.divider){
+      const dataIdx=resolveChipDataIndex(row.colors,ci);
+      if(dataIdx>=0){row.colors[dataIdx].deleted=true;row.colors[dataIdx].updatedAt=now();}
+    }
+    saveGroups();renderGroups();
+  }
   showToast('削除しました');
 }
 function closeOverwriteModal(){pendingOverwrite=null;document.getElementById('overwriteModal').style.display='none';}
 function confirmOverwrite(){
   if(!pendingOverwrite) return;
   const {gi,ri,ci,chipType,newT,newB,newLabel}=pendingOverwrite;
-  const chip=getLpChipByIndex(chipType,gi,ri,ci);
+  const chip=getLpChipByRenderIndex(chipType,gi,ri,ci);
   if(!chip){showToast('チップが見つかりません');pendingOverwrite=null;document.getElementById('overwriteModal').style.display='none';return;}
-  chip.t=newT;chip.b=newB;if(newLabel!==undefined)chip.label=newLabel;
+  chip.t=newT;chip.b=newB;if(newLabel!==undefined)chip.label=newLabel;chip.updatedAt=now();
   if(chipType==='pin'){savePinColors();renderPinRow();}else{saveGroups();renderGroups();}
   showToast('色を上書きしました ✓');pendingOverwrite=null;document.getElementById('overwriteModal').style.display='none';
 }
@@ -1510,28 +1587,37 @@ function confirmOverwrite(){
 let deleteGroupIndex=-1;
 function openDeleteGroupModal(gi){
   deleteGroupIndex=gi;const g=groups[gi];
-  const colorCount=g.rows.reduce((n,r)=>n+(r.divider?0:r.colors.length),0);
+  const colorCount=g.rows.reduce((n,r)=>n+(r.divider||r.deleted?0:r.colors.filter(c=>!c.deleted).length),0);
   const detail=colorCount>0?`カラー ${colorCount} 件も削除されます。 `:'';
   document.getElementById('deleteGroupMsg').textContent=`「${g.name}」を削除します。${detail}この操作は取り消せません。`;
   document.getElementById('deleteGroupModal').style.display='flex';
 }
 function closeDeleteGroupModal(){deleteGroupIndex=-1;document.getElementById('deleteGroupModal').style.display='none';}
+// ② グループ削除: deleted:true に変更
 function confirmDeleteGroup(){
   if(deleteGroupIndex<0||deleteGroupIndex>=groups.length){closeDeleteGroupModal();return;}
-  const name=groups[deleteGroupIndex].name;groups.splice(deleteGroupIndex,1);
+  const name=groups[deleteGroupIndex].name;
+  const ts=now();
+  groups[deleteGroupIndex].deleted=true;
+  groups[deleteGroupIndex].updatedAt=ts;
+  // 配下もすべて tombstone
+  groups[deleteGroupIndex].rows.forEach(row=>{
+    row.deleted=true; row.updatedAt=ts;
+    row.colors.forEach(c=>{ c.deleted=true; c.updatedAt=ts; });
+  });
   saveGroups();renderGroups();showToast(`「${name}」を削除しました`);closeDeleteGroupModal();
 }
 function openAddGroupModal(){document.getElementById('addGroupNameInput').value='';document.getElementById('addGroupModal').style.display='flex';setTimeout(()=>document.getElementById('addGroupNameInput').focus(),50);}
 function closeAddGroupModal(){document.getElementById('addGroupModal').style.display='none';}
 function confirmAddGroup(){
   const name=document.getElementById('addGroupNameInput').value.trim();
-  groups.push({id:uid(),name:name||'⭐',rows:[]});
+  groups.push({id:uid(),name:name||'⭐',rows:[],updatedAt:now(),deleted:false});
   saveGroups();renderGroups();closeAddGroupModal();showToast('グループを追加しました');
 }
 document.getElementById('addGroupNameInput').addEventListener('keydown',e=>{if(e.key==='Enter')confirmAddGroup();if(e.key==='Escape')closeAddGroupModal();});
 
 // ============================================================
-//  Sync — GitHub Gist
+//  Sync — GitHub Gist（LWW マージ）
 // ============================================================
 let syncConfig={token:'',gistId:''},pollTimer=null,lastEtag='',isSyncPushing=false;
 function setSyncBadge(state,label){document.getElementById('syncBadge').className='sync-badge '+(state||'');document.getElementById('syncLabel').textContent=label;if(state==='error')document.getElementById('syncSetup').style.display='block';}
@@ -1555,87 +1641,144 @@ async function gistPut(gs,pin,dc){
   const r=await fetch('https://api.github.com/gists/'+syncConfig.gistId,{method:'PATCH',headers:{'Authorization':'token '+syncConfig.token,'Content-Type':'application/json'},body:JSON.stringify({files})});
   return r.ok;
 }
-let _localPendingChipIds = (() => {
-  try { return new Set(JSON.parse(localStorage.getItem('cp_pending_chip_ids') || '[]')); } catch { return new Set(); }
-})();
-let _localPendingDividerIds = (() => {
-  try { return new Set(JSON.parse(localStorage.getItem('cp_pending_div_ids') || '[]')); } catch { return new Set(); }
-})();
-  
-function mergeGroups(localGs, remoteGs) {
-  const remoteChipIds = new Set();
-  remoteGs.forEach(g => g.rows.forEach(r => {
-    if (!r.divider) r.colors.forEach(c => { if (c.id) remoteChipIds.add(c.id); });
-  }));
-  const pendingIds = _getPendingChipIds();
-  const localOnlyChips = [];
-  localGs.forEach(lg => lg.rows.forEach(lr => {
-    if (!lr.divider) lr.colors.forEach(c => {
-      if (c.id && !remoteChipIds.has(c.id) && pendingIds.has(c.id))
-        localOnlyChips.push({ chip: c, groupId: lg.id, groupName: lg.name, rowKey: lr.key });
-    });
-  }));
-  const remoteDividerIds = new Set();
-  remoteGs.forEach(g => g.rows.forEach(r => { if (r.divider && r.id) remoteDividerIds.add(r.id); }));
-  const pendingDividerIds = _getPendingDividerIds();
-  const localOnlyDividers = [];
-  localGs.forEach(lg => lg.rows.forEach(lr => {
-    if (lr.divider && lr.id && !remoteDividerIds.has(lr.id) && pendingDividerIds.has(lr.id))
-      localOnlyDividers.push({ divider: lr, groupId: lg.id, groupName: lg.name });
-  }));
-  const merged = ensureIds(remoteGs);
 
-  // ★ ローカルにしかないグループを追加
-  const remoteGroupIds = new Set(remoteGs.map(g => g.id).filter(Boolean));
-  localGs.forEach(lg => {
-    if (lg.id && !remoteGroupIds.has(lg.id)) {
-      merged.push(JSON.parse(JSON.stringify(lg)));
+// ============================================================
+//  ③ LWW マージ関数
+// ============================================================
+
+/**
+ * チップ配列を LWW でマージ
+ * - 同一 id: updatedAt が新しい方を採用（deleted フラグも含む）
+ * - 片方にしかない id: そのままマージ
+ */
+function mergeChipsLWW(localChips, remoteChips) {
+  const map = new Map();
+  // local を先に登録
+  localChips.forEach(c => { if(c.id) map.set(c.id, normalizeChip(c)); });
+  // remote をマージ（updatedAt で勝ち負け）
+  remoteChips.forEach(c => {
+    c = normalizeChip(c);
+    if (!c.id) return;
+    const existing = map.get(c.id);
+    if (!existing || c.updatedAt >= existing.updatedAt) {
+      map.set(c.id, c);
+    }
+  });
+  // local の順序を維持しつつ remote-only を末尾に追加
+  const result = [];
+  const seen = new Set();
+  localChips.forEach(lc => {
+    if (!lc.id) return;
+    const merged = map.get(lc.id);
+    if (merged) { result.push(merged); seen.add(lc.id); }
+  });
+  map.forEach((c, id) => { if (!seen.has(id)) result.push(c); });
+  return result;
+}
+
+/**
+ * グループ配列を LWW でマージ
+ * - 同一グループ id: updatedAt が新しい方の name / deleted を採用
+ * - 行: key ベースでマージ（divider は id ベース）
+ * - チップ: id ベース LWW
+ */
+function mergeGroups(localGs, remoteGs) {
+  const localNorm  = ensureIds(localGs);
+  const remoteNorm = ensureIds(remoteGs);
+
+  const groupMap = new Map();
+  localNorm.forEach(g => groupMap.set(g.id, JSON.parse(JSON.stringify(g))));
+
+  remoteNorm.forEach(rg => {
+    const lg = groupMap.get(rg.id);
+    if (!lg) {
+      // remote にしかないグループ → そのまま追加
+      groupMap.set(rg.id, JSON.parse(JSON.stringify(rg)));
+      return;
+    }
+    // グループメタ（name, deleted）: LWW
+    const merged = lg.updatedAt >= rg.updatedAt ? lg : rg;
+    merged.rows = mergeRowsLWW(lg.rows, rg.rows);
+    groupMap.set(rg.id, merged);
+  });
+
+  // local の順序を維持しつつ remote-only グループを末尾に
+  const result = [];
+  const seen = new Set();
+  localNorm.forEach(lg => {
+    const m = groupMap.get(lg.id);
+    if (m) { result.push(m); seen.add(lg.id); }
+  });
+  groupMap.forEach((g, id) => { if (!seen.has(id)) result.push(g); });
+  return result;
+}
+
+/**
+ * 行配列を LWW でマージ
+ * - 区切り行（divider）: id ベース LWW
+ * - 通常行: key ベース（同一 key なら チップを LWW マージ）
+ * - 片方にしかない行: そのまま追加
+ */
+function mergeRowsLWW(localRows, remoteRows) {
+  // 区切り行は id でマップ
+  const divMap = new Map();
+  const normalMap = new Map(); // key → row
+
+  localRows.forEach(r => {
+    const nr = normalizeRow(r);
+    if (nr.divider) { if(nr.id) divMap.set(nr.id, nr); }
+    else normalMap.set(nr.key, nr);
+  });
+
+  remoteRows.forEach(r => {
+    const nr = normalizeRow(r);
+    if (nr.divider) {
+      if (!nr.id) return;
+      const existing = divMap.get(nr.id);
+      if (!existing || nr.updatedAt >= existing.updatedAt) divMap.set(nr.id, nr);
+    } else {
+      const existing = normalMap.get(nr.key);
+      if (!existing) {
+        normalMap.set(nr.key, nr);
+      } else {
+        // 行メタ（deleted）: LWW
+        const winRow = existing.updatedAt >= nr.updatedAt ? existing : nr;
+        winRow.colors = mergeChipsLWW(existing.colors, nr.colors);
+        normalMap.set(nr.key, winRow);
+      }
     }
   });
 
-  localOnlyChips.forEach(({ chip, groupId, groupName, rowKey }) => {
-    const tg = merged.find(g => g.id === groupId) || merged.find(g => g.name === groupName);
-    if (!tg) return;
-    // ★ 行がなければ作る
-    let tr = tg.rows.find(r => !r.divider && r.key === rowKey);
-    if (!tr) { tr = { key: rowKey, colors: [] }; tg.rows.push(tr); }
-    tr.colors.push(chip);
+  // 順序再構築: local の順を維持し、remote-only を末尾に
+  const result = [];
+  const seenDiv = new Set();
+  const seenKey = new Set();
+
+  localRows.forEach(r => {
+    const nr = normalizeRow(r);
+    if (nr.divider) {
+      const m = nr.id ? divMap.get(nr.id) : null;
+      if (m) { result.push(m); seenDiv.add(nr.id); }
+    } else {
+      const m = normalMap.get(nr.key);
+      if (m) { result.push(m); seenKey.add(nr.key); }
+    }
   });
-  localOnlyDividers.forEach(({ divider, groupId, groupName }) => {
-    const tg = merged.find(g => g.id === groupId) || merged.find(g => g.name === groupName);
-    if (!tg) return;
-    tg.rows.push({ ...divider });
-  });
-  return merged;
+  divMap.forEach((d, id) => { if (!seenDiv.has(id)) result.push(d); });
+  normalMap.forEach((row, key) => { if (!seenKey.has(key)) result.push(row); });
+  return result;
 }
-function _getPendingChipIds() { return _localPendingChipIds; }
-function _getPendingDividerIds() { return _localPendingDividerIds; }
-function _registerPendingChip(id) {
-  if (id) {
-    _localPendingChipIds.add(id);
-    localStorage.setItem('cp_pending_chip_ids', JSON.stringify([..._localPendingChipIds]));
-  }
+
+/**
+ * ピン配列を LWW でマージ
+ */
+function mergePins(localPins, remotePins) {
+  if (!remotePins) return localPins;
+  return mergeChipsLWW(localPins, remotePins);
 }
-function _registerPendingDivider(id) {
-  if (id) {
-    _localPendingDividerIds.add(id);
-    localStorage.setItem('cp_pending_div_ids', JSON.stringify([..._localPendingDividerIds]));
-  }
-}
-function _clearPendingAfterPush() {
-  _localPendingChipIds = new Set();
-  _localPendingDividerIds = new Set();
-  localStorage.removeItem('cp_pending_chip_ids');
-  localStorage.removeItem('cp_pending_div_ids');
-}
-  
-function mergePins(localPins,remotePins){
-  if(!remotePins)return localPins;
-  const remoteIds=new Set(remotePins.map(c=>c.id).filter(Boolean));
-  const localOnly=localPins.filter(c=>c.id&&!remoteIds.has(c.id)&&_localPendingChipIds.has(c.id));
-  return[...remotePins,...localOnly];
-}
+
 function mergeDividerColors(localDc,remoteDc){if(!remoteDc)return localDc;const merged=[...remoteDc];localDc.forEach(c=>{if(!merged.includes(c)&&merged.length<6)merged.push(c);});return merged.slice(0,6);}
+
 async function setupSync(){
   const token=document.getElementById('gistTokenInput').value.trim(),gistId=document.getElementById('gistIdInput').value.trim();
   if(!token){showToast('Tokenが必要です');return;}syncConfig.token=token;setSyncBadge('syncing','接続中…');
@@ -1643,9 +1786,9 @@ async function setupSync(){
     syncConfig.gistId=gistId;const data=await gistGet();
     if(data&&data!=='unchanged'){if(data.groups){groups=mergeGroups(groups,data.groups);localStorage.setItem('cp_groups5',JSON.stringify(groups));renderGroups();}if(data.pin){pinColors=mergePins(pinColors,data.pin);localStorage.setItem('cp_pin_row',JSON.stringify(pinColors));renderPinRow();}if(data.dividerColors){dividerColors=mergeDividerColors(dividerColors,data.dividerColors);localStorage.setItem('cp_divider_colors',JSON.stringify(dividerColors));}}
     localStorage.setItem('cp_sync', JSON.stringify(syncConfig));
-await _doPush(); // ← ローカルの未反映データをpush
-startPolling(); updateSyncShareUrl();
-document.getElementById('syncSetup').style.display = 'none';
+    await _doPush();
+    startPolling(); updateSyncShareUrl();
+    document.getElementById('syncSetup').style.display = 'none';
   }else{
     const r=await fetch('https://api.github.com/gists',{method:'POST',headers:{'Authorization':'token '+token,'Content-Type':'application/json'},body:JSON.stringify({description:'ColorPreview',public:false,files:{'presets.json':{content:JSON.stringify(groups)},'pin.json':{content:JSON.stringify(pinColors)},'divider_colors.json':{content:JSON.stringify(dividerColors)}}})});
     const d=await r.json();
@@ -1653,10 +1796,12 @@ document.getElementById('syncSetup').style.display = 'none';
     else setSyncBadge('error','エラー');
   }
 }
-function clearSync(){  stopPolling();
+function clearSync(){
+  stopPolling();
   if (syncPushDebounceTimer) { clearTimeout(syncPushDebounceTimer); syncPushDebounceTimer = null; }
   if (syncPushMaxTimer) { clearTimeout(syncPushMaxTimer); syncPushMaxTimer = null; }
-  syncConfig = { token: '', gistId: '' };localStorage.removeItem('cp_sync');setSyncBadge('','未接続');document.getElementById('syncShareUrlRow').style.display='none';document.getElementById('syncSetup').style.display='block';}
+  syncConfig = { token: '', gistId: '' };localStorage.removeItem('cp_sync');setSyncBadge('','未接続');document.getElementById('syncShareUrlRow').style.display='none';document.getElementById('syncSetup').style.display='block';
+}
 function startPolling(){
   stopPolling();setSyncBadge('synced','同期中');
   pollTimer=setInterval(async()=>{
@@ -1668,7 +1813,7 @@ function startPolling(){
       if(data.dividerColors){dividerColors=mergeDividerColors(dividerColors,data.dividerColors);localStorage.setItem('cp_divider_colors',JSON.stringify(dividerColors));}
       lastEtag='';
     }
-  },3000);  // ← 8000 から変更
+  },3000);
 }
 function stopPolling(){if(pollTimer){clearInterval(pollTimer);pollTimer=null;}}
 let syncPushDebounceTimer=null;
@@ -1683,7 +1828,7 @@ async function _doPush(){
       if(remote.pin){pinColors=mergePins(pinColors,remote.pin);localStorage.setItem('cp_pin_row',JSON.stringify(pinColors));renderPinRow();}
       if(remote.dividerColors){dividerColors=mergeDividerColors(dividerColors,remote.dividerColors);localStorage.setItem('cp_divider_colors',JSON.stringify(dividerColors));}
     }
-    await gistPut(groups,pinColors,dividerColors);lastEtag='';_clearPendingAfterPush();
+    await gistPut(groups,pinColors,dividerColors);lastEtag='';
   }catch(e){console.error('sync push error:',e);}
   finally{isSyncPushing=false;}
 }
@@ -1703,7 +1848,7 @@ function scheduleSyncPush(){
     await _doPush();
   },800);
 }
-  function updateSyncShareUrl(){if(!syncConfig.gistId)return;const url=location.href.split('?')[0]+'?gist='+syncConfig.gistId;document.getElementById('syncShareUrlRow').style.display='flex';document.getElementById('syncShareInput').value=url;}
+function updateSyncShareUrl(){if(!syncConfig.gistId)return;const url=location.href.split('?')[0]+'?gist='+syncConfig.gistId;document.getElementById('syncShareUrlRow').style.display='flex';document.getElementById('syncShareInput').value=url;}
 function copySyncUrl(){navigator.clipboard.writeText(document.getElementById('syncShareInput').value);showToast('同期用URLをコピーしました');}
 
 // ============================================================
@@ -1729,7 +1874,9 @@ function _addDividerUserColor(){_registerDividerColor('dividerHexInput',(c)=>_up
 function _addEditDividerUserColor(){_registerDividerColor('editDividerHexInput',(c)=>_updateEditDividerColorUI(c));}
 
 function _buildDividerPositionPicker(gi,defaultInsertAt){
-  _dividerInsertAt=defaultInsertAt;const picker=document.getElementById('dividerPositionPicker');picker.innerHTML='';const rows=groups[gi].rows;
+  _dividerInsertAt=defaultInsertAt;const picker=document.getElementById('dividerPositionPicker');picker.innerHTML='';
+  // deleted 行を除いた visible rows でピッカーを構築
+  const visibleRows=groups[gi].rows.filter(r=>!r.deleted);
   function makeSlot(idx,label){
     const slot=document.createElement('div');slot.className='divider-pos-slot'+(idx===_dividerInsertAt?' selected':'');slot.dataset.idx=idx;
     const arrow=document.createElement('span');arrow.className='divider-pos-slot-arrow';arrow.textContent='▼';
@@ -1747,27 +1894,44 @@ function _buildDividerPositionPicker(gi,defaultInsertAt){
     }else{item.className='divider-pos-item';item.style.textAlign='center';item.textContent=row.key;}
     return item;
   }
-  // 一番上・一番下に名称変更
-  picker.append(makeSlot(0,rows.length===0?'先頭（行なし）':'一番上'));
-  rows.forEach((row,ri)=>{picker.append(makeRowItem(row));picker.append(makeSlot(ri+1,ri===rows.length-1?'一番下':null));});
-  // 自動スクロールなし。デフォルト最下部表示のためpickerを末尾にスクロール
+  picker.append(makeSlot(0,visibleRows.length===0?'先頭（行なし）':'一番上'));
+  visibleRows.forEach((row,ri)=>{picker.append(makeRowItem(row));picker.append(makeSlot(ri+1,ri===visibleRows.length-1?'一番下':null));});
   requestAnimationFrame(()=>{picker.scrollTop=picker.scrollHeight;});
   if(window._scheduleTwemoji) window._scheduleTwemoji();
 }
 
 function openAddDividerModal(gi){
   dividerTargetGi=gi;_dividerSelectedColor='';document.getElementById('dividerLabelInput').value='';
-  _buildAddDividerPresets();_updateAddDividerColorUI('');_buildDividerPositionPicker(gi,groups[gi].rows.length);
+  _buildAddDividerPresets();_updateAddDividerColorUI('');
+  const visibleCount=groups[gi].rows.filter(r=>!r.deleted).length;
+  _buildDividerPositionPicker(gi,visibleCount);
   document.getElementById('addDividerModal').style.display='flex';setTimeout(()=>document.getElementById('dividerLabelInput').focus(),60);
 }
 function closeAddDividerModal(){document.getElementById('addDividerModal').style.display='none';}
 function confirmAddDivider() {
   const label = document.getElementById('dividerLabelInput').value.trim();
   const color = _dividerSelectedColor;
-  const insertAt = Math.max(0, Math.min(_dividerInsertAt, groups[dividerTargetGi].rows.length));
-  const divId = 'div_' + uid(); // ← IDを先に生成
-  groups[dividerTargetGi].rows.splice(insertAt, 0, { id: divId, key: '---', divider: true, label, color, colors: [] });
-  _registerPendingDivider(divId); // ← 追加
+  // _dividerInsertAt は visible rows のインデックス → データ上の実挿入位置に変換
+  const visibleRows = groups[dividerTargetGi].rows.filter(r=>!r.deleted);
+  let insertAfterKey = null;
+  if (_dividerInsertAt > 0 && _dividerInsertAt <= visibleRows.length) {
+    const refRow = visibleRows[_dividerInsertAt - 1];
+    insertAfterKey = refRow.divider ? refRow.id : refRow.key;
+  }
+  const divId = 'div_' + uid();
+  const newDivider = { id: divId, key: '---', divider: true, label, color, colors: [], updatedAt: now(), deleted: false };
+
+  if (insertAfterKey === null) {
+    // 一番上（先頭の非deletedの前）
+    const firstVisibleIdx = groups[dividerTargetGi].rows.findIndex(r=>!r.deleted);
+    groups[dividerTargetGi].rows.splice(firstVisibleIdx>=0?firstVisibleIdx:0, 0, newDivider);
+  } else {
+    // insertAfterKey の直後
+    const refDataIdx = groups[dividerTargetGi].rows.findIndex(r=>
+      (!r.deleted) && (r.divider ? r.id===insertAfterKey : r.key===insertAfterKey)
+    );
+    groups[dividerTargetGi].rows.splice(refDataIdx>=0?refDataIdx+1:groups[dividerTargetGi].rows.length, 0, newDivider);
+  }
   saveGroups(); renderGroups(); closeAddDividerModal(); showToast('区切りを追加しました');
 }
 document.getElementById('dividerLabelInput').addEventListener('keydown',e=>{if(e.key==='Enter')confirmAddDivider();if(e.key==='Escape')closeAddDividerModal();});
@@ -1783,9 +1947,16 @@ function closeEditDividerModal(){document.getElementById('editDividerModal').sty
 function saveEditDivider(){
   if(editDividerGi<0||editDividerRi<0) return;const row=groups[editDividerGi].rows[editDividerRi];if(!row||!row.divider)return;
   row.label=document.getElementById('editDividerLabelInput').value.trim();const hexVal=document.getElementById('editDividerHexInput').value.trim();let c=hexVal;if(/^[0-9a-fA-F]{6}$/.test(c))c='#'+c;row.color=validHex(c)?c:'';
+  row.updatedAt=now();
   saveGroups();renderGroups();closeEditDividerModal();showToast('区切りを更新しました');
 }
-function deleteEditDivider(){if(editDividerGi<0||editDividerRi<0)return;groups[editDividerGi].rows.splice(editDividerRi,1);saveGroups();renderGroups();closeEditDividerModal();showToast('区切りを削除しました');}
+// ② 区切り行削除（編集モーダルから）: deleted:true に変更
+function deleteEditDivider(){
+  if(editDividerGi<0||editDividerRi<0)return;
+  groups[editDividerGi].rows[editDividerRi].deleted=true;
+  groups[editDividerGi].rows[editDividerRi].updatedAt=now();
+  saveGroups();renderGroups();closeEditDividerModal();showToast('区切りを削除しました');
+}
 document.getElementById('editDividerLabelInput').addEventListener('keydown',e=>{if(e.key==='Enter')saveEditDivider();if(e.key==='Escape')closeEditDividerModal();});
 document.getElementById('editDividerColorInput').addEventListener('input',e=>{const c=e.target.value;_updateEditDividerColorUI(c);document.getElementById('editDividerHexInput').value=c;});
 document.getElementById('editDividerHexInput').addEventListener('input',e=>{let v=e.target.value.trim();if(/^[0-9a-fA-F]{6}$/.test(v))v='#'+v;if(v&&!v.startsWith('#'))v='#'+v;if(validHex(v))_updateEditDividerColorUI(v);});
@@ -1801,7 +1972,6 @@ function applyHex(k,hex){if(!validHex(hex))return;const[h,s,v]=hexToHsv(hex);sta
 function syncUI(k){
   const{h,s,v}=state[k];document.getElementById(k+'H').value=h;document.getElementById(k+'S').value=s;document.getElementById(k+'V').value=v;
   document.getElementById(k+'Hval').textContent=h+'°';document.getElementById(k+'Sval').textContent=s+'%';document.getElementById(k+'Vval').textContent=v+'%';
-  // swatchはpickerの実値を使うことでHSV変換誤差による色ズレを防ぐ
   const pickerHex=document.getElementById(k+'Picker').value;
   const hex=validHex(pickerHex)?pickerHex:hsvToHex(h,s,v);
   document.getElementById(k+'Swatch').style.background=hex;
@@ -1834,12 +2004,8 @@ function pasteHex(k){
       inputEl.focus();inputEl.select();
     }
   };
-  // Clipboard API（ユーザージェスチャー内で呼ぶことでiPadでもポップアップなし）
   if(navigator.clipboard&&navigator.clipboard.readText){
-    navigator.clipboard.readText().then(apply).catch(()=>{
-      // 権限拒否やAPI非対応のときはフォーカス+選択でOSのペーストUIを促す
-      inputEl.focus();inputEl.select();
-    });
+    navigator.clipboard.readText().then(apply).catch(()=>{inputEl.focus();inputEl.select();});
   }else{
     inputEl.focus();inputEl.select();
   }
