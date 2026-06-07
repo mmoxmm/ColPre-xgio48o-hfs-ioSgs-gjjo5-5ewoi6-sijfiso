@@ -895,7 +895,7 @@ function applyMigrations() {
 }
 applyMigrations();
 
-function saveGroups() { localStorage.setItem('cp_groups5', JSON.stringify(groups)); scheduleSyncPush(); }
+function saveGroups() {   const ts = now();   groups.forEach(g => { if(!g.deleted) g.updatedAt = ts; });   localStorage.setItem('cp_groups5', JSON.stringify(groups));   scheduleSyncPush(); }
 
 // ============================================================
 //  モード管理
