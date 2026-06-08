@@ -1890,7 +1890,7 @@ function clearSync(){
 function startPolling(){
   stopPolling();setSyncBadge('synced','同期中');
 pollTimer=setInterval(async()=>{
-  if(isSyncPushing) return;
+  if(isSyncPushing) return;     if(now()-lastPushAt<2000) return;
   let data;
   try{ data=await gistGet(); }catch(e){ setSyncBadge('error','エラー','通信エラー: '+e.message); return; }
   if(data===null){ return; }
@@ -1909,10 +1909,10 @@ pollTimer=setInterval(async()=>{
       _lastRenderHash=''; renderGroups(); renderPinRow();
     }
   }
-},1000);
+},700);
 }
 function stopPolling(){if(pollTimer){clearInterval(pollTimer);pollTimer=null;}}
-let syncPushDebounceTimer=null;
+let syncPushDebounceTimer=null; let lastPushAt=0;
 let syncPushMaxTimer=null;
 async function _doPush(){
   if(isSyncPushing) return;
@@ -1927,7 +1927,7 @@ async function _doPush(){
     console.error('sync push error:',e);
     setSyncBadge('error','Push失敗'); // ← 追加
   }
-  finally{isSyncPushing=false;}
+  finally{lastPushAt=now();isSyncPushing=false;}
 }
   function scheduleSyncPush(){
   if(!syncConfig.gistId||!syncConfig.token) return;
@@ -1937,14 +1937,14 @@ async function _doPush(){
       syncPushMaxTimer=null;
       if(syncPushDebounceTimer){clearTimeout(syncPushDebounceTimer);syncPushDebounceTimer=null;}
       await _doPush();
-    },3000);
+    },1500);
   }
   if(syncPushDebounceTimer) clearTimeout(syncPushDebounceTimer);
   syncPushDebounceTimer=setTimeout(async()=>{
     syncPushDebounceTimer=null;
     if(syncPushMaxTimer){clearTimeout(syncPushMaxTimer);syncPushMaxTimer=null;}
     await _doPush();
-  },800);
+  },300);
 }
 
 // ============================================================
