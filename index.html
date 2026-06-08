@@ -895,8 +895,10 @@ function applyMigrations() {
 }
 applyMigrations();
 
-function saveGroups() {   const ts = now();   groups.forEach(g => { if(!g.deleted) g.updatedAt = ts; });   localStorage.setItem('cp_groups5', JSON.stringify(groups));   scheduleSyncPush(); }
-
+function saveGroups() {
+  localStorage.setItem('cp_groups5', JSON.stringify(groups));
+  scheduleSyncPush();
+}
 // ============================================================
 //  モード管理
 // ============================================================
@@ -1887,21 +1889,27 @@ function clearSync(){
 
 function startPolling(){
   stopPolling();setSyncBadge('synced','同期中');
-  pollTimer=setInterval(async()=>{
-    if(isSyncPushing) return;
-    let data;
-    try{ data=await gistGet(); }catch(e){ setSyncBadge('error','エラー','通信エラー: '+e.message); return; }
-    if(data===null){ return; } // gistGet内でエラー表示済み
-    updateLastEditInfo(data);
-    if(data){
-      const prevStr=JSON.stringify(groups)+'|'+JSON.stringify(pinColors);
-      if(data.groups){groups=mergeGroups(groups,data.groups);localStorage.setItem('cp_groups5',JSON.stringify(groups));}
-      if(data.pin){pinColors=mergePins(pinColors,data.pin);localStorage.setItem('cp_pin_row',JSON.stringify(pinColors));}
-      if(data.dividerColors){dividerColors=mergeDividerColors(dividerColors,data.dividerColors);localStorage.setItem('cp_divider_colors',JSON.stringify(dividerColors));}
-      const newStr=JSON.stringify(groups)+'|'+JSON.stringify(pinColors);
-      if(newStr!==prevStr){_lastRenderHash='';renderGroups();renderPinRow();}
+pollTimer=setInterval(async()=>{
+  if(isSyncPushing) return;
+  let data;
+  try{ data=await gistGet(); }catch(e){ setSyncBadge('error','エラー','通信エラー: '+e.message); return; }
+  if(data===null){ return; }
+  updateLastEditInfo(data);
+  if(data){
+    const prevStr=JSON.stringify(groups)+'|'+JSON.stringify(pinColors)+'|'+JSON.stringify(dividerColors);
+    const mergedGroups=mergeGroups(groups,data.groups||groups);
+    const mergedPin=mergePins(pinColors,data.pin||pinColors);
+    const mergedDc=mergeDividerColors(dividerColors,data.dividerColors||dividerColors);
+    const newStr=JSON.stringify(mergedGroups)+'|'+JSON.stringify(mergedPin)+'|'+JSON.stringify(mergedDc);
+    if(newStr!==prevStr){
+      groups=mergedGroups; pinColors=mergedPin; dividerColors=mergedDc;
+      localStorage.setItem('cp_groups5',JSON.stringify(groups));
+      localStorage.setItem('cp_pin_row',JSON.stringify(pinColors));
+      localStorage.setItem('cp_divider_colors',JSON.stringify(dividerColors));
+      _lastRenderHash=''; renderGroups(); renderPinRow();
     }
-  },1000);
+  }
+},1000);
 }
 function stopPolling(){if(pollTimer){clearInterval(pollTimer);pollTimer=null;}}
 let syncPushDebounceTimer=null;
