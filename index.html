@@ -1793,32 +1793,35 @@ function setSyncBadge(state,label,errorMsg){
 // ============================================================
 //  編集履歴バッジ
 // ============================================================
-let _editHistory = [];
-const _lastKeyTimes = new Map();
+let _editHistory = (() => { try { return JSON.parse(localStorage.getItem('cp_edit_history') || '[]'); } catch(_){ return []; } })();
+const _lastKeyTimes = new Map((() => { try { return JSON.parse(localStorage.getItem('cp_last_key_times') || '[]'); } catch(_){ return []; } })());
 const HISTORY_MIN_INTERVAL = 15 * 60 * 1000;
-
-function updateLastEditInfo(data, changedKeys) {
-  if (!changedKeys || changedKeys.length === 0) return;
-  const ts = data && data.updatedAt ? data.updatedAt : Date.now();
-  const uniq = [...new Set(changedKeys)];
-  const label = uniq.length >= 4 ? uniq.slice(0,3).join(' ') + ' …' : uniq.join(' ');
-
-  // 同じキーは15分以内スキップ（連続重複も含む）
-  const lastTime = _lastKeyTimes.get(label);
-  if (lastTime && ts - lastTime < HISTORY_MIN_INTERVAL) return;
-  _lastKeyTimes.set(label, ts);
-
-  const d = new Date(ts);
-  const pad = n => String(n).padStart(2, '0');
-  const timeStr = `${pad(d.getMonth()+1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-
-  _editHistory.unshift({ time: timeStr, label });
-  _editHistory = _editHistory.slice(0, 5);
-
+function saveHistory() {
+  localStorage.setItem('cp_edit_history', JSON.stringify(_editHistory));
+  localStorage.setItem('cp_last_key_times', JSON.stringify([..._lastKeyTimes]));
+  scheduleSyncPush();
+}
+function mergeHistory(localH, remoteData) {
+  if (!remoteData || !remoteData.history) return localH;
+  const combined = [...localH, ...remoteData.history];
+  const seen = new Set();
+  return combined.filter(e => {
+    const key = e.label + '|' + e.time;
+    if (seen.has(key)) return false;
+    seen.add(key); return true;
+  }).sort((a, b) => (b.ts||0) - (a.ts||0)).slice(0, 5);
+}
+function mergeKeyTimes(localMap, remoteData) {
+  if (!remoteData || !remoteData.keyTimes) return;
+  remoteData.keyTimes.forEach(([k, v]) => {
+    const existing = localMap.get(k);
+    if (!existing || v > existing) localMap.set(k, v);
+  });
+}
+function renderHistoryBadges() {
   const container = document.getElementById('editHistoryBadges');
   const infoEl = document.getElementById('lastEditInfo');
   if (!container || !infoEl) return;
-
   container.innerHTML = '';
   for (let i = _editHistory.length - 1; i >= 0; i--) {
     const entry = _editHistory[i];
@@ -1829,8 +1832,27 @@ function updateLastEditInfo(data, changedKeys) {
       : entry.label;
     container.append(badge);
   }
-  infoEl.style.display = 'block';
+  if (_editHistory.length > 0) infoEl.style.display = 'block';
   if (window._scheduleTwemoji) window._scheduleTwemoji();
+}
+const _lastKeyTimes = new Map();
+const HISTORY_MIN_INTERVAL = 15 * 60 * 1000;
+
+function updateLastEditInfo(data, changedKeys) {
+  if (!changedKeys || changedKeys.length === 0) return;
+  const ts = data && data.updatedAt ? data.updatedAt : Date.now();
+  const uniq = [...new Set(changedKeys)];
+  const label = uniq.length >= 4 ? uniq.slice(0,3).join(' ') + ' …' : uniq.join(' ');
+  const lastTime = _lastKeyTimes.get(label);
+  if (lastTime && ts - lastTime < HISTORY_MIN_INTERVAL) return;
+  _lastKeyTimes.set(label, ts);
+  const d = new Date(ts);
+  const pad = n => String(n).padStart(2, '0');
+  const timeStr = `${pad(d.getMonth()+1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  _editHistory.unshift({ time: timeStr, label, ts });
+  _editHistory = _editHistory.slice(0, 5);
+  saveHistory();
+  renderHistoryBadges();
 }
 
 function copySyncGistId(){
@@ -1861,6 +1883,7 @@ async function gistGet(){
       groups:JSON.parse(data.files['presets.json'].content),
       pin:data.files['pin.json']?JSON.parse(data.files['pin.json'].content):null,
       dividerColors:data.files['divider_colors.json']?JSON.parse(data.files['divider_colors.json'].content):null,
+      editHistory:data.files['history.json']?JSON.parse(data.files['history.json'].content):null,
       updatedAt:data.updated_at||null,
       owner:data.owner?data.owner.login:null
     };
@@ -1869,7 +1892,7 @@ async function gistGet(){
 
 async function gistPut(gs,pin,dc){
   if(!syncConfig.gistId||!syncConfig.token) return false;
-  const files={'presets.json':{content:JSON.stringify(gs)},'pin.json':{content:JSON.stringify(pin!==undefined?pin:pinColors)},'divider_colors.json':{content:JSON.stringify(dc!==undefined?dc:dividerColors)}};
+  const files={'presets.json':{content:JSON.stringify(gs)},'pin.json':{content:JSON.stringify(pin!==undefined?pin:pinColors)},'divider_colors.json':{content:JSON.stringify(dc!==undefined?dc:dividerColors)},'history.json':{content:JSON.stringify({history:_editHistory,keyTimes:[..._lastKeyTimes]})}};
   const r=await fetch('https://api.github.com/gists/'+syncConfig.gistId,{method:'PATCH',headers:{'Authorization':'token '+syncConfig.token,'Content-Type':'application/json'},body:JSON.stringify({files})});
   return r.ok;
 }
@@ -1960,7 +1983,7 @@ async function setupSync(){
   if(gistId){
     syncConfig.gistId=gistId;const data=await gistGet();
     if(data===null){return;}
-    if(data){if(data.groups){groups=mergeGroups(groups,data.groups);localStorage.setItem('cp_groups5',JSON.stringify(groups));_lastRenderHash='';renderGroups();}if(data.pin){pinColors=mergePins(pinColors,data.pin);localStorage.setItem('cp_pin_row',JSON.stringify(pinColors));renderPinRow();}if(data.dividerColors){dividerColors=mergeDividerColors(dividerColors,data.dividerColors);localStorage.setItem('cp_divider_colors',JSON.stringify(dividerColors));}}
+    if(data){if(data.groups){groups=mergeGroups(groups,data.groups);localStorage.setItem('cp_groups5',JSON.stringify(groups));_lastRenderHash='';renderGroups();}if(data.pin){pinColors=mergePins(pinColors,data.pin);localStorage.setItem('cp_pin_row',JSON.stringify(pinColors));renderPinRow();}if(data.dividerColors){dividerColors=mergeDividerColors(dividerColors,data.dividerColors);localStorage.setItem('cp_divider_colors',JSON.stringify(dividerColors));}if(data.editHistory){_editHistory=mergeHistory(_editHistory,data.editHistory);mergeKeyTimes(_lastKeyTimes,data.editHistory);saveHistory();renderHistoryBadges();}}
     localStorage.setItem('cp_sync', JSON.stringify(syncConfig));
     await _doPush();
     startPolling();updateSyncGistIdDisplay();
@@ -2046,7 +2069,8 @@ pollTimer=setInterval(async()=>{
       localStorage.setItem('cp_pin_row',JSON.stringify(pinColors));
       localStorage.setItem('cp_divider_colors',JSON.stringify(dividerColors));
       _lastRenderHash=''; renderGroups(); renderPinRow();
-      updateLastEditInfo({updatedAt:Date.now()}, changedKeys);
+      if(data.editHistory){_editHistory=mergeHistory(_editHistory,data.editHistory);mergeKeyTimes(_lastKeyTimes,data.editHistory);saveHistory();renderHistoryBadges();}
+      else if(changedKeys.length>0){updateLastEditInfo({updatedAt:Date.now()},changedKeys);}
     }
   }
 },700);
@@ -2282,7 +2306,7 @@ document.addEventListener('pointerdown', () => {
   const params=new URLSearchParams(location.search);const urlGistId=params.get('gist');
   loadSyncConfig();if(urlGistId){syncConfig.gistId=urlGistId;document.getElementById('gistIdInput').value=urlGistId;}
   if(syncConfig.token&&syncConfig.gistId){startPolling();updateSyncGistIdDisplay();document.getElementById('gistTokenInput').value=syncConfig.token;document.getElementById('gistIdInput').value=syncConfig.gistId;document.getElementById('syncSetup').style.display='none';}
-  syncUI('t');syncUI('b');render();renderGroups();renderPinRow();
+  syncUI('t');syncUI('b');render();renderGroups();renderPinRow();renderHistoryBadges();
   setupCopyHexPressEffect('copyHexBBtn');setupCopyHexPressEffect('copyHexTBtn');
 })();
 </script>
