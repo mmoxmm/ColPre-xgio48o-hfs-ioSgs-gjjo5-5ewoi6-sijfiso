@@ -301,6 +301,9 @@ body.mode-lock .swatch-chip.locked{border-color:rgba(217,54,62,.4);box-shadow:0 
 .lp-label-input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:500;padding:7px 10px;outline:none;transition:border-color .15s;text-align:center}
 .lp-label-input:focus{border-color:var(--accent)}
 .lp-label-input::placeholder{color:var(--muted);font-family:'Syne',sans-serif;font-size:11px}
+.lp-label-suggest-btn{font-family:'Syne',sans-serif;font-size:11px;font-weight:600;padding:4px 11px;border-radius:99px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;outline:none;}
+@media(hover:hover){.lp-label-suggest-btn:hover{background:var(--text);color:#fff;border-color:var(--text);}}
+.lp-label-suggest-btn:active{transform:scale(.92);}
 .lp-footer{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:12px 16px 16px;border-top:1px solid var(--border);background:var(--surface);margin-top:14px}
 .lp-del-btn{font-family:'Syne',sans-serif;font-size:11px;font-weight:600;padding:6px 12px;border-radius:var(--radius-sm);cursor:pointer;border:1px solid #d9363e;color:#d9363e;background:none;transition:all .15s}
 .lp-del-btn:hover{background:#d9363e;color:#fff}
@@ -679,6 +682,13 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
       <div class="lp-sec">
         <div class="lp-sec-title">チップの表示テキスト</div>
         <input type="text" class="lp-label-input" id="lpLabelInput" maxlength="10" placeholder="空欄で「Aa」（大チップにリアルタイム反映）">
+        <div style="display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:7px;">
+          <button class="lp-label-suggest-btn" onclick="lpSetLabel('キャラ')">キャラ</button>
+          <button class="lp-label-suggest-btn" onclick="lpSetLabel('img')">img</button>
+          <button class="lp-label-suggest-btn" onclick="lpSetLabel('ココフォ')">ココフォ</button>
+          <button class="lp-label-suggest-btn" onclick="lpSetLabel('スプシ')">スプシ</button>
+          <button class="lp-label-suggest-btn" onclick="lpSetLabel('秘匿')">秘匿</button>
+        </div>
       </div>
     </div>
     <div class="lp-footer">
@@ -739,7 +749,6 @@ const uid = () => Math.random().toString(36).slice(2, 9);
 const now = () => Date.now();
 
 function orderBetween(prev, next) {
-  // prev/next は number|undefined
   const a = (prev != null) ? prev : 0;
   const b = (next != null) ? next : a + 2000;
   return (a + b) / 2;
@@ -1052,7 +1061,6 @@ if(srcDataIdx<dstDataIdx) insertIdx=dstDataIdx-1;
 if(!insertBefore) insertIdx++;
 insertIdx=Math.max(0,Math.min(insertIdx,groups.length));
 groups.splice(insertIdx,0,moved);
-// order を前後の中間値で更新
 const prevOrder = groups[insertIdx-1] ? (groups[insertIdx-1].order ?? (insertIdx-1)*1000) : undefined;
 const nextOrder = groups[insertIdx+1] ? (groups[insertIdx+1].order ?? (insertIdx+1)*1000) : undefined;
 moved.order = orderBetween(prevOrder, nextOrder);
@@ -1599,6 +1607,11 @@ document.getElementById('lpTPicker').addEventListener('input',e=>{document.getEl
 document.getElementById('lpBHex').addEventListener('input',e=>{let v=normalizeHexInput(e.target.value);if(v!==e.target.value)e.target.value=v;if(validHex(v)){document.getElementById('lpBPicker').value=v;document.getElementById('lpBSwatch').style.background=v;e.target.classList.remove('invalid');}else e.target.classList.add('invalid');lpUpdateCanvas();updateLpOverwriteBtn();});
 document.getElementById('lpTHex').addEventListener('input',e=>{let v=normalizeHexInput(e.target.value);if(v!==e.target.value)e.target.value=v;if(validHex(v)){document.getElementById('lpTPicker').value=v;document.getElementById('lpTSwatch').style.background=v;e.target.classList.remove('invalid');}else e.target.classList.add('invalid');lpUpdateCanvas();updateLpOverwriteBtn();});
 document.getElementById('lpLabelInput').addEventListener('input',lpUpdateCanvas);
+function lpSetLabel(val){
+  const input = document.getElementById('lpLabelInput');
+  input.value = val;
+  input.dispatchEvent(new Event('input'));
+}
 function lpOverwrite(){
   if(!lpTarget) return;
   const bVal=document.getElementById('lpBHex').value,tVal=document.getElementById('lpTHex').value;
@@ -1796,9 +1809,7 @@ function mergeGroups(localGs, remoteGs) {
   remoteNorm.forEach(rg => {
     const lg = groupMap.get(rg.id);
     if (!lg) { groupMap.set(rg.id, JSON.parse(JSON.stringify(rg))); return; }
-    // メタ（name等）は新しい方を採用
     const winMeta = lg.updatedAt >= rg.updatedAt ? lg : rg;
-    // orderは新しい方を採用
     const winOrder = (lg.updatedAt >= rg.updatedAt) ? lg.order : rg.order;
     const merged = Object.assign({}, winMeta, { order: winOrder });
     merged.rows = mergeRowsLWW(lg.rows, rg.rows);
@@ -1827,7 +1838,6 @@ function mergeRowsLWW(localRows, remoteRows) {
       const existing = normalMap.get(nr.key);
       if (!existing) { normalMap.set(nr.key, nr); }
       else {
-        // orderは新しい方を採用
         const winOrder = existing.updatedAt >= nr.updatedAt ? existing.order : nr.order;
         const winRow = existing.updatedAt >= nr.updatedAt ? existing : nr;
         winRow.colors = mergeChipsLWW(existing.colors, nr.colors);
@@ -1856,7 +1866,7 @@ async function setupSync(){
   if(!token){showToast('Tokenが必要です');return;}syncConfig.token=token;setSyncBadge('syncing','接続中…');
   if(gistId){
     syncConfig.gistId=gistId;const data=await gistGet();
-    if(data===null){return;} // gistGet内でエラー表示済み
+    if(data===null){return;}
     if(data){if(data.groups){groups=mergeGroups(groups,data.groups);localStorage.setItem('cp_groups5',JSON.stringify(groups));_lastRenderHash='';renderGroups();}if(data.pin){pinColors=mergePins(pinColors,data.pin);localStorage.setItem('cp_pin_row',JSON.stringify(pinColors));renderPinRow();}if(data.dividerColors){dividerColors=mergeDividerColors(dividerColors,data.dividerColors);localStorage.setItem('cp_divider_colors',JSON.stringify(dividerColors));}}
     updateLastEditInfo(data);
     localStorage.setItem('cp_sync', JSON.stringify(syncConfig));
@@ -1917,15 +1927,14 @@ let syncPushMaxTimer=null;
 async function _doPush(){
   if(isSyncPushing) return;
   isSyncPushing=true;
-  setSyncBadge('syncing','同期中…'); // ← 追加
+  setSyncBadge('syncing','同期中…');
   try{
-    // ...既存の処理...
     await gistPut(groups,pinColors,dividerColors);lastEtag='';
-    setSyncBadge('synced','同期済み ✓'); // ← 追加
-    setTimeout(()=>setSyncBadge('synced','同期中'),2000); // ← 追加（2秒後に通常表示に戻す）
+    setSyncBadge('synced','同期済み ✓');
+    setTimeout(()=>setSyncBadge('synced','同期中'),2000);
   }catch(e){
     console.error('sync push error:',e);
-    setSyncBadge('error','Push失敗'); // ← 追加
+    setSyncBadge('error','Push失敗');
   }
   finally{lastPushAt=now();isSyncPushing=false;}
 }
@@ -2007,7 +2016,6 @@ function confirmAddDivider() {
   const label = document.getElementById('dividerLabelInput').value.trim();
   const color = _dividerSelectedColor;
   
-  // ✅ 先に宣言する
   const visibleRows = groups[dividerTargetGi].rows.filter(r=>!r.deleted);
   
   let insertAfterKey = null;
@@ -2136,7 +2144,6 @@ document.getElementById('bHex').addEventListener('input',e=>{let v=normalizeHexI
 document.getElementById('tName').oninput=render;document.getElementById('bName').oninput=render;
 document.addEventListener('touchstart',e=>{const active=document.activeElement;if(active&&active!==e.target&&!active.contains(e.target)){if(active.tagName!=='INPUT'&&active.tagName!=='TEXTAREA'&&active.tagName!=='SELECT')active.blur();}},{passive:true});
 document.addEventListener('pointerdown', () => {
-  // ポインター開始時に必ずリセット（初回クリック不発防止）
 }, { passive: true });
 // ============================================================
 //  初期化
