@@ -384,7 +384,7 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
     <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
       <button class="sync-action-btn primary" onclick="setupSync()">接続 / 作成</button>
       <button class="sync-action-btn secondary" onclick="clearSync()">切断</button>
-      <button class="sync-action-btn secondary" onclick="(async()=>{const fresh=JSON.parse(localStorage.getItem('cp_groups5'));const freshPin=JSON.parse(localStorage.getItem('cp_pin_row'));const ok=await gistPut(fresh,freshPin,dividerColors);if(ok){lastEtag='';showToast('Gistに保存しました！');}else{showToast('Push失敗！');}})()">↑ 強制Push</button>
+      <button class="sync-action-btn secondary" onclick="(async()=>{const fresh=JSON.parse(localStorage.getItem('cp_groups5'));const freshPin=JSON.parse(localStorage.getItem('cp_pin_row'));const ok=await gistPut(fresh,freshPin,dividerColors,_editHistory);if(ok){lastEtag='';showToast('Gistに保存しました！');}else{showToast('Push失敗！');}})()">↑ 強制Push</button>
     </div>
     <div class="sync-note">
       使い方：<a href="https://github.com/settings/tokens/new?scopes=gist&description=ColorPreview" target="_blank">GitHubでgistスコープのTokenを作成</a> → 1人目が「接続/作成」→ 表示されたGist IDを相手に送る → 2人目も同じTokenとGist IDで接続
@@ -1797,6 +1797,24 @@ let _editHistory = [];
 const _lastKeyTimes = new Map();
 const HISTORY_MIN_INTERVAL = 15 * 60 * 1000;
 
+function _renderEditHistoryBadges() {
+  const container = document.getElementById('editHistoryBadges');
+  const infoEl = document.getElementById('lastEditInfo');
+  if (!container || !infoEl) return;
+  container.innerHTML = '';
+  for (let i = _editHistory.length - 1; i >= 0; i--) {
+    const entry = _editHistory[i];
+    const badge = document.createElement('div');
+    badge.className = 'edit-history-badge';
+    badge.innerHTML = i === 0
+      ? `${entry.label}<span class="badge-time"> ${entry.time}</span>`
+      : entry.label;
+    container.append(badge);
+  }
+  if (_editHistory.length > 0) infoEl.style.display = 'block';
+  if (window._scheduleTwemoji) window._scheduleTwemoji();
+}
+
 function updateLastEditInfo(data, changedKeys) {
   if (!changedKeys || changedKeys.length === 0) return;
   const ts = data && data.updatedAt ? data.updatedAt : Date.now();
@@ -1815,22 +1833,8 @@ function updateLastEditInfo(data, changedKeys) {
   _editHistory.unshift({ time: timeStr, label });
   _editHistory = _editHistory.slice(0, 5);
 
-  const container = document.getElementById('editHistoryBadges');
-  const infoEl = document.getElementById('lastEditInfo');
-  if (!container || !infoEl) return;
-
-  container.innerHTML = '';
-  for (let i = _editHistory.length - 1; i >= 0; i--) {
-    const entry = _editHistory[i];
-    const badge = document.createElement('div');
-    badge.className = 'edit-history-badge';
-    badge.innerHTML = i === 0
-      ? `${entry.label}<span class="badge-time"> ${entry.time}</span>`
-      : entry.label;
-    container.append(badge);
-  }
-  infoEl.style.display = 'block';
-  if (window._scheduleTwemoji) window._scheduleTwemoji();
+  _renderEditHistoryBadges();
+  scheduleSyncPush();
 }
 
 function copySyncGistId(){
@@ -1861,15 +1865,21 @@ async function gistGet(){
       groups:JSON.parse(data.files['presets.json'].content),
       pin:data.files['pin.json']?JSON.parse(data.files['pin.json'].content):null,
       dividerColors:data.files['divider_colors.json']?JSON.parse(data.files['divider_colors.json'].content):null,
+      history:data.files['history.json']?JSON.parse(data.files['history.json'].content):null,
       updatedAt:data.updated_at||null,
       owner:data.owner?data.owner.login:null
     };
   }catch(e){return null;}
 }
 
-async function gistPut(gs,pin,dc){
+async function gistPut(gs,pin,dc,hist){
   if(!syncConfig.gistId||!syncConfig.token) return false;
-  const files={'presets.json':{content:JSON.stringify(gs)},'pin.json':{content:JSON.stringify(pin!==undefined?pin:pinColors)},'divider_colors.json':{content:JSON.stringify(dc!==undefined?dc:dividerColors)}};
+  const files={
+    'presets.json':{content:JSON.stringify(gs)},
+    'pin.json':{content:JSON.stringify(pin!==undefined?pin:pinColors)},
+    'divider_colors.json':{content:JSON.stringify(dc!==undefined?dc:dividerColors)},
+    'history.json':{content:JSON.stringify(hist!==undefined?hist:_editHistory)}
+  };
   const r=await fetch('https://api.github.com/gists/'+syncConfig.gistId,{method:'PATCH',headers:{'Authorization':'token '+syncConfig.token,'Content-Type':'application/json'},body:JSON.stringify({files})});
   return r.ok;
 }
@@ -1954,13 +1964,23 @@ function mergePins(localPins, remotePins) {
 
 function mergeDividerColors(localDc,remoteDc){if(!remoteDc)return localDc;const merged=[...remoteDc];localDc.forEach(c=>{if(!merged.includes(c)&&merged.length<6)merged.push(c);});return merged.slice(0,6);}
 
+function mergeHistory(localH, remoteH) {
+  if (!remoteH || !Array.isArray(remoteH)) return localH;
+  const map = new Map();
+  [...localH, ...remoteH].forEach(e => {
+    const key = e.time + '|' + e.label;
+    if (!map.has(key)) map.set(key, e);
+  });
+  return Array.from(map.values()).slice(0, 5);
+}
+
 async function setupSync(){
   const token=document.getElementById('gistTokenInput').value.trim(),gistId=document.getElementById('gistIdInput').value.trim();
   if(!token){showToast('Tokenが必要です');return;}syncConfig.token=token;setSyncBadge('syncing','接続中…');
   if(gistId){
     syncConfig.gistId=gistId;const data=await gistGet();
     if(data===null){return;}
-    if(data){if(data.groups){groups=mergeGroups(groups,data.groups);localStorage.setItem('cp_groups5',JSON.stringify(groups));_lastRenderHash='';renderGroups();}if(data.pin){pinColors=mergePins(pinColors,data.pin);localStorage.setItem('cp_pin_row',JSON.stringify(pinColors));renderPinRow();}if(data.dividerColors){dividerColors=mergeDividerColors(dividerColors,data.dividerColors);localStorage.setItem('cp_divider_colors',JSON.stringify(dividerColors));}}
+    if(data){if(data.groups){groups=mergeGroups(groups,data.groups);localStorage.setItem('cp_groups5',JSON.stringify(groups));_lastRenderHash='';renderGroups();}if(data.pin){pinColors=mergePins(pinColors,data.pin);localStorage.setItem('cp_pin_row',JSON.stringify(pinColors));renderPinRow();}if(data.dividerColors){dividerColors=mergeDividerColors(dividerColors,data.dividerColors);localStorage.setItem('cp_divider_colors',JSON.stringify(dividerColors));}if(data.history){_editHistory=mergeHistory(_editHistory,data.history);_renderEditHistoryBadges();}}
     localStorage.setItem('cp_sync', JSON.stringify(syncConfig));
     await _doPush();
     startPolling();updateSyncGistIdDisplay();
@@ -2046,7 +2066,8 @@ pollTimer=setInterval(async()=>{
       localStorage.setItem('cp_pin_row',JSON.stringify(pinColors));
       localStorage.setItem('cp_divider_colors',JSON.stringify(dividerColors));
       _lastRenderHash=''; renderGroups(); renderPinRow();
-      updateLastEditInfo({updatedAt:Date.now()}, changedKeys);
+      if(data.history){_editHistory=mergeHistory(_editHistory,data.history);_renderEditHistoryBadges();}
+      else updateLastEditInfo({updatedAt:Date.now()}, changedKeys);
     }
   }
 },700);
@@ -2059,7 +2080,7 @@ async function _doPush(){
   isSyncPushing=true;
   setSyncBadge('syncing','同期中…');
   try{
-    await gistPut(groups,pinColors,dividerColors);lastEtag='';
+    await gistPut(groups,pinColors,dividerColors,_editHistory);lastEtag='';
     setSyncBadge('synced','同期済み ✓');
     setTimeout(()=>setSyncBadge('synced','同期中'),2000);
   }catch(e){
