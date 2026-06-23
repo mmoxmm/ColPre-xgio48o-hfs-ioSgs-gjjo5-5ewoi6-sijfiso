@@ -18,10 +18,8 @@
   var _pending = false;
   function applyTw(root){
     if(!root || typeof twemoji === 'undefined') return;
-    // すでに変換済みの要素（data-tw-done）はスキップ
     var targets = [root];
     if(root.querySelectorAll) {
-      // data-tw-done のない子要素のみ対象
       targets = Array.from(root.querySelectorAll('[data-gi]:not([data-tw-done]), .pin-row-inner:not([data-tw-done])'));
       if(targets.length === 0) return;
     }
@@ -345,6 +343,35 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
   content: ' · ';
   color: var(--border);
 }
+.edit-history-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 99px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  white-space: nowrap;
+  transition: opacity .3s;
+}
+.edit-history-badge:first-child {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
+.edit-history-badge .badge-time {
+  font-size: 9px;
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+  font-weight: 400;
+}
+.edit-history-badge:first-child .badge-time {
+  color: rgba(255,255,255,.6);
+}
 </style>
 </head>
 <body>
@@ -353,8 +380,7 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
     <h1>Color Preview <span>文字色 × 背景色チェッカー</span></h1>
     <div style="display:flex;align-items:center;gap:8px;">
     <div id="lastEditInfo" style="display:none;text-align:right;">
-  <span id="lastEditTime"></span>
-  <span id="lastEditKeys"></span>
+  <div id="editHistoryBadges" style="display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end;align-items:center;max-width:260px;"></div>
 </div>
       <div class="sync-badge" id="syncBadge" onclick="toggleSyncSetupPanel()" title="クリックで同期設定を開閉">
         <span class="sync-dot"></span><span id="syncLabel">未接続</span><span class="sync-gear">⚙</span>
@@ -1583,7 +1609,6 @@ function lpUpdateLockIcon(){
   if(!lpTarget) return;
   const iconBtn=document.getElementById('lpLockIconBtn'),chip=document.getElementById('lpChipBig');
   if(!lpTarget.c.locked){
-    // 未ロック：🔓を表示。pendingLock フラグで「設定保存時にロック」予約
     iconBtn.style.display='flex';
     if(lpTarget.pendingLock){
       iconBtn.className='lp-lock-icon-btn is-locked';
@@ -1603,13 +1628,11 @@ function lpUpdateLockIcon(){
 function lpToggleLock(){
   if(!lpTarget) return;
   if(!lpTarget.c.locked){
-    // 未ロック：pendingLock をトグル
     lpTarget.pendingLock=!lpTarget.pendingLock;
     lpUpdateLockIcon();
     updateLpOverwriteBtn();
     showToast(lpTarget.pendingLock?'🔒 設定保存でロックします':'ロック予約をキャンセルしました');
   } else {
-    // ロック済み：一時解除トグル（既存動作）
     lpTarget.tempUnlocked=!lpTarget.tempUnlocked;
     lpUpdateLockIcon();
     updateLpOverwriteBtn();
@@ -1651,7 +1674,6 @@ function lpSetLabel(val){
 }
 function lpOverwrite(){
   if(!lpTarget) return;
-  // 上書き保存ボタン押下時は必ずページ色（現在のbHex/tHex）を強制セット
   lpCompareTo('new');
   const bVal=document.getElementById('lpBHex').value,tVal=document.getElementById('lpTHex').value;
   if(!validHex(bVal)||!validHex(tVal)){showToast('有効な HEX 値を入力してください');return;}
@@ -1678,7 +1700,6 @@ function lpSaveSettings(){
     if(!isLocked&&validHex(bVal)&&validHex(tVal)){
       chip.b=bVal; chip.t=tVal;
     }
-    // tempUnlocked なら恒久解除、pendingLock なら新規ロック、それ以外は元のロック状態を維持
     if(tempUnlocked){
       chip.locked=false;
     } else if(lpTarget&&lpTarget.pendingLock){
@@ -1724,7 +1745,6 @@ function confirmOverwrite(){
   if(!chip){showToast('チップが見つかりません');pendingOverwrite=null;document.getElementById('overwriteModal').style.display='none';return;}
   chip.t=newT;chip.b=newB;if(newLabel!==undefined)chip.label=newLabel;chip.updatedAt=now();
   if(chipType==='pin'){savePinColors();renderPinRow();}else{saveGroups();_lastRenderHash='';renderGroups();}
-  // 行キー特定
   let _owKey='📌';
   if(chipType==='group'&&gi!=null&&ri!=null){const _r=groups[gi]&&groups[gi].rows[ri];if(_r&&!_r.divider)_owKey=_r.key;}
   notifyLocalEdit([_owKey]);
@@ -1782,26 +1802,36 @@ function setSyncBadge(state,label,errorMsg){
   }
 }
 
-function updateLastEditInfo(data, changedKeys){
-  if(!data||!data.updatedAt) return;
-  const el=document.getElementById('lastEditInfo');
-  const timeEl=document.getElementById('lastEditTime');
-  const keysEl=document.getElementById('lastEditKeys');
-  const d=new Date(data.updatedAt);
-  const pad=n=>String(n).padStart(2,'0');
-  const str=`${pad(d.getMonth()+1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  timeEl.textContent=str;
-  if(changedKeys&&changedKeys.length>0){
-    const uniq=[...new Set(changedKeys)];
-    if(uniq.length>=5){
-      keysEl.textContent=uniq.slice(0,4).join(' ')+' …';
-    } else {
-      keysEl.textContent=uniq.join(' ');
-    }
-  } else {
-    keysEl.textContent='';
-  }
-  el.style.display='block';
+// ============================================================
+//  編集履歴バッジ
+// ============================================================
+let _editHistory = [];
+
+function updateLastEditInfo(data, changedKeys) {
+  if (!changedKeys || changedKeys.length === 0) return;
+  const d = new Date(data && data.updatedAt ? data.updatedAt : Date.now());
+  const pad = n => String(n).padStart(2, '0');
+  const timeStr = `${pad(d.getMonth()+1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const uniq = [...new Set(changedKeys)];
+  const label = uniq.length >= 4 ? uniq.slice(0,3).join(' ') + ' …' : uniq.join(' ');
+
+  _editHistory.unshift({ time: timeStr, label });
+  _editHistory = _editHistory.slice(0, 5);
+
+  const container = document.getElementById('editHistoryBadges');
+  const infoEl = document.getElementById('lastEditInfo');
+  if (!container || !infoEl) return;
+
+  container.innerHTML = '';
+  _editHistory.forEach((entry, i) => {
+    const badge = document.createElement('div');
+    badge.className = 'edit-history-badge';
+    badge.style.opacity = String(1 - i * 0.15);
+    badge.innerHTML = `<span>${entry.label}</span><span class="badge-time">${entry.time}</span>`;
+    container.append(badge);
+  });
+  infoEl.style.display = 'block';
+  if (window._scheduleTwemoji) window._scheduleTwemoji();
 }
 
 function copySyncGistId(){
@@ -1932,7 +1962,6 @@ async function setupSync(){
     syncConfig.gistId=gistId;const data=await gistGet();
     if(data===null){return;}
     if(data){if(data.groups){groups=mergeGroups(groups,data.groups);localStorage.setItem('cp_groups5',JSON.stringify(groups));_lastRenderHash='';renderGroups();}if(data.pin){pinColors=mergePins(pinColors,data.pin);localStorage.setItem('cp_pin_row',JSON.stringify(pinColors));renderPinRow();}if(data.dividerColors){dividerColors=mergeDividerColors(dividerColors,data.dividerColors);localStorage.setItem('cp_divider_colors',JSON.stringify(dividerColors));}}
-    updateLastEditInfo(data, []);
     localStorage.setItem('cp_sync', JSON.stringify(syncConfig));
     await _doPush();
     startPolling();updateSyncGistIdDisplay();
@@ -1964,11 +1993,11 @@ function clearSync(){
 function startPolling(){
   stopPolling();setSyncBadge('synced','同期中');
 pollTimer=setInterval(async()=>{
-  if(isSyncPushing) return;     if(now()-lastPushAt<2000) return;
+  if(isSyncPushing) return;
+  if(now()-lastPushAt<2000) return;
   let data;
   try{ data=await gistGet(); }catch(e){ setSyncBadge('error','エラー','通信エラー: '+e.message); return; }
   if(data===null){ return; }
-  updateLastEditInfo(data);
   if(data){
     const prevStr=JSON.stringify(groups)+'|'+JSON.stringify(pinColors)+'|'+JSON.stringify(dividerColors);
     const mergedGroups=mergeGroups(groups,data.groups||groups);
@@ -1978,7 +2007,6 @@ pollTimer=setInterval(async()=>{
     if(newStr!==prevStr){
       // 変更チップの行キーを収集
       const changedKeys=[];
-      // グループ内チップ
       const prevGroups=JSON.parse(localStorage.getItem('cp_groups5')||'[]');
       mergedGroups.forEach(mg=>{
         const pg=prevGroups.find(g=>g.id===mg.id);
@@ -1992,8 +2020,6 @@ pollTimer=setInterval(async()=>{
               changedKeys.push(mr.key);
             }
           });
-          // 追加チップ（pcが存在しない）はすでに上で拾える
-          // 削除チップ
           if(pr){
             pr.colors.forEach(pc=>{
               if(pc.deleted) return;
