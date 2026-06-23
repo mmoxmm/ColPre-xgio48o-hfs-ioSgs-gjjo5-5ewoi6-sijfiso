@@ -363,13 +363,12 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
   color: var(--bg);
   border-color: var(--text);
 }
-.edit-history-badge .badge-time {
-  font-size: 9px;
-  color: var(--muted);
-  font-family: 'DM Mono', monospace;
-  font-weight: 400;
+.edit-history-badge.latest {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
 }
-.edit-history-badge:first-child .badge-time {
+.edit-history-badge.latest .badge-time {
   color: rgba(255,255,255,.6);
 }
 </style>
@@ -1823,13 +1822,16 @@ function updateLastEditInfo(data, changedKeys) {
   if (!container || !infoEl) return;
 
   container.innerHTML = '';
-  _editHistory.forEach((entry, i) => {
+  for (let i = _editHistory.length - 1; i >= 0; i--) {
+    const entry = _editHistory[i];
     const badge = document.createElement('div');
-    badge.className = 'edit-history-badge';
+    badge.className = 'edit-history-badge' + (i === 0 ? ' latest' : '');
     badge.style.opacity = String(1 - i * 0.15);
-    badge.innerHTML = `<span>${entry.label}</span><span class="badge-time">${entry.time}</span>`;
+    badge.innerHTML = i === 0
+      ? `<span>${entry.label}</span><span class="badge-time">${entry.time}</span>`
+      : `<span>${entry.label}</span>`;
     container.append(badge);
-  });
+  }
   infoEl.style.display = 'block';
   if (window._scheduleTwemoji) window._scheduleTwemoji();
 }
