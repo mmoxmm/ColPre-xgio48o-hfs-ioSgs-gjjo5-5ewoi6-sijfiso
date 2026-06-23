@@ -1582,11 +1582,40 @@ function updateLpOverwriteBtn(){
 function lpUpdateLockIcon(){
   if(!lpTarget) return;
   const iconBtn=document.getElementById('lpLockIconBtn'),chip=document.getElementById('lpChipBig');
-  if(!lpTarget.c.locked){iconBtn.style.display='none';chip.classList.remove('is-locked');}
+  if(!lpTarget.c.locked){
+    // 未ロック：🔓を表示。pendingLock フラグで「設定保存時にロック」予約
+    iconBtn.style.display='flex';
+    if(lpTarget.pendingLock){
+      iconBtn.className='lp-lock-icon-btn is-locked';
+      iconBtn.textContent='🔒';
+      iconBtn.title='ロック予約中 — 設定保存で確定（もう一度押すとキャンセル）';
+      chip.classList.add('is-locked');
+    } else {
+      iconBtn.className='lp-lock-icon-btn is-unlocked-temp';
+      iconBtn.textContent='🔓';
+      iconBtn.title='クリックでロックを設定（設定保存で確定）';
+      chip.classList.remove('is-locked');
+    }
+  }
   else if(!lpTarget.tempUnlocked){iconBtn.style.display='flex';iconBtn.className='lp-lock-icon-btn is-locked';iconBtn.textContent='🔒';iconBtn.title='クリックでロック解除（設定保存で確定）';chip.classList.add('is-locked');}
   else{iconBtn.style.display='flex';iconBtn.className='lp-lock-icon-btn is-unlocked-temp';iconBtn.textContent='🔓';iconBtn.title='ロック解除中 — 設定保存で確定';chip.classList.remove('is-locked');}
 }
-function lpToggleLock(){if(!lpTarget) return;lpTarget.tempUnlocked=!lpTarget.tempUnlocked;lpUpdateLockIcon();updateLpOverwriteBtn();showToast(lpTarget.tempUnlocked?'一時解除中 — 保存時に再ロック':'再ロックしました');}
+function lpToggleLock(){
+  if(!lpTarget) return;
+  if(!lpTarget.c.locked){
+    // 未ロック：pendingLock をトグル
+    lpTarget.pendingLock=!lpTarget.pendingLock;
+    lpUpdateLockIcon();
+    updateLpOverwriteBtn();
+    showToast(lpTarget.pendingLock?'🔒 設定保存でロックします':'ロック予約をキャンセルしました');
+  } else {
+    // ロック済み：一時解除トグル（既存動作）
+    lpTarget.tempUnlocked=!lpTarget.tempUnlocked;
+    lpUpdateLockIcon();
+    updateLpOverwriteBtn();
+    showToast(lpTarget.tempUnlocked?'一時解除中 — 保存時に再ロック':'再ロックしました');
+  }
+}
 function lpSetInputs(bVal,tVal){
   if(validHex(bVal)){document.getElementById('lpBHex').value=bVal;document.getElementById('lpBPicker').value=bVal;document.getElementById('lpBSwatch').style.background=bVal;document.getElementById('lpBHex').classList.remove('invalid');}
   if(validHex(tVal)){document.getElementById('lpTHex').value=tVal;document.getElementById('lpTPicker').value=tVal;document.getElementById('lpTSwatch').style.background=tVal;document.getElementById('lpTHex').classList.remove('invalid');}
@@ -1601,7 +1630,7 @@ function lpSwapColors(){const bVal=document.getElementById('lpBHex').value,tVal=
 function lpMatchToPreview(){const bVal=document.getElementById('lpBHex').value,tVal=document.getElementById('lpTHex').value;const bOk=validHex(bVal),tOk=validHex(tVal);if(!bOk&&!tOk){showToast('有効なHEXを入力してください');return;}const base=bOk?bVal:tVal;lpSetInputs(base,base);lpUpdateCanvas();updateLpOverwriteBtn();showToast('同じ色 '+base.toUpperCase()+' に揃えました');}
 function openLpModal(c,gi,ri,ci,chipType){
   longPressConsumed=true;longPressActive=false;if(longPressTimer){clearTimeout(longPressTimer);longPressTimer=null;}
-  lpTarget={c,gi,ri,ci,chipType:chipType||'group',tempUnlocked:false};
+  lpTarget={c,gi,ri,ci,chipType:chipType||'group',tempUnlocked:false,pendingLock:false};
   lpOldB=c.b;lpOldT=c.t;lpSnapB=document.getElementById('bHex').value;lpSnapT=document.getElementById('tHex').value;
   const rawLabel=(c.label&&c.label.trim()&&c.label.trim()!=='Aa')?c.label.trim():'';
   document.getElementById('lpLabelInput').value=rawLabel;
@@ -1649,9 +1678,11 @@ function lpSaveSettings(){
     if(!isLocked&&validHex(bVal)&&validHex(tVal)){
       chip.b=bVal; chip.t=tVal;
     }
-    // tempUnlocked なら恒久解除、そうでなければ元のロック状態を維持
+    // tempUnlocked なら恒久解除、pendingLock なら新規ロック、それ以外は元のロック状態を維持
     if(tempUnlocked){
       chip.locked=false;
+    } else if(lpTarget&&lpTarget.pendingLock){
+      chip.locked=true;
     }
     chip.updatedAt=now();
   }
