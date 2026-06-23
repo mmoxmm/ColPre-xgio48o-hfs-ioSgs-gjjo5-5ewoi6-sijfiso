@@ -346,31 +346,20 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
 .edit-history-badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 11px;
-  font-family: 'IBM Plex Sans', sans-serif;
+  gap: 5px;
+  font-size: 12px;
+  font-family: 'Syne', sans-serif;
   font-weight: 600;
-  padding: 2px 7px;
-  border-radius: 99px;
-  border: 1px solid var(--border);
-  background: var(--surface);
   color: var(--text);
   white-space: nowrap;
-  transition: opacity .3s;
 }
-.edit-history-badge:first-child {
-  background: var(--text);
-  color: var(--bg);
-  border-color: var(--text);
+.edit-history-badge .badge-time {
+  font-size: 11px;
+  font-family: 'DM Mono', monospace;
+  font-weight: 400;
+  color: var(--muted);
 }
-.edit-history-badge.latest {
-  background: var(--text);
-  color: var(--bg);
-  border-color: var(--text);
-}
-.edit-history-badge.latest .badge-time {
-  color: rgba(255,255,255,.6);
-}
+ 
 </style>
 </head>
 <body>
@@ -1805,14 +1794,23 @@ function setSyncBadge(state,label,errorMsg){
 //  編集履歴バッジ
 // ============================================================
 let _editHistory = [];
+const _lastKeyTimes = new Map();
+const HISTORY_MIN_INTERVAL = 15 * 60 * 1000;
 
 function updateLastEditInfo(data, changedKeys) {
   if (!changedKeys || changedKeys.length === 0) return;
-  const d = new Date(data && data.updatedAt ? data.updatedAt : Date.now());
-  const pad = n => String(n).padStart(2, '0');
-  const timeStr = `${pad(d.getMonth()+1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const ts = data && data.updatedAt ? data.updatedAt : Date.now();
   const uniq = [...new Set(changedKeys)];
   const label = uniq.length >= 4 ? uniq.slice(0,3).join(' ') + ' …' : uniq.join(' ');
+
+  // 同じキーは15分以内スキップ（連続重複も含む）
+  const lastTime = _lastKeyTimes.get(label);
+  if (lastTime && ts - lastTime < HISTORY_MIN_INTERVAL) return;
+  _lastKeyTimes.set(label, ts);
+
+  const d = new Date(ts);
+  const pad = n => String(n).padStart(2, '0');
+  const timeStr = `${pad(d.getMonth()+1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 
   _editHistory.unshift({ time: timeStr, label });
   _editHistory = _editHistory.slice(0, 5);
@@ -1825,11 +1823,10 @@ function updateLastEditInfo(data, changedKeys) {
   for (let i = _editHistory.length - 1; i >= 0; i--) {
     const entry = _editHistory[i];
     const badge = document.createElement('div');
-    badge.className = 'edit-history-badge' + (i === 0 ? ' latest' : '');
-    badge.style.opacity = String(1 - i * 0.15);
+    badge.className = 'edit-history-badge';
     badge.innerHTML = i === 0
-      ? `<span>${entry.label}</span><span class="badge-time">${entry.time}</span>`
-      : `<span>${entry.label}</span>`;
+      ? `${entry.label}<span class="badge-time"> ${entry.time}</span>`
+      : entry.label;
     container.append(badge);
   }
   infoEl.style.display = 'block';
