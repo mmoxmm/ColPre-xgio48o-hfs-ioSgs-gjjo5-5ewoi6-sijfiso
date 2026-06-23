@@ -335,13 +335,13 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
   color: var(--text);
   white-space: nowrap;
 }
-#lastEditUser {
+#lastEditKeys {
   font-size: 11px;
   font-weight: 400;
   color: var(--muted);
   white-space: nowrap;
 }
-#lastEditUser::before {
+#lastEditKeys::before {
   content: ' · ';
   color: var(--border);
 }
@@ -354,7 +354,7 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
     <div style="display:flex;align-items:center;gap:8px;">
     <div id="lastEditInfo" style="display:none;text-align:right;">
   <span id="lastEditTime"></span>
-  <span id="lastEditUser"></span>
+  <span id="lastEditKeys"></span>
 </div>
       <div class="sync-badge" id="syncBadge" onclick="toggleSyncSetupPanel()" title="クリックで同期設定を開閉">
         <span class="sync-dot"></span><span id="syncLabel">未接続</span><span class="sync-gear">⚙</span>
@@ -908,6 +908,11 @@ function saveGroups() {
   localStorage.setItem('cp_groups5', JSON.stringify(groups));
   scheduleSyncPush();
 }
+
+// 自分の操作後に lastEditInfo を更新するユーティリティ
+function notifyLocalEdit(keys){
+  updateLastEditInfo({updatedAt:Date.now()}, keys);
+}
 // ============================================================
 //  モード管理
 // ============================================================
@@ -1370,6 +1375,7 @@ function _buildGroupBlock(g, gi) {
   if(!liveRow||liveRow.deleted){showToast('行が見つかりません');return;}
   liveRow.colors.push({id:uid(),t,b,locked:false,label:'',copyTarget:'b',updatedAt:now(),order:maxOrder(liveRow.colors)+1000,deleted:false});
   saveGroups();_lastRenderHash='';_groupBlockHashes.clear();renderGroups();
+  notifyLocalEdit([liveRow.key]);
 });
     })(row,gi,currentRi);
     swatchesEl.append(addRowBtn); rowEl.append(swatchesEl); rowsEl.append(rowEl);
@@ -1463,6 +1469,7 @@ function confirmAdd(){
   }
   row.colors.push({id:uid(),t,b,locked:false,label,copyTarget:'b',updatedAt:now(),order:maxOrder(row.colors)+1000,deleted:false});
   saveGroups();_lastRenderHash='';renderGroups();closeModal();
+  notifyLocalEdit([key]);
 }
 
 // ============================================================
@@ -1509,6 +1516,7 @@ function confirmAddRow(){
   if(!targetRow||targetRow.divider){showToast('行が見つかりません');closeAddRowModal();return;}
   targetRow.colors.push({id:uid(),t,b,locked:false,label,copyTarget:'b',updatedAt:now(),order:maxOrder(targetRow.colors)+1000,deleted:false});
   saveGroups();_lastRenderHash='';renderGroups();closeAddRowModal();
+  notifyLocalEdit([targetRow.key]);
 }
 
 // ============================================================
@@ -1575,8 +1583,8 @@ function lpUpdateLockIcon(){
   if(!lpTarget) return;
   const iconBtn=document.getElementById('lpLockIconBtn'),chip=document.getElementById('lpChipBig');
   if(!lpTarget.c.locked){iconBtn.style.display='none';chip.classList.remove('is-locked');}
-  else if(!lpTarget.tempUnlocked){iconBtn.style.display='flex';iconBtn.className='lp-lock-icon-btn is-locked';iconBtn.textContent='🔒';chip.classList.add('is-locked');}
-  else{iconBtn.style.display='flex';iconBtn.className='lp-lock-icon-btn is-unlocked-temp';iconBtn.textContent='🔓';chip.classList.remove('is-locked');}
+  else if(!lpTarget.tempUnlocked){iconBtn.style.display='flex';iconBtn.className='lp-lock-icon-btn is-locked';iconBtn.textContent='🔒';iconBtn.title='クリックでロック解除（設定保存で確定）';chip.classList.add('is-locked');}
+  else{iconBtn.style.display='flex';iconBtn.className='lp-lock-icon-btn is-unlocked-temp';iconBtn.textContent='🔓';iconBtn.title='ロック解除中 — 設定保存で確定';chip.classList.remove('is-locked');}
 }
 function lpToggleLock(){if(!lpTarget) return;lpTarget.tempUnlocked=!lpTarget.tempUnlocked;lpUpdateLockIcon();updateLpOverwriteBtn();showToast(lpTarget.tempUnlocked?'一時解除中 — 保存時に再ロック':'再ロックしました');}
 function lpSetInputs(bVal,tVal){
@@ -1614,6 +1622,8 @@ function lpSetLabel(val){
 }
 function lpOverwrite(){
   if(!lpTarget) return;
+  // 上書き保存ボタン押下時は必ずページ色（現在のbHex/tHex）を強制セット
+  lpCompareTo('new');
   const bVal=document.getElementById('lpBHex').value,tVal=document.getElementById('lpTHex').value;
   if(!validHex(bVal)||!validHex(tVal)){showToast('有効な HEX 値を入力してください');return;}
   if(lpTarget.c.locked&&!lpTarget.tempUnlocked){showToast('🔒 一時解除してから操作してください');return;}
@@ -1639,18 +1649,27 @@ function lpSaveSettings(){
     if(!isLocked&&validHex(bVal)&&validHex(tVal)){
       chip.b=bVal; chip.t=tVal;
     }
+    // tempUnlocked なら恒久解除、そうでなければ元のロック状態を維持
+    if(tempUnlocked){
+      chip.locked=false;
+    }
     chip.updatedAt=now();
   }
   lpTarget=null; longPressActive=false; longPressConsumed=false;
   document.getElementById('longPressEditModal').style.display='none';
+  let _lsKey='📌';
+  if(chipType==='group'&&gi!=null&&ri!=null){const _r=groups[gi]&&groups[gi].rows[ri];if(_r&&!_r.divider)_lsKey=_r.key;}
   if(chipType==='pin'){savePinColors();renderPinRow();}
   else{saveGroups();_lastRenderHash='';renderGroups();}
+  notifyLocalEdit([_lsKey]);
   showToast('設定を保存しました ✓');
 }
 function lpDelete(){
   if(!lpTarget) return;
   if(lpTarget.c.locked&&!lpTarget.tempUnlocked){showToast('🔒 ロックされているため削除できません。先にロックを解除してください。');return;}
   const {gi,ri,ci,chipType}=lpTarget;closeLpModal();
+  let _ldKey='📌';
+  if(chipType==='group'&&gi!=null&&ri!=null){const _r=groups[gi]&&groups[gi].rows[ri];if(_r&&!_r.divider)_ldKey=_r.key;}
   if(chipType==='pin'){
     const dataIdx=resolveChipDataIndex(pinColors,ci);
     if(dataIdx>=0){pinColors[dataIdx].deleted=true;pinColors[dataIdx].updatedAt=now();}
@@ -1663,6 +1682,7 @@ function lpDelete(){
     }
     saveGroups();_lastRenderHash='';renderGroups();
   }
+  notifyLocalEdit([_ldKey]);
   showToast('削除しました');
 }
 function closeOverwriteModal(){pendingOverwrite=null;document.getElementById('overwriteModal').style.display='none';}
@@ -1673,6 +1693,10 @@ function confirmOverwrite(){
   if(!chip){showToast('チップが見つかりません');pendingOverwrite=null;document.getElementById('overwriteModal').style.display='none';return;}
   chip.t=newT;chip.b=newB;if(newLabel!==undefined)chip.label=newLabel;chip.updatedAt=now();
   if(chipType==='pin'){savePinColors();renderPinRow();}else{saveGroups();_lastRenderHash='';renderGroups();}
+  // 行キー特定
+  let _owKey='📌';
+  if(chipType==='group'&&gi!=null&&ri!=null){const _r=groups[gi]&&groups[gi].rows[ri];if(_r&&!_r.divider)_owKey=_r.key;}
+  notifyLocalEdit([_owKey]);
   showToast('色を上書きしました ✓');pendingOverwrite=null;document.getElementById('overwriteModal').style.display='none';
 }
 
@@ -1727,16 +1751,25 @@ function setSyncBadge(state,label,errorMsg){
   }
 }
 
-function updateLastEditInfo(data){
+function updateLastEditInfo(data, changedKeys){
   if(!data||!data.updatedAt) return;
   const el=document.getElementById('lastEditInfo');
   const timeEl=document.getElementById('lastEditTime');
-  const userEl=document.getElementById('lastEditUser');
+  const keysEl=document.getElementById('lastEditKeys');
   const d=new Date(data.updatedAt);
   const pad=n=>String(n).padStart(2,'0');
-  const str=`${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  userEl.textContent = data.owner ? '@' + data.owner : '';
+  const str=`${pad(d.getMonth()+1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
   timeEl.textContent=str;
+  if(changedKeys&&changedKeys.length>0){
+    const uniq=[...new Set(changedKeys)];
+    if(uniq.length>=5){
+      keysEl.textContent=uniq.slice(0,4).join(' ')+' …';
+    } else {
+      keysEl.textContent=uniq.join(' ');
+    }
+  } else {
+    keysEl.textContent='';
+  }
   el.style.display='block';
 }
 
@@ -1868,7 +1901,7 @@ async function setupSync(){
     syncConfig.gistId=gistId;const data=await gistGet();
     if(data===null){return;}
     if(data){if(data.groups){groups=mergeGroups(groups,data.groups);localStorage.setItem('cp_groups5',JSON.stringify(groups));_lastRenderHash='';renderGroups();}if(data.pin){pinColors=mergePins(pinColors,data.pin);localStorage.setItem('cp_pin_row',JSON.stringify(pinColors));renderPinRow();}if(data.dividerColors){dividerColors=mergeDividerColors(dividerColors,data.dividerColors);localStorage.setItem('cp_divider_colors',JSON.stringify(dividerColors));}}
-    updateLastEditInfo(data);
+    updateLastEditInfo(data, []);
     localStorage.setItem('cp_sync', JSON.stringify(syncConfig));
     await _doPush();
     startPolling();updateSyncGistIdDisplay();
@@ -1912,11 +1945,52 @@ pollTimer=setInterval(async()=>{
     const mergedDc=mergeDividerColors(dividerColors,data.dividerColors||dividerColors);
     const newStr=JSON.stringify(mergedGroups)+'|'+JSON.stringify(mergedPin)+'|'+JSON.stringify(mergedDc);
     if(newStr!==prevStr){
+      // 変更チップの行キーを収集
+      const changedKeys=[];
+      // グループ内チップ
+      const prevGroups=JSON.parse(localStorage.getItem('cp_groups5')||'[]');
+      mergedGroups.forEach(mg=>{
+        const pg=prevGroups.find(g=>g.id===mg.id);
+        mg.rows.forEach(mr=>{
+          if(mr.divider||mr.deleted) return;
+          const pr=pg?pg.rows.find(r=>!r.divider&&r.key===mr.key):null;
+          mr.colors.forEach(mc=>{
+            if(mc.deleted) return;
+            const pc=pr?pr.colors.find(c=>c.id===mc.id):null;
+            if(!pc||(mc.updatedAt>pc.updatedAt)){
+              changedKeys.push(mr.key);
+            }
+          });
+          // 追加チップ（pcが存在しない）はすでに上で拾える
+          // 削除チップ
+          if(pr){
+            pr.colors.forEach(pc=>{
+              if(pc.deleted) return;
+              const mc=mr.colors.find(c=>c.id===pc.id);
+              if(!mc||mc.deleted) changedKeys.push(mr.key);
+            });
+          }
+        });
+      });
+      // ピンチップ
+      const prevPins=JSON.parse(localStorage.getItem('cp_pin_row')||'[]');
+      mergedPin.forEach(mc=>{
+        if(mc.deleted) return;
+        const pc=prevPins.find(c=>c.id===mc.id);
+        if(!pc||(mc.updatedAt>pc.updatedAt)) changedKeys.push('📌');
+      });
+      prevPins.forEach(pc=>{
+        if(pc.deleted) return;
+        const mc=mergedPin.find(c=>c.id===pc.id);
+        if(!mc||mc.deleted) changedKeys.push('📌');
+      });
+
       groups=mergedGroups; pinColors=mergedPin; dividerColors=mergedDc;
       localStorage.setItem('cp_groups5',JSON.stringify(groups));
       localStorage.setItem('cp_pin_row',JSON.stringify(pinColors));
       localStorage.setItem('cp_divider_colors',JSON.stringify(dividerColors));
       _lastRenderHash=''; renderGroups(); renderPinRow();
+      updateLastEditInfo({updatedAt:Date.now()}, changedKeys);
     }
   }
 },700);
