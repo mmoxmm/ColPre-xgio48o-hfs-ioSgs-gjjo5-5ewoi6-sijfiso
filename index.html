@@ -1793,7 +1793,9 @@ function setSyncBadge(state,label,errorMsg){
 // ============================================================
 //  編集履歴バッジ
 // ============================================================
-let _editHistory = [];
+let _editHistory = (() => {
+  try { return JSON.parse(localStorage.getItem('cp_edit_history') || '[]'); } catch(_){ return []; }
+})();
 const _lastKeyTimes = new Map();
 const HISTORY_MIN_INTERVAL = 15 * 60 * 1000;
 
@@ -1832,7 +1834,7 @@ function updateLastEditInfo(data, changedKeys) {
 
   _editHistory.unshift({ time: timeStr, label });
   _editHistory = _editHistory.slice(0, 5);
-
+localStorage.setItem('cp_edit_history', JSON.stringify(_editHistory));
   _renderEditHistoryBadges();
   scheduleSyncPush();
 }
@@ -2067,7 +2069,7 @@ pollTimer=setInterval(async()=>{
       localStorage.setItem('cp_divider_colors',JSON.stringify(dividerColors));
       _lastRenderHash=''; renderGroups(); renderPinRow();
       if(data.history){_editHistory=mergeHistory(_editHistory,data.history);_renderEditHistoryBadges();}
-      else updateLastEditInfo({updatedAt:Date.now()}, changedKeys);
+      else if (changedKeys.length > 0) updateLastEditInfo({updatedAt:Date.now()}, changedKeys);
     }
   }
 },700);
