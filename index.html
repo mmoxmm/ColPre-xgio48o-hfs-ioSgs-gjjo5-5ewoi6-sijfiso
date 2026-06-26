@@ -2307,6 +2307,7 @@ document.addEventListener('pointerdown', () => {
   if(syncConfig.token&&syncConfig.gistId){startPolling();updateSyncGistIdDisplay();document.getElementById('gistTokenInput').value=syncConfig.token;document.getElementById('gistIdInput').value=syncConfig.gistId;document.getElementById('syncSetup').style.display='none';}
   syncUI('t');syncUI('b');render();renderGroups();renderPinRow();
   setupCopyHexPressEffect('copyHexBBtn');setupCopyHexPressEffect('copyHexTBtn');
+  _renderEditHistoryBadges();
 })();
 </script>
 </body>
