@@ -970,17 +970,9 @@ function _saveDividerUserColors(arr) { dividerColors = arr.slice(0, 6); saveDivi
 function savePinColors() { localStorage.setItem('cp_pin_row', JSON.stringify(pinColors)); scheduleSyncPush(); }
 
 // 比較パネル（複数カラーを並べて見比べるスロット）
-let compareSlots = (() => {
-  try {
-    const d = localStorage.getItem('cp_compare_slots');
-    if (d) {
-      const arr = JSON.parse(d);
-      if (Array.isArray(arr) && arr.length) return arr;
-    }
-  } catch(e) {}
-  return Array.from({ length: 4 }, () => ({ id: uid(), filled: false, t: '', b: '', label: '', updatedAt: 0 }));
-})();
-function saveCompareSlots() { localStorage.setItem('cp_compare_slots', JSON.stringify(compareSlots)); }
+// ※このスロットの内容は保存・共有しない仕様。ページ更新のたびに空の状態に戻る。
+let compareSlots = Array.from({ length: 4 }, () => ({ id: uid(), filled: false, t: '', b: '', label: '', rowKey: '', updatedAt: 0 }));
+function saveCompareSlots() { /* 保存・共有は不要な仕様のため、あえて何もしない */ }
 
 function applyMigrations() {
   const KEY_V1 = 'cp_migrated_row_order_v1';
@@ -1020,6 +1012,7 @@ function notifyLocalEdit(keys){
 // ============================================================
 let appMode = 'normal', swapSelected = null, pendingOverwrite = null;
 let _lastRegisteredChipLabel = '';
+let _lastRegisteredRowKey = '';
 let longPressTimer = null, longPressActive = false, longPressConsumed = false;
 let lpTarget = null, lpOldB = '', lpOldT = '', lpSnapB = '', lpSnapT = '';
 let chipDragSrc = null, chipDropInfo = null, chipDragActive = false, chipPointerId = null, chipGhost = null;
@@ -1348,6 +1341,7 @@ function renderPinRow() {
           if(longPressActive||longPressConsumed){longPressActive=false;longPressConsumed=false;return;}
           chipTapCount++;
           _lastRegisteredChipLabel=getChipLabel(cC);
+          _lastRegisteredRowKey='📌';
           if(chipTapCount===1){chipTapTimer=setTimeout(()=>{chipTapCount=0;applyHex('t',cC.t);applyHex('b',cC.b);copyText(cC.b.toUpperCase());showColorToast(cC.b.toUpperCase(),cC.b,cC.t,'背景色');},280);}
           else if(chipTapCount===2){clearTimeout(chipTapTimer);chipTapTimer=setTimeout(()=>{chipTapCount=0;applyHex('t',cC.t);applyHex('b',cC.b);copyText(cC.t.toUpperCase());showColorToast(cC.t.toUpperCase(),cC.t,cC.b,'文字色');},280);}
           else if(chipTapCount>=3){clearTimeout(chipTapTimer);chipTapTimer=null;chipTapCount=0;applyHex('t',cC.t);applyHex('b',cC.b);showToast('プレビューに反映しました（コピーなし）');}
@@ -1387,11 +1381,16 @@ function renderComparePanel() {
     const div = document.createElement('div');
     div.className = 'compare-slot' + (slot.filled ? '' : ' empty');
     if (slot.filled) { div.style.background = slot.b; div.style.color = slot.t; }
-    div.title = slot.filled ? '短押し: この色をメインに反映 / 長押し: 編集' : '短押し: 現在の色をはめる / 長押し: 編集';
+    div.title = slot.filled ? 'クリック/タップ: 現在の色で上書き / ダブルクリック: プレビューへ反映 / 長押し: 編集' : 'クリック/タップ: 現在の色をはめる / 長押し: 編集';
 
     const label = document.createElement('div');
     label.className = 'compare-slot-sample';
-    label.textContent = slot.filled ? (slot.label && slot.label.trim() ? slot.label.trim() : 'Aa') : '＋';
+    if (slot.filled) {
+      const chipName = (slot.label && slot.label.trim()) ? slot.label.trim() : 'Aa';
+      label.textContent = slot.rowKey ? `${slot.rowKey} ${chipName}` : chipName;
+    } else {
+      label.textContent = '＋';
+    }
     div.append(label);
 
     if (slot.filled) {
@@ -1406,30 +1405,46 @@ function renderComparePanel() {
       clearBtn.title = 'スロットをクリア';
       clearBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        slot.filled = false; slot.t = ''; slot.b = ''; slot.label = ''; slot.updatedAt = now();
-        saveCompareSlots(); renderComparePanel(); showToast('スロットをクリアしました');
+        slot.filled = false; slot.t = ''; slot.b = ''; slot.label = ''; slot.rowKey = ''; slot.updatedAt = now();
+        renderComparePanel(); showToast('スロットをクリアしました');
       });
       div.append(clearBtn);
     }
 
-    let pressTimer = null, longPress = false;
+    let pressTimer = null, longPress = false, tapCount = 0, tapTimer = null;
     div.addEventListener('pointerdown', () => {
       longPress = false;
-      pressTimer = setTimeout(() => { longPress = true; pressTimer = null; openCompareSlotEditor(idx); }, 400);
+      pressTimer = setTimeout(() => {
+        longPress = true; pressTimer = null;
+        tapCount = 0; if (tapTimer) { clearTimeout(tapTimer); tapTimer = null; }
+        openCompareSlotEditor(idx);
+      }, 400);
     });
     div.addEventListener('pointerup', () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } });
     div.addEventListener('pointercancel', () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } longPress = false; });
     div.addEventListener('click', () => {
       if (longPress) { longPress = false; return; }
-      if (!slot.filled) {
-        const t = document.getElementById('tHex').value, b = document.getElementById('bHex').value;
-        slot.filled = true; slot.t = t; slot.b = b; slot.label = _lastRegisteredChipLabel || ''; slot.updatedAt = now();
-        saveCompareSlots(); renderComparePanel(); showToast(slot.label ? `スロットに「${slot.label}」の色をはめました` : 'スロットに色をはめました');
-      } else {
-        _lastRegisteredChipLabel = slot.label || '';
-        applyHex('t', slot.t); applyHex('b', slot.b);
-        copyText(slot.b.toUpperCase());
-        showColorToast(slot.b.toUpperCase(), slot.b, slot.t, '背景色');
+      tapCount++;
+      if (tapCount === 1) {
+        tapTimer = setTimeout(() => {
+          tapCount = 0;
+          // 単クリック/タップ：現在の色（＋行キー・チップ名）でスロットを上書き（空きスロットなら新規にはめる）
+          const t = document.getElementById('tHex').value, b = document.getElementById('bHex').value;
+          slot.filled = true; slot.t = t; slot.b = b;
+          slot.label = _lastRegisteredChipLabel || ''; slot.rowKey = _lastRegisteredRowKey || '';
+          slot.updatedAt = now();
+          renderComparePanel();
+          const nameForToast = slot.rowKey ? `${slot.rowKey} ${slot.label || 'Aa'}` : (slot.label || '');
+          showToast(nameForToast ? `スロットに「${nameForToast}」の色をはめました` : 'スロットに色をはめました');
+        }, 280);
+      } else if (tapCount >= 2) {
+        clearTimeout(tapTimer); tapTimer = null; tapCount = 0;
+        // ダブルクリック/タップ：スロットの色をメインプレビューへ反映
+        if (slot.filled) {
+          _lastRegisteredChipLabel = slot.label || ''; _lastRegisteredRowKey = slot.rowKey || '';
+          applyHex('t', slot.t); applyHex('b', slot.b);
+          showToast('プレビューに反映しました');
+        }
       }
     });
     div.addEventListener('contextmenu', e => e.preventDefault());
@@ -1445,7 +1460,7 @@ function renderComparePanel() {
   minusBtn.addEventListener('click', () => {
     if (compareSlots.length <= 1) { showToast('スロットは最低1つ必要です'); return; }
     compareSlots.pop();
-    saveCompareSlots(); renderComparePanel();
+    renderComparePanel();
   });
 
   const editBtn = document.createElement('button');
@@ -1458,8 +1473,8 @@ function renderComparePanel() {
   plusBtn.title = '枠を1つ追加';
   plusBtn.addEventListener('click', () => {
     if (compareSlots.length >= 10) { showToast('スロットは最大10個までです'); return; }
-    compareSlots.push({ id: uid(), filled: false, t: '', b: '', label: '', updatedAt: now() });
-    saveCompareSlots(); renderComparePanel();
+    compareSlots.push({ id: uid(), filled: false, t: '', b: '', label: '', rowKey: '', updatedAt: now() });
+    renderComparePanel();
   });
 
   controls.append(minusBtn, editBtn, plusBtn);
@@ -1515,13 +1530,13 @@ function saveCompareSlotModal() {
   slot.filled = true; slot.b = b; slot.t = t;
   slot.label = document.getElementById('csLabel').value.trim();
   slot.updatedAt = now();
-  saveCompareSlots(); renderComparePanel(); closeCompareSlotModal(); showToast('比較スロットを保存しました');
+  renderComparePanel(); closeCompareSlotModal(); showToast('比較スロットを保存しました');
 }
 function clearCompareSlotModal() {
   if (csTargetIdx < 0) return;
   const slot = compareSlots[csTargetIdx];
-  slot.filled = false; slot.t = ''; slot.b = ''; slot.label = ''; slot.updatedAt = now();
-  saveCompareSlots(); renderComparePanel(); closeCompareSlotModal(); showToast('スロットをクリアしました');
+  slot.filled = false; slot.t = ''; slot.b = ''; slot.label = ''; slot.rowKey = ''; slot.updatedAt = now();
+  renderComparePanel(); closeCompareSlotModal(); showToast('スロットをクリアしました');
 }
 
 // ============================================================
@@ -1615,6 +1630,7 @@ function _buildGroupBlock(g, gi) {
             if(longPressActive||longPressConsumed){longPressActive=false;longPressConsumed=false;return;}
             chipTapCount++;
             _lastRegisteredChipLabel=getChipLabel(cC);
+            _lastRegisteredRowKey=(groups[cGi]&&groups[cGi].rows[cRi]&&!groups[cGi].rows[cRi].divider)?groups[cGi].rows[cRi].key:'';
             if(chipTapCount===1){chipTapTimer=setTimeout(()=>{chipTapCount=0;applyHex('t',cC.t);applyHex('b',cC.b);copyText(cC.b.toUpperCase());showColorToast(cC.b.toUpperCase(),cC.b,cC.t,'背景色');},280);}
             else if(chipTapCount===2){clearTimeout(chipTapTimer);chipTapTimer=setTimeout(()=>{chipTapCount=0;applyHex('t',cC.t);applyHex('b',cC.b);copyText(cC.t.toUpperCase());showColorToast(cC.t.toUpperCase(),cC.t,cC.b,'文字色');},280);}
             else if(chipTapCount>=3){clearTimeout(chipTapTimer);chipTapTimer=null;chipTapCount=0;applyHex('t',cC.t);applyHex('b',cC.b);showToast('プレビューに反映しました（コピーなし）');}
@@ -2496,9 +2512,9 @@ function syncUI(k){
   document.getElementById(k+'S').style.background=`linear-gradient(to right,${hsvToHex(h,0,v)},${hsvToHex(h,100,v)})`;
   document.getElementById(k+'V').style.background=`linear-gradient(to right,${hsvToHex(h,s,0)},${hsvToHex(h,s,100)})`;
 }
-function fromSlider(k){_lastRegisteredChipLabel='';state[k].h=+document.getElementById(k+'H').value;state[k].s=+document.getElementById(k+'S').value;state[k].v=+document.getElementById(k+'V').value;const hex=hsvToHex(state[k].h,state[k].s,state[k].v);document.getElementById(k+'Picker').value=hex;document.getElementById(k+'Hex').value=hex;syncUI(k);render();}
-function applyMatchBg(){const hex=document.getElementById('bHex').value;if(!validHex(hex))return;_lastRegisteredChipLabel='';applyHex('t',hex);showToast('文字色を背景色 '+hex.toUpperCase()+' に揃えました');}
-function swapColors(){const th=document.getElementById('tHex').value,bh=document.getElementById('bHex').value;_lastRegisteredChipLabel='';applyHex('t',bh);applyHex('b',th);}
+function fromSlider(k){_lastRegisteredChipLabel='';_lastRegisteredRowKey='';state[k].h=+document.getElementById(k+'H').value;state[k].s=+document.getElementById(k+'S').value;state[k].v=+document.getElementById(k+'V').value;const hex=hsvToHex(state[k].h,state[k].s,state[k].v);document.getElementById(k+'Picker').value=hex;document.getElementById(k+'Hex').value=hex;syncUI(k);render();}
+function applyMatchBg(){const hex=document.getElementById('bHex').value;if(!validHex(hex))return;_lastRegisteredChipLabel='';_lastRegisteredRowKey='';applyHex('t',hex);showToast('文字色を背景色 '+hex.toUpperCase()+' に揃えました');}
+function swapColors(){const th=document.getElementById('tHex').value,bh=document.getElementById('bHex').value;_lastRegisteredChipLabel='';_lastRegisteredRowKey='';applyHex('t',bh);applyHex('b',th);}
 function render(){
   const tc=document.getElementById('tHex').value,bc=document.getElementById('bHex').value;
   document.getElementById('preview').style.background=bc;document.getElementById('preview').style.color=tc;
@@ -2514,7 +2530,7 @@ function pasteHex(k){
     let val=text.trim();
     if(/^[0-9a-fA-F]{6}$/.test(val))val='#'+val;
     if(validHex(val)){
-      _lastRegisteredChipLabel='';
+      _lastRegisteredChipLabel='';_lastRegisteredRowKey='';
       applyHex(k,val);
       const other=k==='b'?document.getElementById('tHex').value:document.getElementById('bHex').value;
       showColorToast(val.toUpperCase(),val,other,k==='b'?'背景色':'文字色');
@@ -2540,14 +2556,14 @@ function normalizeHexInput(val){val=val.trim();if(!val)return val;if(!val.starts
 
 ['tH','tS','tV'].forEach(id=>document.getElementById(id).oninput=()=>fromSlider('t'));
 ['bH','bS','bV'].forEach(id=>document.getElementById(id).oninput=()=>fromSlider('b'));
-document.getElementById('tPicker').oninput=e=>{_lastRegisteredChipLabel='';applyHex('t',e.target.value);};
-document.getElementById('bPicker').oninput=e=>{_lastRegisteredChipLabel='';applyHex('b',e.target.value);};
-document.getElementById('tHex').addEventListener('input',e=>{_lastRegisteredChipLabel='';let v=normalizeHexInput(e.target.value);if(v!==e.target.value)e.target.value=v;applyHex('t',v);});
-document.getElementById('bHex').addEventListener('input',e=>{_lastRegisteredChipLabel='';let v=normalizeHexInput(e.target.value);if(v!==e.target.value)e.target.value=v;applyHex('b',v);});
+document.getElementById('tPicker').oninput=e=>{_lastRegisteredChipLabel='';_lastRegisteredRowKey='';applyHex('t',e.target.value);};
+document.getElementById('bPicker').oninput=e=>{_lastRegisteredChipLabel='';_lastRegisteredRowKey='';applyHex('b',e.target.value);};
+document.getElementById('tHex').addEventListener('input',e=>{_lastRegisteredChipLabel='';_lastRegisteredRowKey='';let v=normalizeHexInput(e.target.value);if(v!==e.target.value)e.target.value=v;applyHex('t',v);});
+document.getElementById('bHex').addEventListener('input',e=>{_lastRegisteredChipLabel='';_lastRegisteredRowKey='';let v=normalizeHexInput(e.target.value);if(v!==e.target.value)e.target.value=v;applyHex('b',v);});
 ['tHex','bHex'].forEach(id=>{
   document.getElementById(id).addEventListener('paste',e=>{
     e.preventDefault();const raw=(e.clipboardData||window.clipboardData).getData('text');let val=raw.trim();if(/^[0-9a-fA-F]{6}$/.test(val))val='#'+val;
-    const k=id==='tHex'?'t':'b';_lastRegisteredChipLabel='';if(validHex(val)){applyHex(k,val);const other=k==='b'?document.getElementById('tHex').value:document.getElementById('bHex').value;showColorToast(val.toUpperCase(),val,other,k==='b'?'背景色':'文字色');}else{document.getElementById(id).value=raw;}
+    const k=id==='tHex'?'t':'b';_lastRegisteredChipLabel='';_lastRegisteredRowKey='';if(validHex(val)){applyHex(k,val);const other=k==='b'?document.getElementById('tHex').value:document.getElementById('bHex').value;showColorToast(val.toUpperCase(),val,other,k==='b'?'背景色':'文字色');}else{document.getElementById(id).value=raw;}
   });
 });
 document.getElementById('tName').oninput=render;document.getElementById('bName').oninput=render;
