@@ -1019,6 +1019,7 @@ function notifyLocalEdit(keys){
 //  モード管理
 // ============================================================
 let appMode = 'normal', swapSelected = null, pendingOverwrite = null;
+let _lastRegisteredChipLabel = '';
 let longPressTimer = null, longPressActive = false, longPressConsumed = false;
 let lpTarget = null, lpOldB = '', lpOldT = '', lpSnapB = '', lpSnapT = '';
 let chipDragSrc = null, chipDropInfo = null, chipDragActive = false, chipPointerId = null, chipGhost = null;
@@ -1346,6 +1347,7 @@ function renderPinRow() {
           if(appMode==='lock'){cC.locked=!cC.locked;cC.updatedAt=now();chip.classList.toggle('locked',cC.locked);saveGroups();showToast(cC.locked?'🔒 ロックしました':'🔓 解除しました');updateTooltip();return;}
           if(longPressActive||longPressConsumed){longPressActive=false;longPressConsumed=false;return;}
           chipTapCount++;
+          _lastRegisteredChipLabel=getChipLabel(cC);
           if(chipTapCount===1){chipTapTimer=setTimeout(()=>{chipTapCount=0;applyHex('t',cC.t);applyHex('b',cC.b);copyText(cC.b.toUpperCase());showColorToast(cC.b.toUpperCase(),cC.b,cC.t,'背景色');},280);}
           else if(chipTapCount===2){clearTimeout(chipTapTimer);chipTapTimer=setTimeout(()=>{chipTapCount=0;applyHex('t',cC.t);applyHex('b',cC.b);copyText(cC.t.toUpperCase());showColorToast(cC.t.toUpperCase(),cC.t,cC.b,'文字色');},280);}
           else if(chipTapCount>=3){clearTimeout(chipTapTimer);chipTapTimer=null;chipTapCount=0;applyHex('t',cC.t);applyHex('b',cC.b);showToast('プレビューに反映しました（コピーなし）');}
@@ -1421,9 +1423,10 @@ function renderComparePanel() {
       if (longPress) { longPress = false; return; }
       if (!slot.filled) {
         const t = document.getElementById('tHex').value, b = document.getElementById('bHex').value;
-        slot.filled = true; slot.t = t; slot.b = b; slot.updatedAt = now();
-        saveCompareSlots(); renderComparePanel(); showToast('スロットに色をはめました');
+        slot.filled = true; slot.t = t; slot.b = b; slot.label = _lastRegisteredChipLabel || ''; slot.updatedAt = now();
+        saveCompareSlots(); renderComparePanel(); showToast(slot.label ? `スロットに「${slot.label}」の色をはめました` : 'スロットに色をはめました');
       } else {
+        _lastRegisteredChipLabel = slot.label || '';
         applyHex('t', slot.t); applyHex('b', slot.b);
         copyText(slot.b.toUpperCase());
         showColorToast(slot.b.toUpperCase(), slot.b, slot.t, '背景色');
@@ -1611,6 +1614,7 @@ function _buildGroupBlock(g, gi) {
             if(appMode==='lock'){cC.locked=!cC.locked;cC.updatedAt=now();chip.classList.toggle('locked',cC.locked);saveGroups();showToast(cC.locked?'🔒 ロックしました':'🔓 解除しました');updateTooltip();return;}
             if(longPressActive||longPressConsumed){longPressActive=false;longPressConsumed=false;return;}
             chipTapCount++;
+            _lastRegisteredChipLabel=getChipLabel(cC);
             if(chipTapCount===1){chipTapTimer=setTimeout(()=>{chipTapCount=0;applyHex('t',cC.t);applyHex('b',cC.b);copyText(cC.b.toUpperCase());showColorToast(cC.b.toUpperCase(),cC.b,cC.t,'背景色');},280);}
             else if(chipTapCount===2){clearTimeout(chipTapTimer);chipTapTimer=setTimeout(()=>{chipTapCount=0;applyHex('t',cC.t);applyHex('b',cC.b);copyText(cC.t.toUpperCase());showColorToast(cC.t.toUpperCase(),cC.t,cC.b,'文字色');},280);}
             else if(chipTapCount>=3){clearTimeout(chipTapTimer);chipTapTimer=null;chipTapCount=0;applyHex('t',cC.t);applyHex('b',cC.b);showToast('プレビューに反映しました（コピーなし）');}
@@ -2492,9 +2496,9 @@ function syncUI(k){
   document.getElementById(k+'S').style.background=`linear-gradient(to right,${hsvToHex(h,0,v)},${hsvToHex(h,100,v)})`;
   document.getElementById(k+'V').style.background=`linear-gradient(to right,${hsvToHex(h,s,0)},${hsvToHex(h,s,100)})`;
 }
-function fromSlider(k){state[k].h=+document.getElementById(k+'H').value;state[k].s=+document.getElementById(k+'S').value;state[k].v=+document.getElementById(k+'V').value;const hex=hsvToHex(state[k].h,state[k].s,state[k].v);document.getElementById(k+'Picker').value=hex;document.getElementById(k+'Hex').value=hex;syncUI(k);render();}
-function applyMatchBg(){const hex=document.getElementById('bHex').value;if(!validHex(hex))return;applyHex('t',hex);showToast('文字色を背景色 '+hex.toUpperCase()+' に揃えました');}
-function swapColors(){const th=document.getElementById('tHex').value,bh=document.getElementById('bHex').value;applyHex('t',bh);applyHex('b',th);}
+function fromSlider(k){_lastRegisteredChipLabel='';state[k].h=+document.getElementById(k+'H').value;state[k].s=+document.getElementById(k+'S').value;state[k].v=+document.getElementById(k+'V').value;const hex=hsvToHex(state[k].h,state[k].s,state[k].v);document.getElementById(k+'Picker').value=hex;document.getElementById(k+'Hex').value=hex;syncUI(k);render();}
+function applyMatchBg(){const hex=document.getElementById('bHex').value;if(!validHex(hex))return;_lastRegisteredChipLabel='';applyHex('t',hex);showToast('文字色を背景色 '+hex.toUpperCase()+' に揃えました');}
+function swapColors(){const th=document.getElementById('tHex').value,bh=document.getElementById('bHex').value;_lastRegisteredChipLabel='';applyHex('t',bh);applyHex('b',th);}
 function render(){
   const tc=document.getElementById('tHex').value,bc=document.getElementById('bHex').value;
   document.getElementById('preview').style.background=bc;document.getElementById('preview').style.color=tc;
@@ -2510,6 +2514,7 @@ function pasteHex(k){
     let val=text.trim();
     if(/^[0-9a-fA-F]{6}$/.test(val))val='#'+val;
     if(validHex(val)){
+      _lastRegisteredChipLabel='';
       applyHex(k,val);
       const other=k==='b'?document.getElementById('tHex').value:document.getElementById('bHex').value;
       showColorToast(val.toUpperCase(),val,other,k==='b'?'背景色':'文字色');
@@ -2535,14 +2540,14 @@ function normalizeHexInput(val){val=val.trim();if(!val)return val;if(!val.starts
 
 ['tH','tS','tV'].forEach(id=>document.getElementById(id).oninput=()=>fromSlider('t'));
 ['bH','bS','bV'].forEach(id=>document.getElementById(id).oninput=()=>fromSlider('b'));
-document.getElementById('tPicker').oninput=e=>applyHex('t',e.target.value);
-document.getElementById('bPicker').oninput=e=>applyHex('b',e.target.value);
-document.getElementById('tHex').addEventListener('input',e=>{let v=normalizeHexInput(e.target.value);if(v!==e.target.value)e.target.value=v;applyHex('t',v);});
-document.getElementById('bHex').addEventListener('input',e=>{let v=normalizeHexInput(e.target.value);if(v!==e.target.value)e.target.value=v;applyHex('b',v);});
+document.getElementById('tPicker').oninput=e=>{_lastRegisteredChipLabel='';applyHex('t',e.target.value);};
+document.getElementById('bPicker').oninput=e=>{_lastRegisteredChipLabel='';applyHex('b',e.target.value);};
+document.getElementById('tHex').addEventListener('input',e=>{_lastRegisteredChipLabel='';let v=normalizeHexInput(e.target.value);if(v!==e.target.value)e.target.value=v;applyHex('t',v);});
+document.getElementById('bHex').addEventListener('input',e=>{_lastRegisteredChipLabel='';let v=normalizeHexInput(e.target.value);if(v!==e.target.value)e.target.value=v;applyHex('b',v);});
 ['tHex','bHex'].forEach(id=>{
   document.getElementById(id).addEventListener('paste',e=>{
     e.preventDefault();const raw=(e.clipboardData||window.clipboardData).getData('text');let val=raw.trim();if(/^[0-9a-fA-F]{6}$/.test(val))val='#'+val;
-    const k=id==='tHex'?'t':'b';if(validHex(val)){applyHex(k,val);const other=k==='b'?document.getElementById('tHex').value:document.getElementById('bHex').value;showColorToast(val.toUpperCase(),val,other,k==='b'?'背景色':'文字色');}else{document.getElementById(id).value=raw;}
+    const k=id==='tHex'?'t':'b';_lastRegisteredChipLabel='';if(validHex(val)){applyHex(k,val);const other=k==='b'?document.getElementById('tHex').value:document.getElementById('bHex').value;showColorToast(val.toUpperCase(),val,other,k==='b'?'背景色':'文字色');}else{document.getElementById(id).value=raw;}
   });
 });
 document.getElementById('tName').oninput=render;document.getElementById('bName').oninput=render;
