@@ -105,11 +105,18 @@ input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2)}
 .preview-flex-row{display:flex;gap:10px;align-items:stretch;margin-bottom:16px;position:sticky;top:12px;z-index:50;}
 .preview-wrap{border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);box-shadow:0 4px 16px rgba(0,0,0,.1);flex:7;min-width:0;display:flex;flex-direction:column;}
 .compare-panel{flex:3;min-width:0;flex-shrink:0;display:flex;flex-direction:column;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.1);}
-.compare-slot{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;position:relative;cursor:pointer;min-height:44px;padding:4px 6px;transition:filter .15s;border-bottom:1px solid var(--border);-webkit-tap-highlight-color:transparent;}
+.compare-slot{flex:1;display:flex;flex-direction:row;align-items:stretch;gap:2px;position:relative;cursor:pointer;min-height:44px;padding:4px 6px 4px 2px;transition:filter .15s;border-bottom:1px solid var(--border);-webkit-tap-highlight-color:transparent;}
 .compare-slot:last-of-type{border-bottom:none;}
 @media(hover:hover){.compare-slot:hover{filter:brightness(0.96);}}
 .compare-slot.empty{background:var(--bg);}
 .compare-slot.empty:hover{background:var(--accent-light);}
+.compare-slot-handle{flex-shrink:0;width:14px;display:flex;align-items:center;justify-content:center;cursor:grab;touch-action:none;color:inherit;opacity:.5;font-size:11px;line-height:1;-webkit-tap-highlight-color:transparent;}
+@media(hover:hover){.compare-slot-handle:hover{opacity:.9;}}
+.compare-slot-handle:active{cursor:grabbing;}
+.compare-slot-content{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;}
+.compare-slot.compare-slot-dragging{opacity:.35;}
+.compare-slot.drag-over-top{box-shadow:inset 0 2px 0 0 var(--accent);}
+.compare-slot.drag-over-bottom{box-shadow:inset 0 -2px 0 0 var(--accent);}
 .compare-slot-sample{font-family:'IBM Plex Sans',sans-serif;font-weight:600;line-height:1.1;user-select:none;text-align:center;word-break:break-all;white-space:normal;max-width:100%;}
 .compare-slot:not(.empty) .compare-slot-sample{font-size:12px;}
 .compare-slot.empty .compare-slot-sample{color:var(--muted);opacity:.45;font-size:18px;font-weight:400;}
@@ -1373,6 +1380,59 @@ let compareSampleText = (() => {
 })();
 function saveCompareSampleText() { localStorage.setItem('cp_compare_sample_text', compareSampleText); }
 
+function setupCompareSlotDnD(handle, slotEl, idx) {
+  let startY = 0, dragActive = false, pointerId = null, dragOverIdx = null, dragOverBefore = true;
+  handle.addEventListener('pointerdown', e => {
+    e.stopPropagation();
+    if (e.button !== 0 && e.pointerType !== 'touch') return;
+    startY = e.clientY; dragActive = false; pointerId = e.pointerId; dragOverIdx = null; dragOverBefore = true;
+    try { handle.setPointerCapture(e.pointerId); } catch (_) {}
+  });
+  handle.addEventListener('pointermove', e => {
+    if (pointerId === null || e.pointerId !== pointerId) return;
+    const dy = e.clientY - startY;
+    if (!dragActive && Math.abs(dy) > 6) { dragActive = true; slotEl.classList.add('compare-slot-dragging'); }
+    if (!dragActive) return;
+    e.preventDefault();
+    document.querySelectorAll('.compare-slot.drag-over-top,.compare-slot.drag-over-bottom').forEach(s => s.classList.remove('drag-over-top', 'drag-over-bottom'));
+    try { handle.releasePointerCapture(e.pointerId); } catch (_) {}
+    const elemBelow = document.elementFromPoint(e.clientX, e.clientY);
+    try { handle.setPointerCapture(e.pointerId); } catch (_) {}
+    if (!elemBelow) return;
+    const targetSlot = elemBelow.closest('.compare-slot');
+    if (targetSlot && targetSlot !== slotEl) {
+      const rect = targetSlot.getBoundingClientRect();
+      dragOverBefore = e.clientY < rect.top + rect.height / 2;
+      targetSlot.classList.add(dragOverBefore ? 'drag-over-top' : 'drag-over-bottom');
+      dragOverIdx = +targetSlot.dataset.slotIdx;
+    }
+  });
+  handle.addEventListener('pointerup', e => {
+    if (pointerId === null || e.pointerId !== pointerId) return;
+    const wasActive = dragActive;
+    document.querySelectorAll('.compare-slot.compare-slot-dragging').forEach(s => s.classList.remove('compare-slot-dragging'));
+    document.querySelectorAll('.compare-slot.drag-over-top,.compare-slot.drag-over-bottom').forEach(s => s.classList.remove('drag-over-top', 'drag-over-bottom'));
+    pointerId = null; dragActive = false;
+    if (wasActive && dragOverIdx !== null && dragOverIdx !== idx) {
+      const [moved] = compareSlots.splice(idx, 1);
+      let insertIdx = dragOverIdx;
+      if (idx < dragOverIdx) insertIdx--;
+      if (!dragOverBefore) insertIdx++;
+      insertIdx = Math.max(0, Math.min(insertIdx, compareSlots.length));
+      compareSlots.splice(insertIdx, 0, moved);
+      renderComparePanel();
+      showToast('スロットを並び替えました');
+    }
+    dragOverIdx = null;
+  });
+  handle.addEventListener('pointercancel', () => {
+    pointerId = null; dragActive = false;
+    slotEl.classList.remove('compare-slot-dragging');
+    document.querySelectorAll('.compare-slot.drag-over-top,.compare-slot.drag-over-bottom').forEach(s => s.classList.remove('drag-over-top', 'drag-over-bottom'));
+  });
+  handle.addEventListener('click', e => e.stopPropagation());
+}
+
 function renderComparePanel() {
   const el = document.getElementById('comparePanel');
   if (!el) return;
@@ -1380,8 +1440,19 @@ function renderComparePanel() {
   compareSlots.forEach((slot, idx) => {
     const div = document.createElement('div');
     div.className = 'compare-slot' + (slot.filled ? '' : ' empty');
+    div.dataset.slotIdx = idx;
     if (slot.filled) { div.style.background = slot.b; div.style.color = slot.t; }
     div.title = slot.filled ? 'クリック/タップ: 現在の色で上書き / ダブルクリック: プレビューへ反映 / 長押し: 編集' : 'クリック/タップ: 現在の色をはめる / 長押し: 編集';
+
+    const handle = document.createElement('div');
+    handle.className = 'compare-slot-handle';
+    handle.textContent = '⠿';
+    handle.title = 'ドラッグして並び替え';
+    div.append(handle);
+    setupCompareSlotDnD(handle, div, idx);
+
+    const content = document.createElement('div');
+    content.className = 'compare-slot-content';
 
     const label = document.createElement('div');
     label.className = 'compare-slot-sample';
@@ -1391,14 +1462,17 @@ function renderComparePanel() {
     } else {
       label.textContent = '＋';
     }
-    div.append(label);
+    content.append(label);
 
     if (slot.filled) {
       const textLine = document.createElement('div');
       textLine.className = 'compare-slot-text';
       textLine.textContent = compareSampleText;
-      div.append(textLine);
+      content.append(textLine);
+    }
+    div.append(content);
 
+    if (slot.filled) {
       const clearBtn = document.createElement('div');
       clearBtn.className = 'compare-slot-clear';
       clearBtn.textContent = '×';
@@ -2289,6 +2363,7 @@ pollTimer=setInterval(async()=>{
     const mergedPin=mergePins(pinColors,data.pin||pinColors);
     const mergedDc=mergeDividerColors(dividerColors,data.dividerColors||dividerColors);
     const newStr=JSON.stringify(mergedGroups)+'|'+JSON.stringify(mergedPin)+'|'+JSON.stringify(mergedDc);
+    let historyAlreadyRendered=false;
     if(newStr!==prevStr){
       // 変更チップの行キーを収集
       const changedKeys=[];
@@ -2332,8 +2407,22 @@ pollTimer=setInterval(async()=>{
       localStorage.setItem('cp_pin_row',JSON.stringify(pinColors));
       localStorage.setItem('cp_divider_colors',JSON.stringify(dividerColors));
       _lastRenderHash=''; renderGroups(); renderPinRow();
-      if(data.history){_editHistory=mergeHistory(_editHistory,data.history);_renderEditHistoryBadges();}
-      else if (changedKeys.length > 0) updateLastEditInfo({updatedAt:Date.now()}, changedKeys);
+      if(data.history){
+        const mergedH=mergeHistory(_editHistory,data.history);
+        if(JSON.stringify(mergedH)!==JSON.stringify(_editHistory)){_editHistory=mergedH;_renderEditHistoryBadges();}
+        historyAlreadyRendered=true;
+      } else if (changedKeys.length > 0) {
+        updateLastEditInfo({updatedAt:Date.now()}, changedKeys);
+      }
+    }
+    // 履歴は色データの変化と無関係に、Gist側に新しい履歴があれば常に反映する
+    if(!historyAlreadyRendered && data.history){
+      const mergedH=mergeHistory(_editHistory,data.history);
+      if(JSON.stringify(mergedH)!==JSON.stringify(_editHistory)){
+        _editHistory=mergedH;
+        localStorage.setItem('cp_edit_history',JSON.stringify(_editHistory));
+        _renderEditHistoryBadges();
+      }
     }
   }
 },700);
@@ -2576,7 +2665,27 @@ document.addEventListener('pointerdown', () => {
 (function init(){
   const params=new URLSearchParams(location.search);const urlGistId=params.get('gist');
   loadSyncConfig();if(urlGistId){syncConfig.gistId=urlGistId;document.getElementById('gistIdInput').value=urlGistId;}
-  if(syncConfig.token&&syncConfig.gistId){startPolling();updateSyncGistIdDisplay();document.getElementById('gistTokenInput').value=syncConfig.token;document.getElementById('gistIdInput').value=syncConfig.gistId;document.getElementById('syncSetup').style.display='none';}
+  if(syncConfig.token&&syncConfig.gistId){
+    startPolling();updateSyncGistIdDisplay();
+    document.getElementById('gistTokenInput').value=syncConfig.token;document.getElementById('gistIdInput').value=syncConfig.gistId;document.getElementById('syncSetup').style.display='none';
+    // ページ読み込み直後、ポーリングの初回tickを待たずにGistの内容（履歴含む）を取得して反映する
+    (async()=>{
+      let data;
+      try{ data=await gistGet(); }catch(e){ return; }
+      if(!data) return;
+      if(data.groups){groups=mergeGroups(groups,data.groups);localStorage.setItem('cp_groups5',JSON.stringify(groups));_lastRenderHash='';renderGroups();}
+      if(data.pin){pinColors=mergePins(pinColors,data.pin);localStorage.setItem('cp_pin_row',JSON.stringify(pinColors));renderPinRow();}
+      if(data.dividerColors){dividerColors=mergeDividerColors(dividerColors,data.dividerColors);localStorage.setItem('cp_divider_colors',JSON.stringify(dividerColors));}
+      if(data.history){
+        const mergedH=mergeHistory(_editHistory,data.history);
+        if(JSON.stringify(mergedH)!==JSON.stringify(_editHistory)){
+          _editHistory=mergedH;
+          localStorage.setItem('cp_edit_history',JSON.stringify(_editHistory));
+          _renderEditHistoryBadges();
+        }
+      }
+    })();
+  }
   syncUI('t');syncUI('b');render();renderGroups();renderPinRow();renderComparePanel();
   setupCopyHexPressEffect('copyHexBBtn');setupCopyHexPressEffect('copyHexTBtn');
   _renderEditHistoryBadges();
