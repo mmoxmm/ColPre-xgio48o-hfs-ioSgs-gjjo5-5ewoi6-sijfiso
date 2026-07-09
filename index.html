@@ -3735,12 +3735,10 @@
       chip.addEventListener('pointerup', e => {
         if (e.pointerId !== chipPointerId) return;
         const wasActive = chipDragActive, src = { ...chipDragSrc }, dst = chipDropInfo; cancelChipDrag();
-        if (wasActive) {
-          if (dst !== null) {
-            let isSelf = false;
-            if (dst.position !== 'append' && dst.type === src.type) { if (dst.type === 'pin') isSelf = (dst.ci === src.ci); else isSelf = (dst.gi === src.gi && dst.ri === src.ri && dst.ci === src.ci); }
-            if (!isSelf) { doMoveChip(src, dst); showToast('チップを移動しました'); } else { renderGroups(); renderPinRow(); }
-          } else { renderGroups(); renderPinRow(); }
+        if (wasActive && dst !== null) {
+          let isSelf = false;
+          if (dst.position !== 'append' && dst.type === src.type) { if (dst.type === 'pin') isSelf = (dst.ci === src.ci); else isSelf = (dst.gi === src.gi && dst.ri === src.ri && dst.ci === src.ci); }
+          if (!isSelf) { doMoveChip(src, dst); showToast('チップを移動しました'); } else { renderGroups(); renderPinRow(); }
         } else {
           const tapId = c.id;
           if (swapSelected === null) { swapSelected = { ...src, chipId: tapId, _key: tapId }; renderGroups(); renderPinRow(); showToast('入れ替え先のチップをタップ（同じチップでキャンセル）'); }
