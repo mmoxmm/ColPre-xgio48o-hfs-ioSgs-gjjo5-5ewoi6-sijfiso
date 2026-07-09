@@ -86,6 +86,9 @@ h1 span{color:var(--muted);font-weight:400;font-size:13px;margin-left:6px}
 .paste-hex-btn{flex-shrink:0;background:var(--text);border:1px solid var(--text);border-radius:var(--radius-sm);color:#fff;font-size:10px;padding:5px 7px;cursor:pointer;transition:all .15s;font-family:'Syne',sans-serif;font-weight:700;white-space:nowrap;text-align:center;outline:none;-webkit-tap-highlight-color:transparent;letter-spacing:.02em;}
 @media(hover:hover){.paste-hex-btn:hover{background:#333;border-color:#333}}
 .paste-hex-btn:active{transform:scale(.9)}
+.lp-paste-btn{flex-shrink:0;background:var(--text);border:1px solid var(--text);border-radius:6px;color:#fff;font-size:9px;padding:5px 6px;cursor:pointer;transition:all .15s;font-family:'Syne',sans-serif;font-weight:700;white-space:nowrap;text-align:center;outline:none;-webkit-tap-highlight-color:transparent;}
+@media(hover:hover){.lp-paste-btn:hover{background:#333;border-color:#333}}
+.lp-paste-btn:active{transform:scale(.9)}
 .copy-hex-btn{flex-shrink:0;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:10px;padding:5px 12px;min-width:15px;cursor:pointer;transition:all .15s;font-family:'Syne',sans-serif;font-weight:600;white-space:nowrap;text-align:center;outline:none;-webkit-tap-highlight-color:transparent;letter-spacing:.02em;}
 @media(hover:hover){.copy-hex-btn:hover{background:#fff;border-color:#bbb}}
 .copy-hex-btn.pressed{background:#fff;border-color:#bbb}
@@ -715,6 +718,7 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
               <div class="lp-swatch-row">
                 <div class="lp-color-swatch" id="lpBSwatch"><input type="color" id="lpBPicker"></div>
                 <input type="text" class="lp-hex" id="lpBHex" maxlength="7" spellcheck="false" placeholder="#rrggbb">
+                <button class="lp-paste-btn" onclick="pasteHexLp('B');this.blur()">貼付</button>
               </div>
             </div>
             <div class="lp-color-col">
@@ -722,6 +726,7 @@ footer{text-align:center;font-size:10px;color:var(--muted);padding-top:12px;line
               <div class="lp-swatch-row">
                 <div class="lp-color-swatch" id="lpTSwatch"><input type="color" id="lpTPicker"></div>
                 <input type="text" class="lp-hex" id="lpTHex" maxlength="7" spellcheck="false" placeholder="#rrggbb">
+                <button class="lp-paste-btn" onclick="pasteHexLp('T');this.blur()">貼付</button>
               </div>
             </div>
           </div>
@@ -2023,7 +2028,6 @@ function lpSetLabel(val){
 }
 function lpOverwrite(){
   if(!lpTarget) return;
-  lpCompareTo('new');
   const bVal=document.getElementById('lpBHex').value,tVal=document.getElementById('lpTHex').value;
   if(!validHex(bVal)||!validHex(tVal)){showToast('有効な HEX 値を入力してください');return;}
   if(lpTarget.c.locked&&!lpTarget.tempUnlocked){showToast('🔒 一時解除してから操作してください');return;}
@@ -2646,6 +2650,26 @@ function pasteHex(k){
       applyHex(k,val);
       const other=k==='b'?document.getElementById('tHex').value:document.getElementById('bHex').value;
       showColorToast(val.toUpperCase(),val,other,k==='b'?'背景色':'文字色');
+    }else{
+      showToast('クリップボードに有効なHEXカラーがありません');
+      inputEl.focus();inputEl.select();
+    }
+  };
+  if(navigator.clipboard&&navigator.clipboard.readText){
+    navigator.clipboard.readText().then(apply).catch(()=>{inputEl.focus();inputEl.select();});
+  }else{
+    inputEl.focus();inputEl.select();
+  }
+}
+function pasteHexLp(k){
+  const inputEl=document.getElementById('lp'+k+'Hex');if(!inputEl)return;
+  const apply=text=>{
+    let val=text.trim();
+    if(/^[0-9a-fA-F]{6}$/.test(val))val='#'+val;
+    if(validHex(val)){
+      inputEl.value=val;
+      inputEl.classList.remove('invalid');
+      inputEl.dispatchEvent(new Event('input'));
     }else{
       showToast('クリップボードに有効なHEXカラーがありません');
       inputEl.focus();inputEl.select();
